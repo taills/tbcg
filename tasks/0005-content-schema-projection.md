@@ -1,6 +1,6 @@
 # 0005 共享内容 Schema 投影 spike
 
-**状态：**进行中（三端实现及本地测试已通过，等待 Godot 最终审查收口）
+**状态：**已完成（三端测试与审查已通过）
 **目标：**验证一类内容定义如何从单一 JSON Schema 投影到 Go、React 与 Godot，避免三端手写漂移。
 
 ## 范围
@@ -12,9 +12,9 @@
 
 ## 验收标准
 
-- [ ] 同一份合法/非法 fixtures 在 Go、TypeScript 和 Godot 得到约定一致的有效性结论与字段路径。
-- [ ] 选择并记录可靠生成策略或受限投影；无意外类型转换、JSON 数值精度损失或私有字段泄漏。
-- [ ] Schema 版本与 Definition ID/revision 规则清晰，可由后续内容类型复用。
+- [x] 同一份合法/非法 fixtures 在 Go、TypeScript 和 Godot 得到约定一致的有效性结论与字段路径。
+- [x] 选择并记录可靠生成策略或受限投影；无意外类型转换、JSON 数值精度损失或私有字段泄漏。
+- [x] Schema 版本与 Definition ID/revision 规则清晰，可由后续内容类型复用。
 
 ## 验证
 
