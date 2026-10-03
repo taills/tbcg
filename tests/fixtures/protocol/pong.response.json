@@ -1,0 +1,1 @@
+{"protocol_version":"1","request_id":"req-ping-2","type":"system.pong","success":true,"server_seq":"2","state_version":null,"data":{"nonce":"ping-nonce-2","server_time":"2026-10-04T00:00:00Z"},"error":null,"meta":{}}

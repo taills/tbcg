@@ -1,0 +1,1 @@
+{"protocol_version":"1","request_id":"req-hello-1","type":"system.hello_ack","success":true,"server_seq":"1","state_version":null,"data":{"release_id":"demo-release-1","capabilities":["protocol.v1"]},"error":null,"meta":{}}

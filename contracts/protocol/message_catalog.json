@@ -1,0 +1,50 @@
+{
+  "protocol_version": "1",
+  "transport": {
+    "protocol": "wss",
+    "frame_type": "binary",
+    "encoding": "utf-8",
+    "max_message_bytes": 65536
+  },
+  "handshake": {
+    "request_type": "system.hello",
+    "ready_after_type": "system.hello_ack",
+    "reject_business_messages_before_ready": true
+  },
+  "request_envelope": {
+    "required_fields": ["protocol_version", "request_id", "type", "payload"],
+    "request_id_encoding": "opaque-string",
+    "payload_type": "object"
+  },
+  "response_envelope": {
+    "required_fields": ["protocol_version", "request_id", "type", "success", "server_seq", "data", "error", "meta"],
+    "server_seq_encoding": "unsigned-decimal-string",
+    "state_version_encoding": "unsigned-decimal-string"
+  },
+  "messages": [
+    {
+      "type": "system.hello",
+      "direction": "client_to_server",
+      "phase": "handshake",
+      "required_payload_fields": ["game_id", "realm_id", "client_build", "release_id", "session_token", "capabilities"]
+    },
+    {
+      "type": "system.hello_ack",
+      "direction": "server_to_client",
+      "phase": "handshake",
+      "required_payload_fields": ["release_id", "capabilities"]
+    },
+    {
+      "type": "system.ping",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": ["nonce"]
+    },
+    {
+      "type": "system.pong",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": ["nonce", "server_time"]
+    }
+  ]
+}

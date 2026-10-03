@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:item-public:v1",
+  "title": "TBCG public item projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "game_id",
+    "content_id",
+    "revision",
+    "schema_version",
+    "item_type",
+    "display_name",
+    "icon_id",
+    "stack_limit",
+    "price_minor"
+  ],
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "content_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._/-]*$"
+    },
+    "revision": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+    "schema_version": { "const": 1 },
+    "item_type": { "enum": ["consumable", "equipment", "material", "quest"] },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "description": { "type": "string", "maxLength": 1024 },
+    "icon_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "stack_limit": { "type": "integer", "minimum": 1, "maximum": 999 },
+    "price_minor": { "type": "string", "pattern": "^(0|[1-9][0-9]{0,17})$" }
+  }
+}

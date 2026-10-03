@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:protocol:response:v1",
+  "title": "TBCG protocol response envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "request_id", "type", "success", "server_seq", "data", "error", "meta"],
+  "properties": {
+    "protocol_version": { "const": "1" },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "type": {
+      "type": "string",
+      "enum": ["system.hello_ack", "system.pong"]
+    },
+    "success": { "type": "boolean" },
+    "server_seq": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "state_version": {
+      "oneOf": [
+        { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+        { "type": "null" }
+      ]
+    },
+    "data": { "type": "object" },
+    "error": {
+      "oneOf": [
+        { "type": "object" },
+        { "type": "null" }
+      ]
+    },
+    "meta": { "type": "object" }
+  }
+}

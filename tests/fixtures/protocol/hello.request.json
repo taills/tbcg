@@ -1,0 +1,1 @@
+{"protocol_version":"1","request_id":"req-hello-1","type":"system.hello","payload":{"game_id":"demo","realm_id":"local-test","client_build":"0.0.1-test","release_id":"demo-release-1","session_token":"fixture-only-session-token","capabilities":["protocol.v1"]}}

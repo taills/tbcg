@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:protocol:request:v1",
+  "title": "TBCG protocol request envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "request_id", "type", "payload"],
+  "properties": {
+    "protocol_version": { "const": "1" },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "type": {
+      "type": "string",
+      "enum": ["system.hello", "system.ping"]
+    },
+    "payload": { "type": "object" }
+  }
+}

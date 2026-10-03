@@ -1,0 +1,21 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/healing-potion",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/healing-potion",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "unknown",
+    "display_name": "回复药剂",
+    "icon_id": "item/potion-small",
+    "stack_limit": 20,
+    "price_minor": "1"
+  },
+  "server": {
+    "reward_value_minor": "1",
+    "drop_weight_basis_points": 0
+  }
+}

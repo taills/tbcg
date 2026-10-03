@@ -1,6 +1,6 @@
 # 0004 Leaf 与 Godot 游戏协议 spike
 
-**状态：**未开始
+**状态：**进行中
 **目标：**在真实 Leaf 与 Godot `WebSocketPeer` 之间证明版本化 WSS binary JSON 契约可用，再进入游戏业务。
 
 ## 范围

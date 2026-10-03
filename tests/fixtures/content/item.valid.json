@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/healing-potion",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/healing-potion",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "回复药剂",
+    "description": "一瓶用于冒险的药剂。",
+    "icon_id": "item/potion-small",
+    "stack_limit": 20,
+    "price_minor": "9007199254740993"
+  },
+  "server": {
+    "reward_value_minor": "250000000000000001",
+    "drop_weight_basis_points": 1250
+  }
+}
