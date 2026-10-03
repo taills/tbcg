@@ -119,4 +119,4 @@ Battle、Dungeon、Quest 和 Map Instance 必须固定开始/接取时的 Releas
 
 安全契约：客户端不可信；WS 校验 Origin、凭证、版本和限额；管理面 RBAC、审计和 CSRF；导入只创建可审查 revision，不清空目标、不覆盖手工内容、不执行陌生脚本；未授权素材不得进入可分发包。
 
-P0 未决项：Godot 4.7.1 与 export templates 获取方式；公开/私有包存储策略；Schema 到 Go/TypeScript/GDScript 的投影范围；战斗事件 catalog 稳定 ID；PostgreSQL 版本与迁移工具；管理认证和 CSRF 细节。
+P0 未决项：公开/私有包存储策略；Schema 到 Go/TypeScript/GDScript 的投影范围；战斗事件 catalog 稳定 ID；PostgreSQL 本地/CI 测试服务配置、Tern 迁移部署与备份/升级演练；管理认证和 CSRF 细节。Go 1.26.4、PostgreSQL 18.3、Godot 4.7.1 与 Tern v2.4.3 已锁定。

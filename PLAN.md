@@ -206,7 +206,7 @@ Outbox 可至少一次重投，消费者按事件 ID 幂等，不宣称跨网络
 - Go 使用 `pgx/v5/stdlib` 的 `database/sql` 驱动；连接池、超时、TLS、健康检查和事务生命周期集中在 PostgreSQL 存储模块。DSN 从环境变量/秘密管理读取，错误日志不得泄露凭据。
 - 只保留按业务定义的小型 Repository 和必要的事务协调 Interface；不创建通用数据库工厂、Dialect/Capabilities 层、SQLite/MySQL Adapter 或万能 BaseRepository。领域不直接操作原始 SQL，但存储实现可以明确使用 PostgreSQL 原生能力。
 - 草稿/revision 使用 JSONB，关键资产/归属/幂等使用明确表与约束；事务、行锁、advisory lock、owner_epoch、唯一约束和 outbox 按 PostgreSQL 语义实现，不为其他数据库降级。
-- 只维护一套 PostgreSQL 迁移脚本；迁移由独立受控入口执行，不让游戏与管理进程竞争修改 Schema。P0 固定数据库版本与对应开发/CI 环境。
+- 只维护一套 PostgreSQL 迁移脚本；使用 PostgreSQL 专用 Tern CLI `github.com/jackc/tern/v2 v2.4.3` 执行 SQL migrations，独立受控入口运行，不作为游戏服务运行时依赖，不让游戏与管理进程竞争修改 Schema。P0 固定数据库版本与对应开发/CI 环境。
 - 仓库单测可使用 fake/mock，但集成与故障验收必须使用真实 PostgreSQL；SQLite 通过不能替代 PostgreSQL 通过，也不建设三数据库兼容性矩阵。
 - 当前 TBCG 没有既存 SQLite 数据库，因此这是新项目的存储选择，不是实际数据迁移；不修改或迁移参考项目 xyq 的 SQLite。
 

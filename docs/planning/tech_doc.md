@@ -7,7 +7,7 @@
 - **业务数据库：PostgreSQL ONLY**，开发、CI、测试和生产使用 PostgreSQL；不提供 SQLite/MySQL adapter，也不以 SQLite 替代集成测试。
 - PostgreSQL 主版本锁定 **18**；本机 Homebrew client/server 为 **18.3**。`psql --version` / `postgres --version` 已确认 18.3；本机 `pg_isready` 对默认 `/tmp:5432` 返回无响应，表示目前没有可用服务，未运行数据库集成测试。数据库容器和测试库由任务 0003 建立。
 - PostgreSQL 驱动依赖锁定 `github.com/jackc/pgx/v5 v5.10.0`；运行时实现应使用 `pgx/v5/stdlib` 的 `database/sql` 适配器，并由 Go 存储模块管理事务与连接生命周期。
-- 数据库迁移工具尚未加入 `go.mod`；在任务 0003 的真实 PostgreSQL migration spike 中选定并固定，不提前引入未用依赖。
+- 数据库迁移采用 PostgreSQL 专用 standalone CLI `github.com/jackc/tern/v2 v2.4.3`（Tern 使用 PostgreSQL/pgx，Go 1.25+，MIT）；通过 `go install github.com/jackc/tern/v2@v2.4.3` 固定安装，不加入游戏服务的运行时 `go.mod`。任务 0003 将验证空库、重复迁移和升级行为；连接由 `PG*` 环境变量提供，不在仓库保存 DSN/密码。
 - **Leaf 传递依赖说明：**`github.com/taills/leaf/v2 v2.0.3` 自身的 `go.mod` 声明可选 SQLite 实现依赖，因此 `go list -m all`/`go.sum` 会出现 `modernc.org/sqlite`。TBCG 没有直接 SQLite 依赖、driver 注册或 SQLite 打开逻辑，不使用 Leaf SQLite Adapter；这不构成 SQLite 数据库存储支持。若将来要求连依赖图也不得包含 SQLite，需先重新评估 Leaf，而不是偷偷删除校验和或 fork。
 
 ## 2. Go 服务端
@@ -19,6 +19,7 @@
 | Leaf | `github.com/taills/leaf/v2 v2.0.3` |
 | PostgreSQL | `github.com/jackc/pgx/v5 v5.10.0` |
 | JSON Schema | `github.com/santhosh-tekuri/jsonschema/v6 v6.0.3` |
+| PostgreSQL 迁移 CLI | `github.com/jackc/tern/v2 v2.4.3`；独立安装，不作为游戏运行时依赖 |
 | Go 格式化工具 | `gofmt`（与 Go 工具链同版本）+ `golang.org/x/tools/cmd/goimports v0.51.0` |
 | 模块路径 | 暂用 `example.com/tbcg/server`；确认代码托管组织/远程仓库后、向外发布前需替换为正式模块路径。 |
 
