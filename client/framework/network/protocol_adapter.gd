@@ -1,5 +1,12 @@
 extends RefCounted
 
+# 适配器支持的信封 ABI；注入 Schema 不能删除处理代码依赖的字段。
+const RESPONSE_FIELDS := ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"]
+const RESPONSE_FIELD_TYPES := {
+	"request_id": "string", "type": "string", "success": "boolean",
+	"server_seq": "string", "data": "object", "meta": "object"
+}
+
 var _peer: Object
 var _timeout_seconds: float
 var _elapsed := 0.0
@@ -233,8 +240,7 @@ func _load_contracts(catalog: Dictionary, response_schema: Dictionary) -> void:
 		if not field is String or not properties[field] is Dictionary:
 			_fail("/properties", "schema_violation", "Response schema properties are invalid")
 			return
-	if not properties.has("protocol_version") or not properties.has("type"):
-		_fail("/properties", "schema_violation", "Response schema is missing protocol fields")
+	if not _validate_response_contract(properties, required):
 		return
 	_protocol_version = str(_catalog.get("protocol_version", ""))
 	_max_message_bytes = int(transport.get("max_message_bytes", 0))
@@ -277,6 +283,36 @@ func _load_contracts(catalog: Dictionary, response_schema: Dictionary) -> void:
 		return
 	if transport.get("protocol", "") != "wss" or transport.get("frame_type", "") != "binary" or transport.get("encoding", "") != "utf-8":
 		_fail("/transport", "schema_violation", "Protocol transport does not match WSS binary UTF-8")
+
+func _validate_response_contract(properties: Dictionary, required: Array) -> bool:
+	if _response_schema.get("type") != "object":
+		_fail("/type", "schema_violation", "响应 Schema 必须声明对象信封")
+		return false
+	for field in RESPONSE_FIELDS:
+		if not properties.has(field) or not required.has(field):
+			_fail("/required", "schema_violation", "响应 Schema 缺少必填信封字段：" + field)
+			return false
+	for field in RESPONSE_FIELD_TYPES:
+		if properties[field].get("type") != RESPONSE_FIELD_TYPES[field]:
+			_fail("/properties/" + field, "schema_violation", "响应字段类型与适配器契约不兼容")
+			return false
+	for field in {"state_version": "string", "error": "object"}:
+		var expected_type := "string" if field == "state_version" else "object"
+		if not _has_nullable_type(properties[field], expected_type):
+			_fail("/properties/" + field, "schema_violation", "响应可空字段类型与适配器契约不兼容")
+			return false
+	return true
+
+func _has_nullable_type(definition: Dictionary, expected_type: String) -> bool:
+	var branches: Variant = definition.get("oneOf")
+	if not branches is Array or branches.size() != 2:
+		return false
+	var types := []
+	for branch in branches:
+		if not branch is Dictionary:
+			return false
+		types.append(branch.get("type"))
+	return types.has("null") and types.has(expected_type)
 
 func _payload_has_fields(message_type: String, payload: Dictionary) -> bool:
 	for field in _request_payload_fields.get(message_type, []):

@@ -49,6 +49,7 @@ func _run() -> void:
 	var ack: Dictionary = _read_fixture("hello.response.json")
 	var ping: Dictionary = _read_fixture("ping.request.json")
 	var pong: Dictionary = _read_fixture("pong.response.json")
+	_test_response_contract_shape(hello["payload"])
 	var premature_peer := FakePeer.new()
 	var premature_client = _new_client(premature_peer)
 	_assert(not premature_client.send_business_message("system.ping", {"nonce": "early"}), "business message before HelloAck")
@@ -137,6 +138,33 @@ func _run() -> void:
 	_assert(not buffered_client.is_ready(), "closed peer cannot stay ready")
 
 	quit(1 if _failures > 0 else 0)
+
+func _test_response_contract_shape(hello_payload: Dictionary) -> void:
+	var fields := ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"]
+	for field in fields:
+		for remove_property in [false, true]:
+			var response_schema := _read_json(RESPONSE_SCHEMA_PATH)
+			response_schema["required"].erase(field)
+			if remove_property:
+				response_schema["properties"].erase(field)
+			_assert_invalid_contract(response_schema, hello_payload, "缺失必填信封字段 %s" % field)
+	for field in ["request_id", "type", "success", "server_seq", "data", "meta"]:
+		var response_schema := _read_json(RESPONSE_SCHEMA_PATH)
+		response_schema["properties"][field]["type"] = "integer"
+		_assert_invalid_contract(response_schema, hello_payload, "信封字段类型错误 %s" % field)
+	for field in ["state_version", "error"]:
+		var response_schema := _read_json(RESPONSE_SCHEMA_PATH)
+		response_schema["properties"][field] = {"type": "integer"}
+		_assert_invalid_contract(response_schema, hello_payload, "信封可空字段类型错误 %s" % field)
+
+func _assert_invalid_contract(response_schema: Dictionary, hello_payload: Dictionary, label: String) -> void:
+	var peer := FakePeer.new()
+	var client = ProtocolAdapter.new(peer, _read_json(CATALOG_PATH), response_schema)
+	_assert(_error_code(client) == "schema_violation", label + "必须在初始化时拒绝")
+	_assert(not client.is_ready(), label + "不能进入 ready")
+	_assert(not client.start_handshake(hello_payload), label + "不能发送 Hello")
+	_assert(peer.sent_packets.is_empty(), label + "不能发送任何数据包")
+	_assert(peer.close_count == 1, label + "必须关闭持有的连接")
 
 func _new_client(peer: FakePeer, timeout_seconds: float = 10.0) -> Object:
 	return ProtocolAdapter.new(peer, _read_json(CATALOG_PATH), _read_json(RESPONSE_SCHEMA_PATH), timeout_seconds)

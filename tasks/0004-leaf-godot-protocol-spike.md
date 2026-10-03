@@ -25,6 +25,7 @@
 
 - Go 1.26.4 的协议包 race 测试通过，语句覆盖率 87.6%；probe 命令包 84.6%；`go vet ./...` 通过。
 - Godot 4.7.1 editor 导入、headless 协议状态机测试通过：HelloAck 前不得 ready、错误包与文本帧拒绝、真实 handshaking timeout、断线关闭和缓冲消息先处理。
+- 最终审查回归：新增 26 组不完整/错误类型响应契约测试，先确认旧实现 RED，再验证初始化强制检查九个必需信封字段、基本类型与可空类型；配置不匹配时返回 `schema_violation`、关闭连接且不发送 Hello。修复后两个 headless 脚本均无 `SCRIPT ERROR`，真实 WSS 正负向联调通过。
 - `python3 tools/verify_protocol.py` 已在本机真实运行 Leaf WSS ↔ Godot：使用临时证书与随机令牌完成 HelloAck/Ping/Pong；错误令牌必须在握手阶段失败，不受信 CA 必须出现 TLS 握手错误，且服务器仍存活。不是 mock 替代的 E2E。
 - 联调工具 pytest 7 项通过，Black/isort/Ruff 检查通过；结合真实 E2E 执行，脚本自身语句覆盖率 90%（不以测试代码覆盖率冒充工具覆盖率）。临时私钥和测试服务均由工具清理。
 - 明确边界：本任务仅实现协议 spike 与受控 loopback probe，不交付生产账号/令牌颁发、重连快照、持续心跳及按时间窗口限流。当前有消息字节上限、连接数/写队列上限、每连接请求数上限与重复 request_id 拒绝；这些不等同于正式生产网关验收。
