@@ -119,3 +119,13 @@ pnpm build
 - 工具测试依赖固定在 `tools/requirements-test.txt`。pytest 7 项通过，Black/isort/Ruff 检查通过；单元测试加真实 WSS 执行后，联调脚本自身覆盖率 90%。
 - CI 已加入两个 Godot headless 脚本、真正 WSS 联调及管理端覆盖率门禁；Godot 步骤同时检查退出码和 `SCRIPT ERROR`，避免引擎运行错误仍返回 0。CI 配置仅本地语法验证，尚未向远端推送/运行。
 - 尚未完成 Godot 导出/PCK 资源打包，当前也没有可玩的地图、战斗、内容管理界面或生产游戏服务。
+
+## 9. 地图空间创作与导出（任务 0006）
+
+- 地图空间 Schema 为 `contracts/content/map_geometry.schema.json`，约定详见同目录 `map_geometry.md`；最大 256×256 格、1024 锚点，0 可走/1 阻挡，拒绝旋转/缩放/非整数原点等不支持的空间布局。
+- Godot 已启用 `client/addons/tbcg_authoring/plugin.cfg`。在原创 `client/games/demo/maps/training-ground.tscn` 中选择地图根，通过“项目 → 工具 → 校验/导出当前地图”生成确定性 JSON。
+- `spatial_grid.gd` 为生产空间规则，Exporter 与共享向量测试均直接使用；首个 spawn 的可达集合只计算一次。导出器不会改写输入场景，锚点按稳定 ID 排序，与节点顺序无关。
+- Go `internal/content/mapdata` 从受信 Schema 编译不可变几何快照，拒绝坏尺寸、重复/越界/阻挡/不可达锚点；支持边界、像素/格转换、禁止对角切墙及有界 BFS。
+- 本机 Go 1.26.4 race：mapdata 覆盖率94.4%，map-validate CLI92.3%；build/vet通过。Godot4.7.1 headless editor、场景/写入测试通过；真实挂载 SceneTree 的地图也能导出。
+- `python3 tools/verify_map_export.py --godot <4.7.1编辑器>` 重复从真实场景导出，校验字节确定性和golden语义，再调用Go CLI；真实跨端验证通过，工具覆盖率91%。与WSS工具合并运行11项Python单测通过，Black/isort/Ruff通过。
+- 写入失败会检查 store/flush 错误并报告失败；不冒充完整资源包发布或原子持久化。未测量GDScript覆盖率；未执行真实人工菜单点击及导出包验收，后续创作体验与发布任务继续补足。

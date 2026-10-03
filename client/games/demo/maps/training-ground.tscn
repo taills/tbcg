@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_authoring_2d.gd" id="1_map"]
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_anchor_2d.gd" id="2_anchor"]
+
+[node name="TrainingGround" type="Node2D"]
+position = Vector2(64, 96)
+script = ExtResource("1_map")
+grid_rows = Array[String](["000000", "011010", "010010", "000000", "000000"])
+tile_size = 32
+map_id = "demo:map/training-ground"
+geometry_revision = 1
+
+[node name="arrival" type="Marker2D" parent="."]
+position = Vector2(16, 16)
+script = ExtResource("2_anchor")
+placement_id = "arrival"
+kind = "spawn"
+extent = Vector2i(1, 1)
+
+[node name="guide" type="Marker2D" parent="."]
+position = Vector2(80, 80)
+script = ExtResource("2_anchor")
+placement_id = "guide"
+kind = "npc"
+extent = Vector2i(1, 1)
+
+[node name="portal" type="Marker2D" parent="."]
+position = Vector2(176, 144)
+script = ExtResource("2_anchor")
+placement_id = "portal"
+kind = "portal"
+extent = Vector2i(1, 1)
+
+[node name="training-area" type="Marker2D" parent="."]
+position = Vector2(16, 112)
+script = ExtResource("2_anchor")
+placement_id = "training-area"
+kind = "trigger"
+extent = Vector2i(2, 2)

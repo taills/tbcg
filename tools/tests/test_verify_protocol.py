@@ -55,6 +55,17 @@ def test_script_error_fails_even_with_zero_exit(
         probe.run(["godot"])
 
 
+def test_timeout_preserves_script_diagnostics(monkeypatch: pytest.MonkeyPatch) -> None:
+    def timed_out(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(
+            "godot", 1, output=b"SCRIPT ERROR: missing helper", stderr=b"details"
+        )
+
+    monkeypatch.setattr(probe.subprocess, "run", timed_out)
+    with pytest.raises(RuntimeError, match="SCRIPT ERROR: missing helper"):
+        probe.run(["godot"])
+
+
 def test_explicit_godot_path(tmp_path: Path) -> None:
     executable = tmp_path / "godot"
     executable.write_text("placeholder", encoding="utf-8")

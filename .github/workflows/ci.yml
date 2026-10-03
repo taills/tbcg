@@ -149,15 +149,21 @@ jobs:
           ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-content.log"
           godot --headless --path client --script res://tests/network/protocol_adapter_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-protocol.log"
           ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-protocol.log"
+          godot --headless --path client --script res://tests/maps/map_authoring_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-maps.log"
+          ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-maps.log"
+          godot --headless --path client --script res://tests/maps/map_file_writer_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-map-writer.log"
+          ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-map-writer.log"
 
-      - name: Verify WSS integration and tooling
+      - name: Verify WSS and map integration with tooling
         run: |
           python3 -m venv "$RUNNER_TEMP/tbcg-tools"
           export PATH="$RUNNER_TEMP/tbcg-tools/bin:$PATH"
           python -m pip install -r tools/requirements-test.txt
-          black --check tools/verify_protocol.py tools/tests/test_verify_protocol.py
-          isort --check-only --profile black tools/verify_protocol.py tools/tests/test_verify_protocol.py
-          ruff check tools/verify_protocol.py tools/tests/test_verify_protocol.py
-          pytest -q tools/tests/test_verify_protocol.py --cov=tools --cov-report=term
+          black --check tools
+          isort --check-only --profile black tools
+          ruff check tools
+          pytest -q tools/tests --cov=tools --cov-report=term
           coverage run --append tools/verify_protocol.py
+          coverage run --append tools/verify_map_export.py
           coverage report --include='*/tools/verify_protocol.py' --fail-under=80
+          coverage report --include='*/tools/verify_map_export.py' --fail-under=80

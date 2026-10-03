@@ -1,0 +1,26 @@
+{
+  "walkability": [
+    { "cell": {"x": 0, "y": 0}, "walkable": true },
+    { "cell": {"x": 1, "y": 1}, "walkable": false },
+    { "cell": {"x": 5, "y": 4}, "walkable": true },
+    { "cell": {"x": -1, "y": 0}, "walkable": false },
+    { "cell": {"x": 6, "y": 4}, "walkable": false }
+  ],
+  "steps": [
+    { "from": {"x": 0, "y": 0}, "to": {"x": 1, "y": 0}, "allowed": true },
+    { "from": {"x": 3, "y": 1}, "to": {"x": 2, "y": 2}, "allowed": false },
+    { "from": {"x": 2, "y": 2}, "to": {"x": 3, "y": 3}, "allowed": true },
+    { "from": {"x": 0, "y": 0}, "to": {"x": 2, "y": 0}, "allowed": false },
+    { "from": {"x": 1, "y": 1}, "to": {"x": 0, "y": 1}, "allowed": false }
+  ],
+  "conversions": [
+    { "pixel": {"x": 64, "y": 96}, "cell": {"x": 0, "y": 0}, "inside": true },
+    { "pixel": {"x": 80, "y": 112}, "cell": {"x": 0, "y": 0}, "inside": true },
+    { "pixel": {"x": 63, "y": 96}, "cell": {"x": -1, "y": 0}, "inside": false },
+    { "pixel": {"x": 256, "y": 96}, "cell": {"x": 6, "y": 0}, "inside": false }
+  ],
+  "routes": [
+    { "from": {"x": 0, "y": 0}, "to": {"x": 5, "y": 4}, "reachable": true },
+    { "from": {"x": 0, "y": 0}, "to": {"x": 1, "y": 1}, "reachable": false }
+  ]
+}

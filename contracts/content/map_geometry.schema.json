@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:map-geometry:v1",
+  "title": "TBCG 正交地图空间契约 v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "map_id", "geometry_revision", "width", "height", "tile_size", "origin", "axis", "order", "diagonal_policy", "grid", "anchors"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "map_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._:/-]*$" },
+    "geometry_revision": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+    "width": { "type": "integer", "minimum": 1, "maximum": 256 },
+    "height": { "type": "integer", "minimum": 1, "maximum": 256 },
+    "tile_size": { "type": "integer", "minimum": 1, "maximum": 512 },
+    "origin": { "$ref": "#/$defs/point" },
+    "axis": { "const": "x_right_y_down" },
+    "order": { "const": "row_major" },
+    "diagonal_policy": { "const": "no_corner_cutting" },
+    "grid": {
+      "type": "array", "minItems": 1, "maxItems": 256,
+      "items": { "type": "array", "minItems": 1, "maxItems": 256, "items": { "type": "integer", "enum": [0, 1] } }
+    },
+    "anchors": {
+      "type": "array", "maxItems": 1024,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["placement_id", "kind", "cell", "extent"],
+        "properties": {
+          "placement_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+          "kind": { "enum": ["spawn", "npc", "portal", "trigger", "region"] },
+          "cell": { "$ref": "#/$defs/cell" },
+          "extent": {
+            "type": "object", "additionalProperties": false, "required": ["x", "y"],
+            "properties": { "x": { "type": "integer", "minimum": 1, "maximum": 256 }, "y": { "type": "integer", "minimum": 1, "maximum": 256 } }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "object", "additionalProperties": false, "required": ["x", "y"],
+      "properties": { "x": { "type": "integer", "minimum": -1000000, "maximum": 1000000 }, "y": { "type": "integer", "minimum": -1000000, "maximum": 1000000 } }
+    },
+    "cell": {
+      "type": "object", "additionalProperties": false, "required": ["x", "y"],
+      "properties": { "x": { "type": "integer", "minimum": 0, "maximum": 255 }, "y": { "type": "integer", "minimum": 0, "maximum": 255 } }
+    }
+  }
+}

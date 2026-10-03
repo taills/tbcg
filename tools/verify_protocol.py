@@ -28,14 +28,25 @@ def run(
     timeout_seconds: int = TIMEOUT_SECONDS,
     required_output: str | None = None,
 ) -> str:
-    result = subprocess.run(
-        command,
-        cwd=cwd,
-        env=env,
-        text=True,
-        capture_output=True,
-        timeout=timeout_seconds,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout or b""
+        stderr = error.stderr or b""
+        output = (
+            stdout.decode(errors="replace") if isinstance(stdout, bytes) else stdout
+        )
+        output += (
+            stderr.decode(errors="replace") if isinstance(stderr, bytes) else stderr
+        )
+        raise RuntimeError(f"验证命令超时：{command[0]}\n{output}") from error
     output = result.stdout + result.stderr
     if "SCRIPT ERROR:" in output or (result.returncode == 0) != expected_success:
         raise RuntimeError(f"验证命令失败：{command[0]}\n{output}")
