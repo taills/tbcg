@@ -17,7 +17,7 @@
     "payload_type": "object"
   },
   "response_envelope": {
-    "required_fields": ["protocol_version", "request_id", "type", "success", "server_seq", "data", "error", "meta"],
+    "required_fields": ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"],
     "server_seq_encoding": "unsigned-decimal-string",
     "state_version_encoding": "unsigned-decimal-string"
   },

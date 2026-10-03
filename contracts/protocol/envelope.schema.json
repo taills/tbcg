@@ -1,17 +1,50 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:tbcg:protocol:request:v1",
-  "title": "TBCG protocol request envelope v1",
+  "title": "TBCG 协议请求 v1",
   "type": "object",
   "additionalProperties": false,
   "required": ["protocol_version", "request_id", "type", "payload"],
   "properties": {
     "protocol_version": { "const": "1" },
     "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "type": {
-      "type": "string",
-      "enum": ["system.hello", "system.ping"]
-    },
+    "type": { "enum": ["system.hello", "system.ping"] },
     "payload": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "system.hello" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/hello" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "system.ping" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/ping" } } }
+    }
+  ],
+  "$defs": {
+    "nonempty_string": { "type": "string", "minLength": 1 },
+    "hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["game_id", "realm_id", "client_build", "release_id", "session_token", "capabilities"],
+      "properties": {
+        "game_id": { "$ref": "#/$defs/nonempty_string" },
+        "realm_id": { "$ref": "#/$defs/nonempty_string" },
+        "client_build": { "$ref": "#/$defs/nonempty_string" },
+        "release_id": { "$ref": "#/$defs/nonempty_string" },
+        "session_token": { "$ref": "#/$defs/nonempty_string" },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonempty_string" }
+        }
+      }
+    },
+    "ping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nonce"],
+      "properties": { "nonce": { "$ref": "#/$defs/nonempty_string" } }
+    }
   }
 }

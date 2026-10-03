@@ -4,7 +4,7 @@
   "title": "TBCG protocol response envelope v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["protocol_version", "request_id", "type", "success", "server_seq", "data", "error", "meta"],
+  "required": ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"],
   "properties": {
     "protocol_version": { "const": "1" },
     "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
