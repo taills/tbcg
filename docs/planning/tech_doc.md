@@ -5,7 +5,7 @@
 ## 1. 唯一数据库决策
 
 - **业务数据库：PostgreSQL ONLY**，开发、CI、测试和生产使用 PostgreSQL；不提供 SQLite/MySQL adapter，也不以 SQLite 替代集成测试。
-- PostgreSQL 主版本锁定 **18**；本机 Homebrew client/server 为 **18.3**。`psql --version` / `postgres --version` 已确认 18.3；本机 `pg_isready` 对默认 `/tmp:5432` 返回无响应，表示目前没有可用服务，未运行数据库集成测试。数据库容器和测试库由任务 0003 建立。
+- PostgreSQL 主版本锁定 **18**；本机 Homebrew client/server 为 **18.3**。`psql --version` / `postgres --version` 已确认 18.3；Unix socket 默认检查 `/tmp:5432` 无响应，但 TCP 5432 已被一个无关 Docker 服务占用，禁止复用或停止。任务 0003 的本机集成测试要求显式设置 disposable 确认标记，只接受 loopback `127.0.0.1:55432` 上的 `postgres` 维护库，拒绝默认5432/非loopback并清除/拒绝继承的 `PGHOSTADDR`、`PGSERVICE` 路由覆盖；测试使用独立临时数据目录与随机凭据，结束后仅关闭并清理自己创建的集群。
 - PostgreSQL 驱动依赖锁定 `github.com/jackc/pgx/v5 v5.10.0`；运行时实现应使用 `pgx/v5/stdlib` 的 `database/sql` 适配器，并由 Go 存储模块管理事务与连接生命周期。
 - 数据库迁移采用 PostgreSQL 专用 standalone CLI `github.com/jackc/tern/v2 v2.4.3`（Tern 使用 PostgreSQL/pgx，Go 1.25+，MIT）；通过 `go install github.com/jackc/tern/v2@v2.4.3` 固定安装，不加入游戏服务的运行时 `go.mod`。任务 0003 将验证空库、重复迁移和升级行为；连接由 `PG*` 环境变量提供，不在仓库保存 DSN/密码。
 - **Leaf 传递依赖说明：**`github.com/taills/leaf/v2 v2.0.3` 自身的 `go.mod` 声明可选 SQLite 实现依赖，因此 `go list -m all`/`go.sum` 会出现 `modernc.org/sqlite`。TBCG 没有直接 SQLite 依赖、driver 注册或 SQLite 打开逻辑，不使用 Leaf SQLite Adapter；这不构成 SQLite 数据库存储支持。若将来要求连依赖图也不得包含 SQLite，需先重新评估 Leaf，而不是偷偷删除校验和或 fork。
@@ -23,7 +23,7 @@
 | Go 格式化工具 | `gofmt`（与 Go 工具链同版本）+ `golang.org/x/tools/cmd/goimports v0.51.0` |
 | 模块路径 | 暂用 `example.com/tbcg/server`；确认代码托管组织/远程仓库后、向外发布前需替换为正式模块路径。 |
 
-`go.mod` 不设置指向 xyq、本机绝对目录或 Leaf 工作树的 `replace`。Leaf 使用 `/v2` 模块路径。Go 模块校验与依赖图在 Go 1.27.0 和 Go 1.26.4 下均成功；任务 0002 尚无应用 Go package，因此不能宣称 `go test ./...` 有业务代码可测。
+`go.mod` 不设置指向 xyq、本机绝对目录或 Leaf 工作树的 `replace`。Leaf 使用 `/v2` 模块路径。Go 模块校验与依赖图在 Go 1.27.0 和 Go 1.26.4 下均成功；当前只实现 PostgreSQL persistence 基础切片，游戏网络/领域模块仍未实现。
 
 ## 3. Godot 客户端/创作工具
 
@@ -78,7 +78,7 @@ pnpm build
 - `actions/setup-node` v7.0.0
 - `chickensoft-games/setup-godot` v2.4.3
 
-当前 CI 检查 Go modules、Go 源码出现后的 gofmt/goimports/race/coverage/vet、管理前端依赖审计/格式/typecheck/test/build 和 Godot headless 项目导入。Go 源码尚不存在时，CI 会明确输出 notice，仅验证依赖，不声称 Go tests 已通过；首次添加 Go package 后自动安装固定的 `golang.org/x/tools/cmd/goimports v0.51.0`，再运行格式检查、`go test -race -cover ./...` 和 `go vet ./...`。Admin 的 Playwright E2E 尚未配置，后续入口计划为 `pnpm exec playwright test`。需要 PostgreSQL 的 migration/集成故障测试将在任务 0003/0007 中使用版本固定的 PostgreSQL 18 service 补入，不在当前工具链任务启动 CI 服务。
+当前 CI 检查 Go modules、Go 源码存在时的 gofmt/goimports/race/coverage/vet、管理前端依赖审计/格式/typecheck/test/build 和 Godot headless 项目导入。Go 源码存在后会安装固定的 `golang.org/x/tools/cmd/goimports v0.51.0`；无 Go 源码时输出 notice 且只验证模块。Go job 使用版本固定的 PostgreSQL 18 service 和一次性 trust-auth 测试容器（仅loopback映射、无生产数据/秘密），并强制设置 URL、confirmation token、required 标记；测试端拒绝非loopback、非55432或非 `postgres` maintenance DB，防止误操作共享数据库。Tern v2.4.3 在 CI 显式安装。Admin 的 Playwright E2E 尚未配置，后续入口计划为 `pnpm exec playwright test`。
 
 本次没有触发 GitHub 远端 workflow；本地成功结果不等于远程 CI 已通过。
 
@@ -87,13 +87,15 @@ pnpm build
 | 检查 | 本机结果 | 说明 |
 |---|---|---|
 | `GOTOOLCHAIN=go1.26.4 go version` | 通过，输出 Go 1.26.4 | 工具链由 Go 自动下载至本机工具链缓存 |
-| `go mod download all` / `go mod verify` / `go list -m all` | Go 1.27.0 和指定 1.26.4 下通过 | 仅检查依赖，无业务包构建 |
-| Go `gofmt` / `goimports` | CI 已锁定命令；本机尚无 Go source packages | `goimports` 固定为 `golang.org/x/tools/cmd/goimports v0.51.0`，首次出现 Go 文件后运行 |
+| `go mod download all` / `go mod verify` / `go list -m all` | Go 1.27.0 和指定 1.26.4 下通过 | Go 模块图与校验和已固定 |
+| Go `gofmt` / `goimports` | 本机对当前 Go 源码已格式化；CI 固定 `golang.org/x/tools/cmd/goimports v0.51.0` | Go module/persistence tests 使用 Go 1.26.4 |
+| Go `go test -race -cover ./...` / `go vet ./...` | 真实 PostgreSQL 隔离测试通过；Postgres persistence statements 覆盖率 98.1%；race 与 vet 通过 | 测试临时初始化 PG 18.3 私有集群，使用 loopback 55432、随机凭据与显式确认标记并清理；拒绝共享5432、非loopback和 PGHOSTADDR/PGSERVICE 覆盖 |
 | Admin `pnpm audit/format:check/typecheck/test/build` | 全部通过；audit 未发现高危公告 | 测试为初始脚手架 smoke test |
 | Playwright E2E | 尚未配置 | 后续入口计划 `pnpm exec playwright test`，目前不可运行 |
 | Godot `--version` / headless editor import | 通过，Godot 4.7.1 | 项目场景有效；还没有真实游戏/E2E |
-| PostgreSQL 客户端/服务端版本 | 18.3 已安装 | 默认本机服务未运行；没有做迁移、事务或故障测试 |
+| PostgreSQL 客户端/服务端版本 | 18.3 已安装 | task0003测试使用独立临时PG18.3集群和55432 loopback端口，结束后已停止并清理；共享5432未触碰 |
+| Tern schema migration / PostgreSQL UoW | v2.4.3 通过真实 PostgreSQL 空库测试 | 两次up、down到0、up重放、scope约束/字段版本/owner guard保护及Game Repo提交/回滚/唯一冲突均通过；state_version并发CAS通过 |
 | GitHub Actions workflow | 文件已锁版本/Actions SHA | 尚未在 GitHub 远端执行 |
 | Godot 导出 | 未验证 | 尚无 export preset；版本匹配的模板已安装 |
 
-任务 0003 将补 PostgreSQL 服务配置、migration 工具/版本和真实集成测试入口；任务 0004–0006 分别验证 Leaf/Godot 协议、Schema 和地图几何导出。
+任务 0003 已完成 PostgreSQL schema/migration 与基础 repository/UoW 切片，Go integration 使用临时隔离 PostgreSQL 18.3 完成 race、迁移 down/up、幂等冲突、owner_guard 防回退/删除/跨域迁移及 state_version 并发 CAS 测试；package statement coverage 98.1%，go vet 通过。Realm 接管与运行事务两连接竞态、业务 commit unknown 恢复及真实奖励 outbox 故障注入仍由任务 0007 验证，不因当前 Schema/基础 UnitOfWork 测试通过而宣称已完成。任务 0004–0006 将分别验证 Leaf/Godot 协议、Schema 和地图几何导出。
