@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go-modules:
+    name: Go module verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.4
+          cache-dependency-path: server/go.sum
+
+      - name: Verify Go modules
+        working-directory: server
+        run: |
+          go mod download all
+          go mod verify
+          go list -m all
+
+      - name: Format, test, and vet Go packages when present
+        working-directory: server
+        run: |
+          mapfile -d '' go_files < <(find . -type f -name '*.go' -not -path './vendor/*' -print0)
+          if [ "${#go_files[@]}" -eq 0 ]; then
+            echo "::notice title=Go checks::No Go source packages yet; module integrity was verified."
+            exit 0
+          fi
+
+          go install golang.org/x/tools/cmd/goimports@v0.51.0
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          gofmt_files="$(gofmt -l "${go_files[@]}")"
+          goimports_files="$(goimports -l "${go_files[@]}")"
+          if [ -n "$gofmt_files" ] || [ -n "$goimports_files" ]; then
+            printf 'Go formatting check failed.\n%s\n%s\n' "$gofmt_files" "$goimports_files"
+            exit 1
+          fi
+
+          go test -race -cover ./...
+          go vet ./...
+
+  admin:
+    name: Admin typecheck, tests, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.20.0
+
+      - name: Set up pnpm
+        run: npm install --global pnpm@10.21.0
+
+      - name: Install dependencies
+        working-directory: admin
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit, format, typecheck, tests, and build
+        working-directory: admin
+        run: |
+          pnpm audit --audit-level high
+          pnpm format:check
+          pnpm typecheck
+          pnpm test
+          pnpm build
+
+  godot:
+    name: Godot headless project validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Godot
+        uses: chickensoft-games/setup-godot@ac93246ea68518a384c1c280a496e5989341f2f6 # v2.4.3
+        with:
+          version: 4.7.1
+          use-dotnet: false
+          include-templates: true
+
+      - name: Verify Godot project
+        run: |
+          godot --version
+          godot --headless --editor --path client --quit
