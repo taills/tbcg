@@ -90,12 +90,32 @@ pnpm build
 | `go mod download all` / `go mod verify` / `go list -m all` | Go 1.27.0 和指定 1.26.4 下通过 | Go 模块图与校验和已固定 |
 | Go `gofmt` / `goimports` | 本机对当前 Go 源码已格式化；CI 固定 `golang.org/x/tools/cmd/goimports v0.51.0` | Go module/persistence tests 使用 Go 1.26.4 |
 | Go `go test -race -cover ./...` / `go vet ./...` | 真实 PostgreSQL 隔离测试通过；Postgres persistence statements 覆盖率 98.1%；race 与 vet 通过 | 测试临时初始化 PG 18.3 私有集群，使用 loopback 55432、随机凭据与显式确认标记并清理；拒绝共享5432、非loopback和 PGHOSTADDR/PGSERVICE 覆盖 |
-| Admin `pnpm audit/format:check/typecheck/test/build` | 全部通过；audit 未发现高危公告 | 测试为初始脚手架 smoke test |
+| Admin `pnpm audit/format:check/typecheck/test --coverage/build` | 全部通过，16 项测试；语句 94.2%、分支 81.63%；audit 无已知漏洞 | 包含共享内容 Schema、公开投影、身份匹配及原型链属性拒绝 |
 | Playwright E2E | 尚未配置 | 后续入口计划 `pnpm exec playwright test`，目前不可运行 |
-| Godot `--version` / headless editor import | 通过，Godot 4.7.1 | 项目场景有效；还没有真实游戏/E2E |
+| Godot headless 与 WSS probe | 通过，Godot 4.7.1 | 协议/内容脚本与真实 Leaf WSS 联调通过；尚无游戏玩法 E2E |
 | PostgreSQL 客户端/服务端版本 | 18.3 已安装 | task0003测试使用独立临时PG18.3集群和55432 loopback端口，结束后已停止并清理；共享5432未触碰 |
 | Tern schema migration / PostgreSQL UoW | v2.4.3 通过真实 PostgreSQL 空库测试 | 两次up、down到0、up重放、scope约束/字段版本/owner guard保护及Game Repo提交/回滚/唯一冲突均通过；state_version并发CAS通过 |
 | GitHub Actions workflow | 文件已锁版本/Actions SHA | 尚未在 GitHub 远端执行 |
 | Godot 导出 | 未验证 | 尚无 export preset；版本匹配的模板已安装 |
 
-任务 0003 已完成 PostgreSQL schema/migration 与基础 repository/UoW 切片，Go integration 使用临时隔离 PostgreSQL 18.3 完成 race、迁移 down/up、幂等冲突、owner_guard 防回退/删除/跨域迁移及 state_version 并发 CAS 测试；package statement coverage 98.1%，go vet 通过。Realm 接管与运行事务两连接竞态、业务 commit unknown 恢复及真实奖励 outbox 故障注入仍由任务 0007 验证，不因当前 Schema/基础 UnitOfWork 测试通过而宣称已完成。任务 0004–0006 将分别验证 Leaf/Godot 协议、Schema 和地图几何导出。
+任务 0003 已完成 PostgreSQL schema/migration 与基础 repository/UoW 切片，Go integration 使用临时隔离 PostgreSQL 18.3 完成 race、迁移 down/up、幂等冲突、owner_guard 防回退/删除/跨域迁移及 state_version 并发 CAS 测试；package statement coverage 98.1%，go vet 通过。Realm 接管与运行事务两连接竞态、业务 commit unknown 恢复及真实奖励 outbox 故障注入仍由任务 0007 验证，不因当前 Schema/基础 UnitOfWork 测试通过而宣称已完成。任务 0004–0006 分别负责 Leaf/Godot 协议、共享 Schema 和地图几何导出。
+
+## 7. 内容 Schema 投影验证（任务 0005）
+
+- 单一来源：`contracts/content/item.schema.json` 与 `item-public.schema.json`。字段约定、错误码和受限投影说明见 `contracts/content/README.md`。
+- Go 使用 `jsonschema/v6 v6.0.3`，管理端使用 `ajv 8.20.0` 的 Draft 2020-12 + strict/ownProperties；不动态加载远程 Schema。Go Schema 包的 race 测试通过，语句覆盖率 88.2%。
+- Godot 接收可信 Schema Dictionary，构造仅含公开字段的 Resource，生产适配器不读取工作区父目录。headless fixture 校验通过，尚无 GDScript 覆盖率统计。
+- Vite 仅允许 `admin/` 和 `contracts/content/` 两个明确目录；已验证本地开发页、应用入口和 Schema 模块可加载。
+- 管理端使用 `@vitest/coverage-v8 5.0.3`，四项覆盖指标门槛均为 80%。统计包含手写业务代码；排除测试文件、测试 setup 和 DOM 挂载入口 `main.tsx`，不排除内容校验逻辑。
+- 当前选择手写受限适配器而不是通用三语言代码生成器。变更必须运行同一组 canonical fixtures；公开字段与顶层身份不一致会拒绝，金额保持十进制字符串。
+
+## 8. Leaf/Godot WSS 协议验证（任务 0004）
+
+- `server/internal/transport/leaf` 提供受限协议适配器；`cmd/protocol-probe` 只绑定 loopback，要求显式临时令牌，不是正式账号认证服务。
+- 当前消息为 Hello/HelloAck/Ping/Pong；默认响应 data/meta 为对象，拒绝未知字段/类型/版本、重复请求 ID 和超额请求。生产心跳、限流、账号生命周期与重连快照留在后续任务。
+- Go 协议包 race 测试通过，覆盖率 87.6%；probe 包 84.6%。Godot 状态机 headless 测试通过；不把 GDScript 覆盖率写成已测量。
+- 真实跨端验证：在仓库根目录执行 `python3 tools/verify_protocol.py --godot /path/to/godot`，或通过 `GODOT` 指定 4.7.1 编辑器。脚本使用系统 OpenSSL、Go 1.26.4 和 Python 3.9+，创建并清理自己的临时证书、令牌、二进制及进程。
+- 正向联调验证可信 TLS、HelloAck 与 Ping/Pong；负向用例分别断言认证阶段拒绝和 TLS 握手失败，避免任意非零退出造成假阳性。禁止 `client_unsafe`。
+- 工具测试依赖固定在 `tools/requirements-test.txt`。pytest 7 项通过，Black/isort/Ruff 检查通过；单元测试加真实 WSS 执行后，联调脚本自身覆盖率 90%。
+- CI 已加入两个 Godot headless 脚本、真正 WSS 联调及管理端覆盖率门禁；Godot 步骤同时检查退出码和 `SCRIPT ERROR`，避免引擎运行错误仍返回 0。CI 配置仅本地语法验证，尚未向远端推送/运行。
+- 尚未完成 Godot 导出/PCK 资源打包，当前也没有可玩的地图、战斗、内容管理界面或生产游戏服务。

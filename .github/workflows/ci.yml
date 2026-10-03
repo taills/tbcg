@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -110,7 +114,7 @@ jobs:
           pnpm audit --audit-level high
           pnpm format:check
           pnpm typecheck
-          pnpm test
+          pnpm test --coverage
           pnpm build
 
   godot:
@@ -130,7 +134,30 @@ jobs:
           use-dotnet: false
           include-templates: true
 
-      - name: Verify Godot project
+      - name: Set up Go for WSS probe
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.4
+          cache-dependency-path: server/go.sum
+
+      - name: Verify Godot project and adapters
         run: |
           godot --version
-          godot --headless --editor --path client --quit
+          godot --headless --editor --path client --import 2>&1 | tee "$RUNNER_TEMP/godot-import.log"
+          ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-import.log"
+          godot --headless --path client --script res://tests/content/item_projection_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-content.log"
+          ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-content.log"
+          godot --headless --path client --script res://tests/network/protocol_adapter_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-protocol.log"
+          ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-protocol.log"
+
+      - name: Verify WSS integration and tooling
+        run: |
+          python3 -m venv "$RUNNER_TEMP/tbcg-tools"
+          export PATH="$RUNNER_TEMP/tbcg-tools/bin:$PATH"
+          python -m pip install -r tools/requirements-test.txt
+          black --check tools/verify_protocol.py tools/tests/test_verify_protocol.py
+          isort --check-only --profile black tools/verify_protocol.py tools/tests/test_verify_protocol.py
+          ruff check tools/verify_protocol.py tools/tests/test_verify_protocol.py
+          pytest -q tools/tests/test_verify_protocol.py --cov=tools --cov-report=term
+          coverage run --append tools/verify_protocol.py
+          coverage report --include='*/tools/verify_protocol.py' --fail-under=80

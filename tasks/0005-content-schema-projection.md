@@ -1,6 +1,6 @@
 # 0005 共享内容 Schema 投影 spike
 
-**状态：**进行中
+**状态：**进行中（三端实现及本地测试已通过，等待 Godot 最终审查收口）
 **目标：**验证一类内容定义如何从单一 JSON Schema 投影到 Go、React 与 Godot，避免三端手写漂移。
 
 ## 范围
@@ -20,6 +20,14 @@
 
 - Go 与前端 Schema 单测，Godot headless fixture 测试；对无效枚举、缺失引用、null 与边界整数做负例。
 - 检查生成步骤可复现且仓库 diff 干净；若本机 Godot 不可用，任务未通过。
+
+### 本地验证记录
+
+- 选择受限投影方案：Go/Ajv 直接编译共享 JSON Schema；Godot 注入可信公开 Schema，返回只含公开字段的新 Resource。不生成通用 Schema 引擎、不复制第二份定义。
+- Go 1.26.4：`go test -race -count=1 -cover ./internal/content/schema` 通过，语句覆盖率 88.2%；`go vet ./...` 通过。
+- 管理端：16 项测试通过；V8 语句覆盖率 94.2%、分支覆盖率 81.63%，满足 80% 门禁；typecheck、build、format、frozen install 和高危依赖 audit 通过。覆盖率只排除测试文件、测试初始化和 DOM 挂载入口 `main.tsx`。
+- Godot 4.7.1：公开内容 fixture 脚本与 editor headless 导入通过；未测量 GDScript 覆盖率，不声称达到 80%。
+- 已覆盖必填/未知属性、枚举、null、整数范围、大整数字符串、Definition/公开投影身份不一致、私有数据隔离与 Ajv 原型链必填属性拒绝。
 
 ## 依赖与文件
 

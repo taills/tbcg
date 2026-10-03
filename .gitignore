@@ -17,5 +17,12 @@
 .env.*
 !.env.example
 
+# Python 验证工具的缓存与覆盖率文件
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # OS/editor artifacts
 .DS_Store
