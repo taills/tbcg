@@ -129,3 +129,13 @@ pnpm build
 - 本机 Go 1.26.4 race：mapdata 覆盖率94.4%，map-validate CLI92.3%；build/vet通过。Godot4.7.1 headless editor、场景/写入测试通过；真实挂载 SceneTree 的地图也能导出。
 - `python3 tools/verify_map_export.py --godot <4.7.1编辑器>` 重复从真实场景导出，校验字节确定性和golden语义，再调用Go CLI；真实跨端验证通过，工具覆盖率91%。与WSS工具合并运行11项Python单测通过，Black/isort/Ruff通过。
 - 写入失败会检查 store/flush 错误并报告失败；不冒充完整资源包发布或原子持久化。未测量GDScript覆盖率；未执行真实人工菜单点击及导出包验收，后续创作体验与发布任务继续补足。
+
+## 10. PostgreSQL 结算与发布故障验证（任务 0007）
+
+- `internal/economy` 以单事务提交钱包、账本、operation result 和 outbox；按 game/realm/actor/operation 作用域核验载荷 hash，事件类型参与 hash 且经白名单校验。消费者凭据与数据库副作用同事务提交，过期租约不能冒领。
+- `internal/persistence/commit.go` 统一提交结果分类，使用 PostgreSQL 18 的 `SeverityUnlocalized`，不比较本地化错误文本。明确拒绝/回滚与 FATAL、传输错误、超时造成的 unknown 分离；恢复缺记录不视为回滚。
+- `Settle` 重放同样要求当前 owner；接管后的旧命令通过只读 `Recover` 核验，新 owner 可用当前 epoch、原键和原业务载荷重放。真实 PG 测试确认资产不重复。
+- Release 激活按 owner guard → realm → Release 锁序，在事务中验证 epoch 并持 guard 共享锁到提交。不可变产物先完整暂存、同步，再原子 no-replace 安装；同内容重试复用，不同内容/不完整目标/符号链接拒绝。
+- Release 身份和定义按 game 共享，realm 持各自活动指针；跨 realm 复用不降级已激活状态、不重置首次激活时间。注册和激活均核对全部版本、manifest 与公开/私有产物 hash。
+- 2026-10-04 最终真实 PG 18.3 全量 Go race、build、vet、staticcheck 通过；全部 Go 语句覆盖 87.8%，经济模块 83.1%、Release 84.9%。gosec 扫描生产代码 0 条问题。奖励和 Release 均验证真实 COMMIT 成功、测试 driver 丢弃确认后的 pending/恢复路径。
+- 本切片不代表管理平台或真实运行进程发布确认已经完成；artifact root 是运维控制的私有目录，尚无公共 HTTP 路由。任务 0008 必须交付真实运行进程加载/确认、管理权限及公开白名单路由。详细故障、复审与未运行项见 [`../verification/0007.md`](../verification/0007.md)。

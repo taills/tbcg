@@ -84,6 +84,15 @@ jobs:
           fi
 
           go test -race -cover ./...
+
+          go test -coverpkg=./internal/economy -coverprofile="$RUNNER_TEMP/economy.coverage" ./internal/economy ./internal/persistence/postgres
+          economy_coverage="$(go tool cover -func="$RUNNER_TEMP/economy.coverage" | awk '/^total:/ { gsub("%", "", $3); print $3 }')"
+          awk -v coverage="$economy_coverage" 'BEGIN { exit !(coverage >= 80) }'
+
+          go test -coverpkg=./internal/content/release -coverprofile="$RUNNER_TEMP/release.coverage" ./internal/content/release ./internal/persistence/postgres
+          release_coverage="$(go tool cover -func="$RUNNER_TEMP/release.coverage" | awk '/^total:/ { gsub("%", "", $3); print $3 }')"
+          awk -v coverage="$release_coverage" 'BEGIN { exit !(coverage >= 80) }'
+
           go vet ./...
 
   admin:

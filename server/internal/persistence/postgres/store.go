@@ -94,7 +94,7 @@ func (u unitOfWork) WithinTx(ctx context.Context, fn func(persistence.TxReposito
 		return fmt.Errorf("transaction callback failed: %w", err)
 	}
 	if err := tx.Commit(); err != nil {
-		if _, ok := errors.AsType[*pgconn.PgError](err); ok {
+		if !persistence.IsCommitOutcomeUnknown(err) {
 			return fmt.Errorf("commit PostgreSQL transaction rejected: %w", err)
 		}
 		return fmt.Errorf("commit PostgreSQL transaction outcome unknown: %w", errors.Join(persistence.ErrUnknown, err))

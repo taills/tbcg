@@ -340,7 +340,7 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
 	}
 	for _, name := range []string{
 		"games", "realms", "content_revisions", "releases", "owner_guards",
-		"characters", "operation_results", "wallets", "wallet_ledger", "outbox",
+		"characters", "operation_results", "wallets", "wallet_ledger", "outbox", "outbox_consumer_receipts",
 	} {
 		if !tables[name] {
 			t.Errorf("required PostgreSQL table %q is missing", name)

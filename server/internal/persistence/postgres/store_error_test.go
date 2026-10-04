@@ -92,7 +92,7 @@ func TestUnitOfWorkBeginFailsAfterDatabaseClose(t *testing.T) {
 }
 
 func TestUnitOfWorkPostgreSQLCommitErrorIsNotUnknown(t *testing.T) {
-	commitErr := &pgconn.PgError{Code: "40001", Message: "serialization failure"}
+	commitErr := &pgconn.PgError{Severity: "ERROR", SeverityUnlocalized: "ERROR", Code: "40001", Message: "serialization failure"}
 	store, _ := newFakeStore(t, fakeTxBehavior{commitErr: commitErr})
 
 	err := store.UnitOfWork().WithinTx(context.Background(), func(persistence.TxRepositories) error {
@@ -100,6 +100,22 @@ func TestUnitOfWorkPostgreSQLCommitErrorIsNotUnknown(t *testing.T) {
 	})
 	if errors.Is(err, persistence.ErrUnknown) {
 		t.Fatalf("PostgreSQL commit error was classified as unknown: %v", err)
+	}
+	got, ok := errors.AsType[*pgconn.PgError](err)
+	if !ok || got != commitErr {
+		t.Fatalf("commit error = %v, want original PostgreSQL error %p", got, commitErr)
+	}
+}
+
+func TestUnitOfWorkFatalPostgreSQLCommitErrorIsUnknownAndPreserved(t *testing.T) {
+	commitErr := &pgconn.PgError{Severity: "FATAL", SeverityUnlocalized: "FATAL", Code: "57P01", Message: "admin_shutdown"}
+	store, _ := newFakeStore(t, fakeTxBehavior{commitErr: commitErr})
+
+	err := store.UnitOfWork().WithinTx(context.Background(), func(persistence.TxRepositories) error {
+		return nil
+	})
+	if !errors.Is(err, persistence.ErrUnknown) {
+		t.Fatalf("FATAL PostgreSQL commit error was not classified as unknown: %v", err)
 	}
 	got, ok := errors.AsType[*pgconn.PgError](err)
 	if !ok || got != commitErr {
@@ -238,7 +254,7 @@ type fakeConnector struct {
 }
 
 func (c fakeConnector) Connect(context.Context) (driver.Conn, error) {
-	return fakeConn{behavior: c.behavior}, nil
+	return fakeConn(c), nil
 }
 
 func (fakeConnector) Driver() driver.Driver {
