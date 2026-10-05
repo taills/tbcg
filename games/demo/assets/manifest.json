@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "asset_id": "demo:icon/placeholder",
+      "path": "icons/original-placeholder.svg",
+      "sha256": "a0907ac90d3ef9763054c21cb0f4a9f32be5cb08f34df4f34046a72587e31f80",
+      "source": "Original TBCG placeholder icon authored in-repository on 2026-10-04",
+      "license": "TBCG original asset; internal demo use"
+    }
+  ]
+}

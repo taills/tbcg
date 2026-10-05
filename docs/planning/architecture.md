@@ -45,6 +45,16 @@ Definition 通过稳定 Content ID 和不可变 Revision 寻址；Release 是不
 
 新增已有机制下的内容只改 Definition；组合已有机制必须通过校验；新增机制、新交互或新表现必须增加版本化 Go handler、必要 GDScript 表现、Schema、编辑支持和测试。`unsupported` 阻止发布，`approximate` 不得静默降级。
 
+## 5.1 任务 0008 管理控制面阶段
+
+管理端采用专用 Go `net/http` 进程和窄 PostgreSQL repository。第一阶段仅管理身份/session、Game 绑定角色、CAS 草稿、Schema 校验、不可变 revision 与 Reviewer 审批；控制面不得写玩家资产或 Realm 活动 Release 指针。角色可按 Game 分别兼任，但 `revision.review` 只授予 Reviewer，未来 build/activate 只授予 Publisher。
+
+端点契约冻结在 `contracts/admin/openapi.yaml`。现阶段服务端契约为 session/login/logout、`POST /games/{gameId}/item-drafts`、`GET/PUT /games/{gameId}/item-drafts/{draftId}`、draftId 下 validate/submit、review queue 与在请求体指定 `content_id + integer revision + body_hash` 的审批；content_id 不出现在资源 path。build、activate、runtime acknowledgment 和公开 bundle 均为 planned，未实现前不暴露空路由或成功占位。Reviewer 才能审批，Publisher 负责后续构建/激活请求且不隐式继承 Reviewer 权限；活动 Release 指针只能由真实 runtime owner 确认。
+
+身份认证使用服务端 PostgreSQL session；随机 session token 只以 hash 持久化。浏览器管理面只走 HTTPS，cookie 为 Secure、HttpOnly、SameSite、无 Domain。匿名 session 建立 CSRF token；登录轮换 session 和 CSRF。登录、登出及写请求校验精确 Origin 与 session CSRF。
+
+2026-10-04 已完成控制面第一纵切片本地验收：真实 PostgreSQL 18.3/Tern 2.4.3、受限 `tbcg_admin_control_plane` 角色、可信 TLS 管理 API、React 生产构建与 Firefox 真实浏览器 E2E 均通过。该验收只覆盖 login/edit/CAS/submit/review，不覆盖隔离 build、runtime owner 激活或 Godot 公开包读取；详见 [`../verification/0008-stage1.md`](../verification/0008-stage1.md)。
+
 ## 6. Realm 写入边界
 
 首版每个 Realm 单写者。游戏写进程通过 PostgreSQL advisory lock、递增 `owner_epoch` 和事务内校验防双写。Character、Map、Party、Battle、Dungeon 各自拥有独占状态；跨 owner 变化只能通过命令、事实和事务协调完成。

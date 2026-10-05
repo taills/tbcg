@@ -309,6 +309,18 @@ TBCG 是一个原创、内容驱动的 **2D 回合制多人 RPG 框架**。首�
 | PostgreSQL 集成不足 | 测试通过但生产行为不一致 | 集成和故障验收必须使用真实 PostgreSQL |
 | 未验证性能承诺 | 误导计划和发布判断 | 首版只记录实测环境和结果，不预设吞吐宣传指标 |
 
+## 13.1 任务 0008 分阶段验收边界
+
+任务 0008 分为五阶段：
+
+1. **契约冻结**：统一 management OpenAPI、响应 envelope、字段错误定位；只有 CAS `draft_version` 是十进制字符串，所有 revision 是 1..2147483647 的整数；build/activate/runtime 公共包只声明 planned，不提供伪成功接口。
+2. **控制面（当前第一纵切片，2026-10-04 已验证）**：管理登录、受控本地 bootstrap、Game 绑定 RBAC、使用 `POST /games/{gameId}/item-drafts` 创建、以 opaque `draftId` 读写/校验/提交草稿、Schema/许可 manifest 引用校验、不可变 revision 提交、Reviewer 审批和审计事务；缺失或无许可的 `public.icon_id` 在当前校验/提交请求即拒绝，定位 `/public/icon_id`。`content_id` 在请求体/查询参数，不作为资源 path。已用真实 Go/PostgreSQL/可信 TLS 管理 API、React 生产构建与 Firefox 浏览器验证 login/edit/CAS/submit/review。
+3. **隔离构建**：以后由 Publisher 启动可审计任务，校验素材 manifest/许可和引用闭包，生成确定性不可变 Release；Publisher 不自动获得 Reviewer 权限；本轮不标完成。
+4. **真实 runtime owner 激活**：Publisher 可请求，真实运行进程验证并由 runtime owner 确认激活；失败时旧指针持续服务；控制面身份不能直接改活动指针。本轮不标完成。
+5. **Godot 公开包读取与端到端验收**：客户端只读公开白名单投影，验证私有字段不可达并完成完整发布链路；本轮不标完成。
+
+控制面局部通过不等于任务 0008 全部完成，也不满足本节首版发布判定。0008 第一纵切片验证记录见 [`../verification/0008-stage1.md`](../verification/0008-stage1.md)：它只确认管理控制面 login/edit/CAS/submit/review 和权限/CSRF/TLS 负向路径；隔离 build、真实 runtime owner 激活、Godot 公开包读取和完整“发布后游戏内获得物品”仍未完成。
+
 ## 14. 发布判定
 
 满足以下条件后，首版可被认为达到 MVP 产品验收：

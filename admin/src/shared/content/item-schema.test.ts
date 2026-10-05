@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { projectPublicItem, validateItemDefinition, validatePublicItem } from './item-schema';
 
 const fixtureDirectory = resolve(
@@ -23,6 +23,30 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 describe('item content schema', () => {
+  it('loads contract validators when the Function constructor is blocked by CSP', async () => {
+    const functionConstructor = globalThis.Function;
+    const blockedFunction = new Proxy(functionConstructor, {
+      apply() {
+        throw new EvalError('unsafe-eval blocked by CSP');
+      },
+      construct() {
+        throw new EvalError('unsafe-eval blocked by CSP');
+      },
+    });
+    vi.stubGlobal('Function', blockedFunction);
+    vi.resetModules();
+
+    let validators: typeof import('./item-schema');
+    try {
+      validators = await import('./item-schema');
+    } finally {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    }
+
+    expect(validators.validateItemDefinition(loadFixture('item.valid.json')).valid).toBe(true);
+  });
+
   it('accepts a valid full definition and preserves large integer strings', () => {
     const result = validateItemDefinition(loadFixture('item.valid.json'));
 
@@ -78,6 +102,16 @@ describe('item content schema', () => {
       { path: '/z', code: 'unknown_field' },
       { path: '/ä', code: 'unknown_field' },
     ]);
+  });
+
+  it('preserves Ajv code-point length semantics for astral Unicode characters', () => {
+    const publicItem = asRecord(loadFixture('item.public.valid.json'));
+    const atLimit = validatePublicItem({ ...publicItem, display_name: '😀'.repeat(64) });
+    const overLimit = validatePublicItem({ ...publicItem, display_name: '😀'.repeat(65) });
+
+    expect(atLimit.valid).toBe(true);
+    expect(overLimit.valid).toBe(false);
+    expect(overLimit.errors).toContainEqual({ path: '/display_name', code: 'invalid_value' });
   });
 
   it('reports enum violations with the public field path and schema code', () => {

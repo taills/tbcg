@@ -1,0 +1,640 @@
+openapi: 3.1.0
+info:
+  title: TBCG Admin Control Plane API
+  version: 1.0.0
+  description: |
+    Task 0008 final management API outline. Operation availability is explicit:
+    session/login/logout, item draft create/recovery-list/read/update/validate/submit, review queue,
+    and exact-revision review are supported by the control-plane slice. Build, runtime
+    owner activation acknowledgement, and public bundle reads are planned only.
+    The control-plane database role MUST NOT write runtime tables, realm pointers,
+    owner guards, player assets, balances, inventories, quests, or battle state.
+servers:
+  - url: https://127.0.0.1:8443
+    description: Local TLS management server
+security: []
+tags:
+  - name: session
+    description: Supported administrator session operations
+  - name: content
+    description: Supported item draft and immutable revision operations
+  - name: review
+    description: Supported Reviewer operations
+  - name: release
+    description: Planned Publisher/runtime operations; not implemented in this slice
+paths:
+  /api/v1/session:
+    get:
+      tags: [session]
+      operationId: getSession
+      x-tbcg-status: supported
+      summary: Establish or inspect the anonymous/authenticated server session
+      responses:
+        '200':
+          description: Session and session-bound CSRF token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /api/v1/login:
+    post:
+      tags: [session]
+      operationId: login
+      x-tbcg-status: supported
+      summary: Authenticate a local administrator and rotate session and CSRF tokens
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [username, password]
+              properties:
+                username: { type: string, minLength: 1, maxLength: 128 }
+                password: { type: string, minLength: 1, maxLength: 72 }
+      responses:
+        '200': { $ref: '#/components/responses/SessionResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/logout:
+    post:
+      tags: [session]
+      operationId: logout
+      x-tbcg-status: supported
+      summary: Revoke the current server-side session
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/item-drafts:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [content]
+      operationId: listItemDrafts
+      x-tbcg-status: supported
+      summary: Discover drafts for one exact content id after a lost create response
+      description: The exact body content_id remains the resource identity; unknown results mean the client must keep the create outcome pending.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - name: content_id
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 }
+      responses:
+        '200': { $ref: '#/components/responses/DraftListResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [content]
+      operationId: createItemDraft
+      x-tbcg-status: supported
+      summary: Create an item draft in a Game using create-only CAS version zero
+      description: |
+        `content_id` is supplied in the request body, never in a path segment.
+        Server identity fields (game_id, content_id, revision and their public
+        projection copies) are assigned or checked by the server, not trusted from
+        the browser. `expected_draft_version` MUST be "0" for create-only semantics.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [content_id, expected_draft_version, definition]
+              properties:
+                content_id: { type: string, minLength: 1, maxLength: 128 }
+                expected_draft_version: { type: string, const: '0' }
+                definition: { $ref: '#/components/schemas/ItemDefinitionCandidate' }
+      responses:
+        '201': { $ref: '#/components/responses/DraftResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/CASConflict' }
+  /api/v1/games/{gameId}/item-drafts/{draftId}:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/DraftId'
+    get:
+      tags: [content]
+      operationId: getItemDraft
+      x-tbcg-status: supported
+      summary: Read one item draft by opaque draft id
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DraftResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [content]
+      operationId: updateItemDraft
+      x-tbcg-status: supported
+      summary: Update an item draft using compare-and-swap
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_draft_version, definition]
+              properties:
+                expected_draft_version: { $ref: '#/components/schemas/ExistingDraftVersion' }
+                definition: { $ref: '#/components/schemas/ItemDefinitionCandidate' }
+      responses:
+        '200': { $ref: '#/components/responses/DraftResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/CASConflict' }
+  /api/v1/games/{gameId}/item-drafts/{draftId}/validate:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/DraftId'
+    post:
+      tags: [content]
+      operationId: validateItemDraft
+      x-tbcg-status: supported
+      summary: Validate the current draft without creating a revision
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      responses:
+        '200': { $ref: '#/components/responses/ValidationResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/games/{gameId}/item-drafts/{draftId}/submit:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/DraftId'
+    post:
+      tags: [content]
+      operationId: submitItemDraft
+      x-tbcg-status: supported
+      summary: Validate and submit the exact draft as an immutable revision
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_draft_version]
+              properties:
+                expected_draft_version: { $ref: '#/components/schemas/ExistingDraftVersion' }
+      responses:
+        '201': { $ref: '#/components/responses/RevisionResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/CASConflict' }
+  /api/v1/games/{gameId}/review-queue:
+    get:
+      tags: [review]
+      operationId: listReviewQueue
+      x-tbcg-status: supported
+      summary: List submitted, unreviewed revisions in a Game with bounded offset pagination
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 }
+      responses:
+        '200': { $ref: '#/components/responses/ReviewQueueResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/revision-approvals:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [review]
+      operationId: reviewItemRevision
+      x-tbcg-status: supported
+      summary: Approve or reject an exact immutable revision as a Reviewer
+      description: |
+        Reviewer authority is independent from Publisher authority. A Publisher
+        cannot approve unless separately bound to the Reviewer role for this Game.
+        The exact body hash and integer revision are required; this operation never
+        follows or approves the latest mutable draft.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [content_id, revision, body_hash, decision]
+              properties:
+                content_id: { type: string, minLength: 1, maxLength: 128 }
+                revision: { $ref: '#/components/schemas/RevisionNumber' }
+                body_hash: { $ref: '#/components/schemas/SHA256' }
+                decision: { type: string, enum: [approved, rejected] }
+                comment: { type: string, maxLength: 2000 }
+      responses:
+        '200': { $ref: '#/components/responses/ApprovalResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/RevisionConflict' }
+  /api/v1/games/{gameId}/builds:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [release]
+      operationId: startBuild
+      x-tbcg-status: planned
+      summary: PLANNED — start an isolated Publisher build; not available in this slice
+      description: |
+        Requires the Publisher role, which is distinct from Reviewer. The build worker
+        creates a deterministic manifest and immutable package. No handler is exposed
+        until the isolated build phase is implemented.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [content_id, revision]
+              properties:
+                content_id: { type: string }
+                revision: { $ref: '#/components/schemas/RevisionNumber' }
+      responses:
+        '202': { description: Planned response — isolated build job }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { description: Not implemented until the isolated build phase }
+  /api/v1/games/{gameId}/releases/{releaseId}/activation:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/ReleaseId'
+    post:
+      tags: [release]
+      operationId: requestActivation
+      x-tbcg-status: planned
+      summary: PLANNED — request activation from the real runtime owner
+      description: |
+        Publisher may request activation; only the game runtime owner can acknowledge
+        and move the active pointer. The admin control-plane database role cannot write
+        realms, releases runtime state, or owner_guards.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      responses:
+        '202': { description: Planned response — activation request accepted for runtime owner }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { description: Not implemented until the runtime owner phase }
+  /api/v1/public/games/{gameId}/releases/{releaseId}/bundle:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/ReleaseId'
+    get:
+      tags: [release]
+      operationId: getPublicBundle
+      x-tbcg-status: planned
+      summary: PLANNED — read the allowlisted public bundle; no route in this slice
+      description: No response may expose server-private reward/drop fields. Godot reader validation is a later phase.
+      responses:
+        '200': { description: Planned response — public bundle and manifest }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { description: Not implemented until the public bundle phase }
+components:
+  securitySchemes:
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: tbcg_admin_session
+  parameters:
+    GameId:
+      name: gameId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 64 }
+    DraftId:
+      name: draftId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ReleaseId:
+      name: releaseId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 128 }
+    Origin:
+      name: Origin
+      in: header
+      required: true
+      schema: { type: string, format: uri }
+    CSRF:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema: { type: string, minLength: 32, maxLength: 128 }
+  schemas:
+    DraftVersion:
+      type: string
+      maxLength: 19
+      pattern: '^(0|[1-9][0-9]{0,18})$'
+      description: Decimal text for PostgreSQL signed bigint in 0..9223372036854775807; only draft_version uses strings and server validates the signed bound.
+    ExistingDraftVersion:
+      allOf:
+        - $ref: '#/components/schemas/DraftVersion'
+        - not: { const: '0' }
+      description: A positive CAS version required for draft update and submit.
+    RevisionNumber:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 2147483647
+      description: Immutable Definition revision; server-assigned integer, not a decimal string.
+    SHA256:
+      type: string
+      pattern: '^[a-f0-9]{64}$'
+    SessionEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [authenticated, csrf_token, user, game_roles]
+              properties:
+                authenticated: { type: boolean }
+                csrf_token: { type: string }
+                user: { oneOf: [{ type: 'null' }, { $ref: '#/components/schemas/AdminUser' }] }
+                game_roles:
+                  type: array
+                  items: { $ref: '#/components/schemas/GameRole' }
+    EnvelopeBase:
+      type: object
+      required: [success, data, error, meta]
+      properties:
+        success: { type: boolean }
+        data: {}
+        error: { oneOf: [{ type: 'null' }, { $ref: '#/components/schemas/APIError' }] }
+        meta: { type: object, additionalProperties: true }
+    APIError:
+      type: object
+      required: [code, message, fields]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/FieldIssue' }
+    FieldIssue:
+      type: object
+      required: [pointer, code, message]
+      properties:
+        pointer: { type: string, description: RFC 6901 JSON Pointer }
+        code: { type: string }
+        message: { type: string }
+    AdminUser:
+      type: object
+      required: [admin_id, username]
+      properties:
+        admin_id: { type: string, format: uuid }
+        username: { type: string }
+    GameRole:
+      type: object
+      required: [game_id, roles]
+      properties:
+        game_id: { type: string }
+        roles:
+          type: array
+          items: { type: string, enum: [Reader, Author, Reviewer, Publisher] }
+    Draft:
+      type: object
+      required: [draft_id, game_id, content_id, draft_version, definition, updated_at]
+      properties:
+        draft_id: { type: string, format: uuid }
+        game_id: { type: string }
+        content_id: { type: string }
+        draft_version: { $ref: '#/components/schemas/DraftVersion' }
+        definition: { $ref: '#/components/schemas/ItemDefinitionCandidate' }
+        updated_at: { type: string, format: date-time }
+    ItemDefinitionCandidate:
+      type: object
+      description: |
+        Structured item definition payload. Server assigns game_id/content_id/revision
+        and mirrors those identity fields into public; clients cannot select a revision.
+        The item schema remains the validation authority for supported content fields.
+      additionalProperties: true
+    Revision:
+      type: object
+      required: [game_id, content_id, revision, body_hash, definition, submitted_at]
+      properties:
+        game_id: { type: string }
+        content_id: { type: string }
+        revision: { $ref: '#/components/schemas/RevisionNumber' }
+        body_hash: { $ref: '#/components/schemas/SHA256' }
+        definition:
+          type: object
+          properties:
+            revision: { $ref: '#/components/schemas/RevisionNumber' }
+            public:
+              type: object
+              properties:
+                revision: { $ref: '#/components/schemas/RevisionNumber' }
+        submitted_at: { type: string, format: date-time }
+    Approval:
+      type: object
+      required: [game_id, content_id, revision, body_hash, decision, reviewer_id, reviewed_at]
+      properties:
+        game_id: { type: string }
+        content_id: { type: string }
+        revision: { $ref: '#/components/schemas/RevisionNumber' }
+        body_hash: { $ref: '#/components/schemas/SHA256' }
+        decision: { type: string, enum: [approved, rejected] }
+        reviewer_id: { type: string, format: uuid }
+        comment: { type: string }
+        reviewed_at: { type: string, format: date-time }
+  responses:
+    SessionResponse:
+      description: Session after successful login and token rotation
+      headers:
+        Set-Cookie:
+          schema: { type: string }
+          description: HttpOnly session cookie and Secure SameSite cookies, with no Domain.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/SessionEnvelope' }
+    EmptySuccess:
+      description: Successful operation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    DraftListResponse:
+      description: Drafts for one exact content id, with bounded offset pagination
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Draft' }
+                  meta:
+                    type: object
+                    required: [total, limit, offset]
+                    properties:
+                      total: { type: integer }
+                      limit: { type: integer }
+                      offset: { type: integer }
+    DraftResponse:
+      description: Draft resource
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Draft' }
+    RevisionResponse:
+      description: Immutable submitted revision
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Revision' }
+    ValidationResponse:
+      description: Validation result with field issues
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data:
+                    type: object
+                    required: [valid, errors]
+                    properties:
+                      valid: { type: boolean }
+                      errors: { type: array, items: { $ref: '#/components/schemas/FieldIssue' } }
+    ReviewQueueResponse:
+      description: Revisions awaiting review
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Revision' }
+                  meta:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      limit: { type: integer }
+                      offset: { type: integer }
+    ApprovalResponse:
+      description: Stored exact-revision decision
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Approval' }
+    ValidationError:
+      description: Invalid request or item definition, with JSON Pointer field errors
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    CASConflict:
+      description: |
+        Draft version is stale. `data` contains the current server draft and version;
+        clients retain local edits and require explicit user confirmation to reapply.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Draft' }
+    RevisionConflict:
+      description: Revision is already reviewed or supplied body hash differs from stored immutable body
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    Unauthorized:
+      description: Authentication is required or credentials are invalid; credential failures use one generic message
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    Forbidden:
+      description: Insufficient Game-bound role, CSRF/Origin rejection, or inaccessible Game scope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    NotFound:
+      description: Resource does not exist in the requested Game scope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    RateLimited:
+      description: Request limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer, minimum: 1 }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }

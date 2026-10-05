@@ -10,10 +10,14 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "test": "vitest run",
+    "e2e": "node ../tools/admin-e2e/run.mjs",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,css,html}\" .prettierrc",
     "audit": "pnpm audit --audit-level high",
-    "build": "vite build"
+    "build": "pnpm check:item-validators && vite build",
+    "generate:item-validators": "node scripts/generate-item-validators.mjs",
+    "check:item-validators": "node scripts/generate-item-validators.mjs --check"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -21,6 +25,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",

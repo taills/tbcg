@@ -1,7 +1,5 @@
-import Ajv2020 from 'ajv/dist/2020.js';
-import type { AnySchema, ErrorObject, ValidateFunction } from 'ajv';
-import itemDefinitionSchemaText from '../../../../contracts/content/item.schema.json?raw';
-import itemPublicSchemaText from '../../../../contracts/content/item-public.schema.json?raw';
+import type { ErrorObject, ValidateFunction } from 'ajv';
+import { validateDefinition, validatePublic } from './item-schema-validators.generated.mjs';
 
 export interface ItemPublic {
   game_id: string;
@@ -39,22 +37,8 @@ export interface ValidationResult<T> {
   errors: readonly ValidationIssue[];
 }
 
-const PUBLIC_SCHEMA_ID = 'urn:tbcg:content:item-public:v1';
 const IDENTITY_FIELDS = ['game_id', 'content_id', 'revision', 'schema_version'] as const;
 const utf8Encoder = new TextEncoder();
-const ajv = new Ajv2020({ allErrors: true, strict: true, ownProperties: true });
-const itemPublicSchema = JSON.parse(itemPublicSchemaText) as AnySchema;
-const itemDefinitionSchema = JSON.parse(itemDefinitionSchemaText) as AnySchema;
-
-ajv.addSchema(itemPublicSchema);
-
-const registeredPublicValidator = ajv.getSchema<ItemPublic>(PUBLIC_SCHEMA_ID);
-if (registeredPublicValidator === undefined) {
-  throw new Error(`Local content schema not registered: ${PUBLIC_SCHEMA_ID}`);
-}
-
-const validatePublic: ValidateFunction<ItemPublic> = registeredPublicValidator;
-const validateDefinition = ajv.compile<ItemDefinition>(itemDefinitionSchema);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

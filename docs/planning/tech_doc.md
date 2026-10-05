@@ -53,7 +53,7 @@ CI 使用 `chickensoft-games/setup-godot` 的完整 commit SHA `ac93246ea68518a3
 | Vite | `8.3.2`；`@vitejs/plugin-react 6.1.1` |
 | TypeScript | `6.0.3`；本版 `typescript-eslint 8.71.0` peer 上限 `<6.1.0`，当前脚手架暂不引入 ESLint TS 插件 |
 | Tailwind CSS | `tailwindcss` / `@tailwindcss/vite` `4.3.3`；官方 Vite plugin 与 Vite 8 peer 范围兼容 |
-| 质量工具 | Prettier `3.9.9`（`format:check`）、Vitest `5.0.3`、Testing Library、jsdom 均精确锁定 |
+| 质量工具 | Prettier `3.9.9`、Vitest `5.0.3`、Testing Library、jsdom、`@playwright/test 1.63.0` 均精确锁定 |
 
 前端基础校验：
 
@@ -63,11 +63,13 @@ pnpm install --frozen-lockfile
 pnpm audit --audit-level high
 pnpm format:check
 pnpm typecheck
-pnpm test
+pnpm typecheck:e2e
+pnpm test --coverage
 pnpm build
+pnpm e2e
 ```
 
-任务 0002 的本机验证结果：依赖 audit 未发现已知高危公告；format:check 与 typecheck 通过；1 个测试文件、1 个测试通过；Vite production build 通过。Playwright/E2E 入口尚未安装或配置；后续加入 `@playwright/test` 后统一采用 `pnpm exec playwright test`。管理员页面目前只含最小脚手架，不代表内容管理功能已完成。
+任务 0002 基线结果（当时）：依赖 audit 未发现已知高危公告；format/typecheck、1 项 Vitest 和 Vite production build 通过，当时无管理内容界面及 Playwright。任务 0008 已添加受控登录、item 编辑/预览、版本冲突对比/显式重应用和 Reviewer 队列；Playwright 入口固定在 `@playwright/test 1.63.0`，命令为 `pnpm e2e`，与 Vitest 80% 覆盖门禁分离。2026-10-04 控制面初验为 64 项 Vitest；2026-10-05 最后响应身份校验及 fixture 补强后，全量 75 项通过，typecheck/typecheck:e2e/format/check:item-validators/build/audit 通过，最终生产 bundle 无 `Function`/`eval`/`require` 调用。
 
 ## 5. CI 与供应链
 
@@ -78,7 +80,7 @@ pnpm build
 - `actions/setup-node` v7.0.0
 - `chickensoft-games/setup-godot` v2.4.3
 
-当前 CI 检查 Go modules、Go 源码存在时的 gofmt/goimports/race/coverage/vet、管理前端依赖审计/格式/typecheck/test/build 和 Godot headless 项目导入。Go 源码存在后会安装固定的 `golang.org/x/tools/cmd/goimports v0.51.0`；无 Go 源码时输出 notice 且只验证模块。Go job 使用版本固定的 PostgreSQL 18 service 和一次性 trust-auth 测试容器（仅loopback映射、无生产数据/秘密），并强制设置 URL、confirmation token、required 标记；测试端拒绝非loopback、非55432或非 `postgres` maintenance DB，防止误操作共享数据库。Tern v2.4.3 在 CI 显式安装。Admin 的 Playwright E2E 尚未配置，后续入口计划为 `pnpm exec playwright test`。
+当前 CI 检查 Go modules、Go 源码存在时的 gofmt/goimports/race/coverage/vet、管理前端依赖审计/格式/typecheck/test/build 和 Godot headless 项目导入。Go 源码存在后会安装固定的 `golang.org/x/tools/cmd/goimports v0.51.0`；无 Go 源码时输出 notice 且只验证模块。Go job 使用版本固定的 PostgreSQL 18 service 和一次性 trust-auth 测试容器（仅loopback映射、无生产数据/秘密），并强制设置 URL、confirmation token、required 标记；测试端拒绝非loopback、非55432或非 `postgres` maintenance DB，防止误操作共享数据库。Tern v2.4.3 在 CI 显式安装。Admin 本地 Playwright Firefox E2E 与 `webServer` 配置已固定，但 `.github/workflows/ci.yml` 尚未增加浏览器 E2E job；CI runner 还需提供受信测试 CA、隔离数据库和临时角色/账号 fixture。
 
 本次没有触发 GitHub 远端 workflow；本地成功结果不等于远程 CI 已通过。
 
@@ -88,10 +90,13 @@ pnpm build
 |---|---|---|
 | `GOTOOLCHAIN=go1.26.4 go version` | 通过，输出 Go 1.26.4 | 工具链由 Go 自动下载至本机工具链缓存 |
 | `go mod download all` / `go mod verify` / `go list -m all` | Go 1.27.0 和指定 1.26.4 下通过 | Go 模块图与校验和已固定 |
-| Go `gofmt` / `goimports` | 本机对当前 Go 源码已格式化；CI 固定 `golang.org/x/tools/cmd/goimports v0.51.0` | Go module/persistence tests 使用 Go 1.26.4 |
-| Go `go test -race -cover ./...` / `go vet ./...` | 真实 PostgreSQL 隔离测试通过；Postgres persistence statements 覆盖率 98.1%；race 与 vet 通过 | 测试临时初始化 PG 18.3 私有集群，使用 loopback 55432、随机凭据与显式确认标记并清理；拒绝共享5432、非loopback和 PGHOSTADDR/PGSERVICE 覆盖 |
-| Admin `pnpm audit/format:check/typecheck/test --coverage/build` | 全部通过，16 项测试；语句 94.2%、分支 81.63%；audit 无已知漏洞 | 包含共享内容 Schema、公开投影、身份匹配及原型链属性拒绝 |
-| Playwright E2E | 尚未配置 | 后续入口计划 `pnpm exec playwright test`，目前不可运行 |
+| Go `gofmt` / `goimports` | 全仓格式/import 检查通过 | Go 1.26.4；工具 `goimports v0.51.0` |
+| Go `go test -race` / `go build` / `go vet` / `staticcheck` | 控制面与 ACL 验证通过，含隔离 PostgreSQL 18.3 migration、最小权限、TLS 管理 API 用户旅程、受控 bootstrap RED→GREEN；2026-10-05 最终主流程 `resume-final-tests/build/vet/staticcheck/format/mod/gosec` 门禁 status 0（Go 1.26.4、12 包、0 Skip） | RequireDB=1，所有真实 PostgreSQL 测试无 Skip；只使用 loopback 55432、随机凭据与 disposable 确认；拒绝共享 5432/非 loopback/PGHOSTADDR/PGSERVICE 覆盖 |
+| 管理 API/PG 覆盖 | `resume-final.coverage` weighted OR：overall 1971/2414 = 81.65%；核心 admin+postgres 961/1174 = 81.86%；admin 596/705 = 84.54%；postgres 365/469 = 77.83%；cmd/admin-server 145/204 = 71.08%；cmd/admin-bootstrap 26/74 = 35.14% | 覆盖匿名/登录、CSRF、CAS、RBAC、不可变 revision/hash、审批、审计回滚、账户凭据哈希、列级 ACL/runtime 写拒绝和 session cleanup 边界；不声明每个 package 都达到 80%，CLI 正确性由真实 workflow E2E 与 bootstrap PG CLI 测试补充证明 |
+| Go gosec | 全仓 0 issues（有说明的 G124/G115 suppressions） | CSRF double-submit cookie 值仅绑定 session 内 SHA-256；revision int32 转换前显式检查范围 |
+| Admin `pnpm install --frozen-lockfile` / `audit` / `format:check` / `typecheck` / `typecheck:e2e` / `test --coverage` / `check:item-validators` / `build` | 通过；2026-10-05 最终 75 项 Vitest；语句 86.52%、分支 83.02%、函数 90.24%、行 86.31%；audit 无已知高危；bundle 无 `Function`/`eval`/`require` 调用 | 含受控登录、字段式物品编辑/公开预览、code point Unicode 边界、AJV standalone 生成校验器、版本冲突显式重应用、Reviewer 队列和权限恢复 |
+| Admin OpenAPI | Redocly CLI `1.34.4 lint` 结构验证通过；语义断言通过 | 1 条 info-license 建议 warning；未加法律许可证声明 |
+| Playwright | 历史三轮 Firefox 各 2 passed（6/6）；2026-10-05 最后生产源码修复后追加一轮，2/2 passed | 使用真实 admin server、生产构建 React、PostgreSQL 管理 API、受信临时 CA/NSS profile；未信任 CA profile 必须返回 `SEC_ERROR_UNKNOWN_ISSUER`；未关闭 TLS 验证、未降级 HTTP、未修改系统 Keychain |
 | Godot headless 与 WSS probe | 通过，Godot 4.7.1 | 协议/内容脚本与真实 Leaf WSS 联调通过；尚无游戏玩法 E2E |
 | PostgreSQL 客户端/服务端版本 | 18.3 已安装 | task0003测试使用独立临时PG18.3集群和55432 loopback端口，结束后已停止并清理；共享5432未触碰 |
 | Tern schema migration / PostgreSQL UoW | v2.4.3 通过真实 PostgreSQL 空库测试 | 两次up、down到0、up重放、scope约束/字段版本/owner guard保护及Game Repo提交/回滚/唯一冲突均通过；state_version并发CAS通过 |
@@ -109,7 +114,24 @@ pnpm build
 - 管理端使用 `@vitest/coverage-v8 5.0.3`，四项覆盖指标门槛均为 80%。统计包含手写业务代码；排除测试文件、测试 setup 和 DOM 挂载入口 `main.tsx`，不排除内容校验逻辑。
 - 当前选择手写受限适配器而不是通用三语言代码生成器。变更必须运行同一组 canonical fixtures；公开字段与顶层身份不一致会拒绝，金额保持十进制字符串。
 
-## 8. Leaf/Godot WSS 协议验证（任务 0004）
+## 8. 任务 0008 控制面实施阶段边界
+
+任务 0008 分为契约、控制面、隔离构建、真实 runtime owner 激活、Godot 公开包读取五阶段。当前分支只交付并验证控制面第一纵切片，不把其局部测试结果当作 0008 完成。控制面完整 API 轮廓与错误 envelope 以 `contracts/admin/openapi.yaml` 为准；创建使用 `POST /games/{gameId}/item-drafts`，读写/校验/提交通过 opaque `draftId` 定址；`content_id` 放请求体/查询参数，不占资源路径。只有 `draft_version` 使用十进制字符串并限制为 PostgreSQL signed bigint `0..9223372036854775807`；所有 Definition、public projection、Revision、Approval revision 均为 1..2147483647 整数。build/activate/runtime ack/公开读取标记 planned，不创建伪接口。
+
+本阶段 migration 003 追加 admin_users、admin_sessions、admin_role_bindings、content_drafts、revision_approvals、audit_logs，并继续复用 001 的 content_revisions；草稿含 opaque `draft_id`、absolute/idle session expiry 以及 `submitted_draft_version`，阻止同一 CAS 快照被重复固化。迁移前由部署/隔离测试集群预置 `NOLOGIN tbcg_admin_control_plane` 权限组和应用登录成员；迁移只授予/撤销当前数据库对象权限，down 不删除集群级角色或触碰其他数据库 ACL。应用连接在每个连接建立后 `SET ROLE tbcg_admin_control_plane`。权限组用列级 grants 只开放控制面所需字段，不得写 runtime/player 数据、Realm active pointer、owner guards 或角色绑定；`admin_users`/`admin_role_bindings` 只读，draft 不授 DELETE，revision/approval/audit 不授 UPDATE，账号和角色通过受控 bootstrap 维护。Reviewer 专属审批，Publisher 未来构建/激活；角色不隐式继承，活动指针只能由真实 runtime owner 确认。提交 revision、审批及成功审计同事务；失败/拒绝操作审计独立提交。revision 插入触发器强制 DB 主键与顶层/public game/content/integer revision identity 一致，数据库阻止已提交 revision 的 UPDATE/DELETE/TRUNCATE。
+
+管理进程入口为 `server/cmd/admin-server`，默认只监听 `127.0.0.1:8443`，无 TLS 证书时拒绝启动。浏览器管理面按 HTTPS-only 验证，cookie 为 Secure、HttpOnly、SameSite、无 Domain；文档不再承诺 HTTP loopback 浏览器例外。运行需提供 `TBCG_ADMIN_DATABASE_URL`（登录成员继承部署预置 `tbcg_admin_control_plane` 后连接钩子 `SET ROLE`）、TLS cert/key、`TBCG_ADMIN_ORIGIN`，并在项目根构建 `admin/dist`。本地账号通过 `server/cmd/admin-bootstrap` 一次性创建，输入使用 env 和确认标记；bootstrap/业务 E2E 使用受控维护文件、PostgreSQL `verify-full` CA 与受限 app login，密码不打印，不存在账号 CRUD/HTTP route。
+
+### 0008 控制面验证记录
+
+- 真正 PostgreSQL 18.3/Tern 2.4.3 测试使用 loopback `127.0.0.1:55432` 的专属临时集群；数据库 fixture 创建受限登录成员，真实执行 `SET ROLE` 后验证允许的控制面权限、拒绝玩家/Realm/owner/Release/outbox写入，并验证 migration down 不删除 NOLOGIN 组、应用 membership 或另一数据库 ACL。DB-owned 隔离测试可使用 NoTLS 本地专属集群；生产和业务 E2E 使用 `verify-full`。
+- 控制面 Go 测试覆盖匿名/登录会话、token hash、Author 草稿、两个独立 cookie contexts 的大整数 CAS 冲突、未授权 Reader/Publisher 操作、许可图标校验、成功审计失败回滚、不可变 revision/hash 审批与审批后草稿编辑。补充验证包含 main bootstrap UUID actor_id/text resource_id 参数冲突 RED→生产 cast+CLI race GREEN、匿名 roles `nil`→`[]` JSON/HTTP RED→race GREEN、bcrypt known-wrong 期望修正为 1 次错误记录 RED→GREEN。
+- 2026-10-05 管理端最终全量为 75 个 Vitest 用例通过，包含 11 个新增 API 响应身份错配反例与合法旧 scope 回包的异步完成检查；Node 24 / pnpm 10.21 下 typecheck、typecheck:e2e、format、AJV standalone validator fingerprint check、生产构建与 audit 均通过；AJV 8.20 是唯一 contracts 静态 standalone ESM 校验器。浏览器 bundle 检查无 `Function`/`eval`/`require`，不需要 `unsafe-eval`；OpenAPI Redocly 结构验证通过，仍有 1 条 `info-license` 建议 warning。
+- Playwright 1.63.0 Firefox 真实浏览器 E2E 历史三轮各 2 passed（6/6），2026-10-05 最后生产源码修复后又通过一轮 2/2。Harness 启动真实 admin server、生产构建 React 与 PostgreSQL 管理 API；每轮创建并清理自己的 appDB、受限 login、随机角色、NSS profile 与 server，不停止 main-owned PostgreSQL cluster，不修改系统 CA/Keychain，不复用已有服务。
+- 真实浏览器旅程覆盖 Author 两个 context 的 CAS 冲突与 dirty 保留、显式 reapply、提交、Reviewer exact hash 审批、Reader/Publisher 拒绝、Origin/CSRF 拒绝、Secure cookie、双 Game confirm/cancel/accept、回访已保存草稿，以及第三个未信任 CA profile 的 `SEC_ERROR_UNKNOWN_ISSUER`。安全截图只保留未输入账号密码的登录页；不声明 E2E 汇总了 console errors = 0，预期的未信任 TLS handshake 日志不按失败记录。
+- 即使控制面 API/PG/TLS/浏览器 E2E 通过，0008 仍进行中；隔离 build、Release manifest/package、真实 runtime owner activation receipt、公共白名单包和 Godot 读取均未实现或验收。详细证据与限制见 [`../verification/0008-stage1.md`](../verification/0008-stage1.md)。
+
+## 9. Leaf/Godot WSS 协议验证（任务 0004）
 
 - `server/internal/transport/leaf` 提供受限协议适配器；`cmd/protocol-probe` 只绑定 loopback，要求显式临时令牌，不是正式账号认证服务。
 - 当前消息为 Hello/HelloAck/Ping/Pong；默认响应 data/meta 为对象，拒绝未知字段/类型/版本、重复请求 ID 和超额请求。生产心跳、限流、账号生命周期与重连快照留在后续任务。

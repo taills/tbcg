@@ -52,6 +52,7 @@ func TestMigrationsInstallAndRemainIdempotent(t *testing.T) {
 		t.Fatalf("connect to TBCG_TEST_DATABASE_URL maintenance database: %v", err)
 	}
 	assertPostgreSQL18(t, ctx, maintenanceDB)
+	roleFixture := prepareAdminRoleFixture(t, ctx, maintenanceDB, maintenanceConfig)
 
 	databaseName, err := randomTestDatabaseName()
 	if err != nil {
@@ -94,8 +95,18 @@ func TestMigrationsInstallAndRemainIdempotent(t *testing.T) {
 	assertSchemaVersionColumns(t, ctx, db)
 	assertOwnerGuardEpochConstraints(t, ctx, db)
 	assertCharacterStateVersionConflict(t, ctx, db)
+	assertAdminControlPlaneSchema(t, ctx, db)
+	assertAdminRolePermissions(t, ctx, maintenanceConfig, databaseName, roleFixture)
+	if _, err := db.ExecContext(ctx, `GRANT SELECT (display_name) ON games TO tbcg_admin_control_plane`); err != nil {
+		t.Fatalf("seed non-owned, non-overlapping Game column grant: %v", err)
+	}
+	runTernMigration(t, ctx, ternPath, findServerRoot(t), env, "migrate", "--destination", "2")
+	assertPreservedAdminGameColumnGrant(t, ctx, db, false)
+	runTernMigration(t, ctx, ternPath, findServerRoot(t), env, "migrate")
+	assertPreservedAdminGameColumnGrant(t, ctx, db, true)
 
 	runTernMigration(t, ctx, ternPath, findServerRoot(t), env, "migrate", "--destination", "0")
+	assertAdminRoleSurvivesDown(t, ctx, maintenanceDB, maintenanceConfig, roleFixture)
 	var gamesTable sql.NullString
 	if err := db.QueryRowContext(ctx, "SELECT to_regclass('public.games')").Scan(&gamesTable); err != nil {
 		t.Fatalf("check games after migrating down to version 0: %v", err)
@@ -109,6 +120,19 @@ func TestMigrationsInstallAndRemainIdempotent(t *testing.T) {
 	assertMigrationVersionRecorded(t, ctx, db)
 	assertSchemaConstraints(t, ctx, db)
 	assertSchemaVersionColumns(t, ctx, db)
+}
+
+func assertPreservedAdminGameColumnGrant(t *testing.T, ctx context.Context, db *sql.DB, gameIDExpected bool) {
+	t.Helper()
+	var displayName, gameID bool
+	if err := db.QueryRowContext(ctx, `
+SELECT has_column_privilege('tbcg_admin_control_plane', 'public.games', 'display_name', 'SELECT'),
+       has_column_privilege('tbcg_admin_control_plane', 'public.games', 'game_id', 'SELECT')`).Scan(&displayName, &gameID); err != nil {
+		t.Fatalf("inspect control-plane Game column grants: %v", err)
+	}
+	if !displayName || gameID != gameIDExpected {
+		t.Errorf("preserved/original Game SELECT privileges display_name/game_id = %t/%t, want true/%t", displayName, gameID, gameIDExpected)
+	}
 }
 
 func runTernMigration(t *testing.T, ctx context.Context, ternPath, serverRoot string, env []string, args ...string) {
@@ -341,6 +365,7 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
 	for _, name := range []string{
 		"games", "realms", "content_revisions", "releases", "owner_guards",
 		"characters", "operation_results", "wallets", "wallet_ledger", "outbox", "outbox_consumer_receipts",
+		"admin_users", "admin_sessions", "admin_role_bindings", "content_drafts", "revision_approvals", "audit_logs",
 	} {
 		if !tables[name] {
 			t.Errorf("required PostgreSQL table %q is missing", name)
@@ -554,5 +579,111 @@ func assertCatalogCount(t *testing.T, ctx context.Context, db *sql.DB, descripti
 	}
 	if count < minimum {
 		t.Errorf("expected at least %d %s, found %d", minimum, description, count)
+	}
+}
+
+func assertAdminControlPlaneSchema(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	var draftVersionType string
+	if err := db.QueryRowContext(ctx, `
+SELECT data_type FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'content_drafts' AND column_name = 'draft_version'`).Scan(&draftVersionType); err != nil {
+		t.Fatalf("inspect content_drafts.draft_version: %v", err)
+	}
+	if draftVersionType != "bigint" {
+		t.Errorf("content_drafts.draft_version type = %q, want bigint", draftVersionType)
+	}
+	var idleExpiryType string
+	if err := db.QueryRowContext(ctx, `
+SELECT data_type FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'admin_sessions' AND column_name = 'idle_expires_at'`).Scan(&idleExpiryType); err != nil {
+		t.Fatalf("inspect idle session expiry: %v", err)
+	}
+	if idleExpiryType != "timestamp with time zone" {
+		t.Errorf("admin_sessions.idle_expires_at type = %q, want timestamptz", idleExpiryType)
+	}
+	var draftIDType, submittedVersionType string
+	if err := db.QueryRowContext(ctx, `
+SELECT
+  (SELECT data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'content_drafts' AND column_name = 'draft_id'),
+  (SELECT data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'content_drafts' AND column_name = 'submitted_draft_version')`).Scan(&draftIDType, &submittedVersionType); err != nil {
+		t.Fatalf("inspect opaque draft id and submitted source version columns: %v", err)
+	}
+	if draftIDType != "uuid" || submittedVersionType != "bigint" {
+		t.Errorf("content draft ID/version types = %q/%q, want uuid/bigint", draftIDType, submittedVersionType)
+	}
+	assertCatalogCount(t, ctx, db, "admin role Game foreign keys", `
+SELECT count(*) FROM pg_constraint
+WHERE connamespace = 'public'::regnamespace AND contype = 'f'
+  AND conrelid = 'public.admin_role_bindings'::regclass`, 1)
+	assertCatalogCount(t, ctx, db, "content revision immutable body trigger", `
+SELECT count(*) FROM pg_trigger
+WHERE tgrelid = 'public.content_revisions'::regclass AND NOT tgisinternal
+  AND tgname = 'content_revisions_immutable_body'`, 1)
+	assertCatalogCount(t, ctx, db, "content revision scope identity trigger", `
+SELECT count(*) FROM pg_trigger
+WHERE tgrelid = 'public.content_revisions'::regclass AND NOT tgisinternal
+  AND tgname = 'content_revisions_identity_matches_scope'`, 1)
+	assertRevisionScopeIsEnforced(t, ctx, db)
+	assertCatalogCount(t, ctx, db, "Game-scoped draft uniqueness", `
+SELECT count(*) FROM pg_constraint
+WHERE conrelid = 'public.content_drafts'::regclass AND contype IN ('p', 'u')
+  AND pg_get_constraintdef(oid) LIKE '%game_id%content_id%'`, 1)
+	for _, indexName := range []string{
+		"admin_sessions_admin_id_idx", "admin_sessions_cleanup_idx", "content_drafts_updated_by_idx",
+		"revision_approvals_reviewer_id_idx", "audit_logs_actor_id_idx",
+	} {
+		var exists bool
+		if err := db.QueryRowContext(ctx, `SELECT to_regclass($1) IS NOT NULL`, "public."+indexName).Scan(&exists); err != nil {
+			t.Fatalf("inspect control-plane foreign-key index %q: %v", indexName, err)
+		}
+		if !exists {
+			t.Errorf("control-plane foreign-key index %q is missing", indexName)
+		}
+	}
+	var canLogin bool
+	if err := db.QueryRowContext(ctx, `SELECT rolcanlogin FROM pg_roles WHERE rolname = 'tbcg_admin_control_plane'`).Scan(&canLogin); err != nil {
+		t.Fatalf("inspect deployment-provisioned control-plane database role: %v", err)
+	}
+	if canLogin {
+		t.Error("tbcg_admin_control_plane must be a NOLOGIN privilege group")
+	}
+}
+
+func assertRevisionScopeIsEnforced(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	gameID := randomTestIdentifier(t, "admin-scope-game-")
+	if _, err := db.ExecContext(ctx, `INSERT INTO games (game_id, display_name) VALUES ($1, $2)`, gameID, "Admin scope test"); err != nil {
+		t.Fatalf("insert revision-scope game: %v", err)
+	}
+	body := []byte(`{"game_id":"other-game","content_id":"demo:item/test","revision":1,"schema_version":1,"public":{"game_id":"other-game","content_id":"demo:item/test","revision":1,"schema_version":1}}`)
+	if _, err := db.ExecContext(ctx, `
+INSERT INTO content_revisions (game_id, content_id, revision, schema_version, content_type, body)
+VALUES ($1, 'demo:item/test', 1, 1, 'item', $2::jsonb)`, gameID, body); err == nil {
+		t.Error("content_revisions accepted body identity that differs from its Game scope")
+	}
+	mismatchedProjection := []byte(`{"game_id":"` + gameID + `","content_id":"demo:item/test","revision":1,"schema_version":1,"public":{"game_id":"different-game","content_id":"demo:item/test","revision":1,"schema_version":1}}`)
+	if _, err := db.ExecContext(ctx, `
+INSERT INTO content_revisions (game_id, content_id, revision, schema_version, content_type, body)
+VALUES ($1, 'demo:item/test', 2, 1, 'item', $2::jsonb)`, gameID, mismatchedProjection); err == nil {
+		t.Error("content_revisions accepted a public identity that differs from its top-level Definition")
+	}
+	validBody := []byte(`{"game_id":"` + gameID + `","content_id":"demo:item/immutable","revision":1,"schema_version":1,"public":{"game_id":"` + gameID + `","content_id":"demo:item/immutable","revision":1,"schema_version":1}}`)
+	if _, err := db.ExecContext(ctx, `
+INSERT INTO content_revisions (game_id, content_id, revision, schema_version, content_type, body)
+VALUES ($1, 'demo:item/immutable', 1, 1, 'item', $2::jsonb)`, gameID, validBody); err != nil {
+		t.Fatalf("insert valid immutable revision fixture: %v", err)
+	}
+	assertExecRejected(t, ctx, db, "updating immutable content revision body", `
+UPDATE content_revisions SET body = '{"changed":true}'::jsonb
+WHERE game_id = $1 AND content_id = 'demo:item/immutable' AND revision = 1`, gameID)
+	assertExecRejected(t, ctx, db, "deleting immutable content revision", `
+DELETE FROM content_revisions WHERE game_id = $1 AND content_id = 'demo:item/immutable' AND revision = 1`, gameID)
+	var immutableRows int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM content_revisions WHERE game_id = $1 AND content_id = 'demo:item/immutable' AND body = $2::jsonb`, gameID, validBody).Scan(&immutableRows); err != nil {
+		t.Fatalf("verify immutable revision after rejected mutations: %v", err)
+	}
+	if immutableRows != 1 {
+		t.Errorf("immutable revision rows after rejected mutations = %d, want 1", immutableRows)
 	}
 }

@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 const adminDirectory = dirname(fileURLToPath(import.meta.url));
 const contentSchemaDirectory = resolve(adminDirectory, '../contracts/content');
@@ -18,6 +18,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test-setup.ts',
     globals: true,
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

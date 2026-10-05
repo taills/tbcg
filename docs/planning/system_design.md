@@ -31,6 +31,14 @@
 
 草稿、revision、审批、构建、激活、回退和运营命令必须审计。管理写运行状态时必须走受控游戏命令或运营入口，不得直接改玩家资产、任务进度、背包或经济账本。管理 cookie 使用安全属性并防 CSRF。
 
+### 2.1 0008 管理 API 冻结契约
+
+OpenAPI 真源为 `contracts/admin/openapi.yaml`。所有现阶段端点只使用 `success/data/error/meta` envelope。只有 CAS `draft_version` 使用十进制字符串；Definition、public projection、Revision 和 Approval 的 revision 均是 1..2147483647 范围内的整数。CAS 不匹配返回 409 和当前服务端版本/字段快照，前端必须保留本地值并由用户明确重应用；审批请求绑定 body 中精确的 `content_id + integer revision + body_hash`，不得隐式跟随最新草稿。
+
+支持范围：session、login/logout、`POST /games/{gameId}/item-drafts`、`GET/PUT /games/{gameId}/item-drafts/{draftId}`、draftId 下 validate/submit、按 `limit/offset` 有界分页的 review queue 和 body 指定 exact revision 的审核。`content_id` 位于请求体或查询参数而非路径段。角色按 Game 绑定；Reviewer 才能审批，Publisher 只负责后续构建/激活请求，不因 Publisher 身份自动获得审核权。规划但当前无可调用实现的范围：isolated build、Release manifest/package、runtime owner activate/ack、公开 bundle read/Godot adapter；活动指针只能由真实 runtime owner 确认。
+
+2026-10-04 控制面第一纵切片已用真实 PostgreSQL 18.3、Tern 2.4.3、HTTPS 管理 API、React 生产构建和 Firefox 真实浏览器验证 login/edit/CAS/submit/review。验证包含 Author CAS 冲突保留与显式 reapply、Reviewer exact hash 审批、Reader/Publisher 写权限拒绝、Origin/CSRF 拒绝、Secure cookie 和未信任 CA 负向路径。该结果不代表 build/activate/runtime/Godot 公共包阶段完成。
+
 ## 3. 空间契约
 
 首版只支持正交整数网格：`grid[y][x]`，左上原点，x 向右，y 向下，`0` 可走，`1` 障碍。服务端使用格坐标作为权威移动单位；客户端按声明的 origin 和 tile_size 转换为像素表现。
@@ -119,4 +127,4 @@ Battle、Dungeon、Quest 和 Map Instance 必须固定开始/接取时的 Releas
 
 安全契约：客户端不可信；WS 校验 Origin、凭证、版本和限额；管理面 RBAC、审计和 CSRF；导入只创建可审查 revision，不清空目标、不覆盖手工内容、不执行陌生脚本；未授权素材不得进入可分发包。
 
-P0 未决项：公开/私有包存储策略；Schema 到 Go/TypeScript/GDScript 的投影范围；战斗事件 catalog 稳定 ID；PostgreSQL 本地/CI 测试服务配置、Tern 迁移部署与备份/升级演练；管理认证和 CSRF 细节。Go 1.26.4、PostgreSQL 18.3、Godot 4.7.1 与 Tern v2.4.3 已锁定。
+P0 未决项：公开/私有包存储策略；Schema 到 Go/TypeScript/GDScript 的投影范围；战斗事件 catalog 稳定 ID；PostgreSQL 本地/CI 测试服务配置的远端 CI 固化、Tern 迁移部署与备份/升级演练；build/activate 的 Publisher/runtime owner 确认细节。Go 1.26.4、PostgreSQL 18.3、Godot 4.7.1 与 Tern v2.4.3 已锁定；管理认证、CSRF 与控制面浏览器路径已有第一纵切片验证记录，但尚未覆盖完整发布链路。
