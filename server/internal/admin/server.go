@@ -21,6 +21,7 @@ import (
 	"time"
 	"unicode"
 
+	"example.com/tbcg/server/internal/content/mapdata"
 	"example.com/tbcg/server/internal/content/schema"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -46,6 +47,8 @@ type handler struct {
 	store     Store
 	config    Config
 	validator *schema.Validator
+	registry  *schema.Registry
+	extras    Extensions
 	assets    fs.FS
 	limiter   *requestLimiter
 	dummyHash []byte
@@ -107,6 +110,26 @@ type limitWindow struct {
 
 // NewHandler creates the management API. The server process must supply a restricted PostgreSQL role.
 func NewHandler(store Store, config Config, validator *schema.Validator, assets fs.FS) http.Handler {
+	return newHandler(store, config, validator, nil, assets, Extensions{})
+}
+
+// Extensions 为全内容类型编辑、快照构建与预览提供可选依赖。
+type Extensions struct {
+	// Preview 使用与 runtime 相同的 Go 规则模拟内容，nil 时预览路由返回 503。
+	Preview PreviewRunner
+	// Geometry 用于全量交叉引用校验中的地图几何解码。
+	Geometry *mapdata.Validator
+}
+
+// NewContentHandler 创建支持全部内容类型的管理 API。
+func NewContentHandler(store Store, config Config, registry *schema.Registry, assets fs.FS, extras Extensions) http.Handler {
+	if registry == nil {
+		return newHandler(store, config, nil, nil, assets, extras)
+	}
+	return newHandler(store, config, registry.Item(), registry, assets, extras)
+}
+
+func newHandler(store Store, config Config, validator *schema.Validator, registry *schema.Registry, assets fs.FS, extras Extensions) http.Handler {
 	config = normalizeConfig(config)
 	_, err := parseExpectedOrigin(config)
 	if err != nil || store == nil {
@@ -124,6 +147,8 @@ func NewHandler(store Store, config Config, validator *schema.Validator, assets 
 		store:     store,
 		config:    config,
 		validator: validator,
+		registry:  registry,
+		extras:    extras,
 		assets:    assets,
 		limiter:   &requestLimiter{windows: make(map[string]limitWindow)},
 		dummyHash: dummyHash,
@@ -138,8 +163,17 @@ func NewHandler(store Store, config Config, validator *schema.Validator, assets 
 	mux.HandleFunc("PUT /api/v1/games/{gameId}/item-drafts/{draftId}", api.updateDraft)
 	mux.HandleFunc("POST /api/v1/games/{gameId}/item-drafts/{draftId}/validate", api.validateDraft)
 	mux.HandleFunc("POST /api/v1/games/{gameId}/item-drafts/{draftId}/submit", api.submitDraft)
+	mux.HandleFunc("POST /api/v1/games/{gameId}/content-drafts", api.createDraft)
+	mux.HandleFunc("GET /api/v1/games/{gameId}/content-drafts", api.listDrafts)
+	mux.HandleFunc("GET /api/v1/games/{gameId}/content-drafts/{draftId}", api.getDraft)
+	mux.HandleFunc("PUT /api/v1/games/{gameId}/content-drafts/{draftId}", api.updateDraft)
+	mux.HandleFunc("POST /api/v1/games/{gameId}/content-drafts/{draftId}/validate", api.validateDraft)
+	mux.HandleFunc("POST /api/v1/games/{gameId}/content-drafts/{draftId}/submit", api.submitDraft)
 	mux.HandleFunc("GET /api/v1/games/{gameId}/review-queue", api.reviewQueue)
 	mux.HandleFunc("POST /api/v1/games/{gameId}/revision-approvals", api.reviewRevision)
+	registerBuildRoutes(mux, api)
+	registerReleaseRoutes(mux, api)
+	registerContentRoutes(mux, api)
 	mux.HandleFunc("/", api.notFound)
 	return api.middleware(mux)
 }

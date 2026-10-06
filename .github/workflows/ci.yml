@@ -162,6 +162,12 @@ jobs:
           ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-maps.log"
           godot --headless --path client --script res://tests/maps/map_file_writer_test.gd 2>&1 | tee "$RUNNER_TEMP/godot-map-writer.log"
           ! grep -q 'SCRIPT ERROR:' "$RUNNER_TEMP/godot-map-writer.log"
+          for test in content/public_bundle_test.gd battle/battle_replay_test.gd maps/navigator_parity_test.gd maps/content_binding_test.gd app_smoke_test.gd; do
+            log="$RUNNER_TEMP/godot-$(basename "$test" .gd).log"
+            godot --headless --path client --script "res://tests/$test" 2>&1 | tee "$log"
+            ! grep -q 'SCRIPT ERROR:' "$log"
+            grep -q 'failures=0' "$log"
+          done
 
       - name: Verify WSS and map integration with tooling
         run: |

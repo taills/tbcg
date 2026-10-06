@@ -1,0 +1,45 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:shop/merchant",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:shop/merchant",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "行商货摊",
+    "npc_id": "demo:npc/merchant",
+    "currency_code": "coin",
+    "goods": [
+      {
+        "item_id": "demo:item/healing-potion",
+        "price": 20,
+        "purchase_limit": 0
+      },
+      {
+        "item_id": "demo:item/herb",
+        "price": 8,
+        "purchase_limit": 0
+      },
+      {
+        "item_id": "demo:item/spirit-egg",
+        "price": 150,
+        "purchase_limit": 1
+      },
+      {
+        "item_id": "demo:item/pony-whistle",
+        "price": 200,
+        "purchase_limit": 1
+      }
+    ]
+  },
+  "server": {
+    "stock": [
+      {
+        "item_id": "demo:item/spirit-egg",
+        "quantity": 100
+      }
+    ]
+  }
+}

@@ -12,12 +12,27 @@
     "reject_business_messages_before_ready": true
   },
   "request_envelope": {
-    "required_fields": ["protocol_version", "request_id", "type", "payload"],
+    "required_fields": [
+      "protocol_version",
+      "request_id",
+      "type",
+      "payload"
+    ],
     "request_id_encoding": "opaque-string",
     "payload_type": "object"
   },
   "response_envelope": {
-    "required_fields": ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"],
+    "required_fields": [
+      "protocol_version",
+      "request_id",
+      "type",
+      "success",
+      "server_seq",
+      "state_version",
+      "data",
+      "error",
+      "meta"
+    ],
     "server_seq_encoding": "unsigned-decimal-string",
     "state_version_encoding": "unsigned-decimal-string"
   },
@@ -26,25 +41,1033 @@
       "type": "system.hello",
       "direction": "client_to_server",
       "phase": "handshake",
-      "required_payload_fields": ["game_id", "realm_id", "client_build", "release_id", "session_token", "capabilities"]
+      "required_payload_fields": [
+        "game_id",
+        "realm_id",
+        "client_build",
+        "release_id",
+        "session_token",
+        "capabilities"
+      ],
+      "response_type": "system.hello_ack"
     },
     {
       "type": "system.hello_ack",
       "direction": "server_to_client",
       "phase": "handshake",
-      "required_payload_fields": ["release_id", "capabilities"]
+      "required_payload_fields": [
+        "release_id",
+        "capabilities"
+      ]
     },
     {
       "type": "system.ping",
       "direction": "client_to_server",
       "phase": "ready",
-      "required_payload_fields": ["nonce"]
+      "required_payload_fields": [
+        "nonce"
+      ],
+      "response_type": "system.pong"
     },
     {
       "type": "system.pong",
       "direction": "server_to_client",
       "phase": "ready",
-      "required_payload_fields": ["nonce", "server_time"]
+      "required_payload_fields": [
+        "nonce",
+        "server_time"
+      ]
+    },
+    {
+      "type": "character.list",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "character.list_result"
+    },
+    {
+      "type": "character.list_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "character.create",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "name",
+        "archetype_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "character.create_result"
+    },
+    {
+      "type": "character.create_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "character.enter",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "character.enter_result"
+    },
+    {
+      "type": "character.enter_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "character.state",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "character.state_result"
+    },
+    {
+      "type": "character.state_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.move",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "path",
+        "state_version"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "world.move_result"
+    },
+    {
+      "type": "world.move_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.teleport",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "portal_anchor_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "world.teleport_result"
+    },
+    {
+      "type": "world.teleport_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "npc.interact",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "npc_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "npc.interact_result"
+    },
+    {
+      "type": "npc.interact_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "npc.choose",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "npc_id",
+        "node_id",
+        "option_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "npc.choose_result"
+    },
+    {
+      "type": "npc.choose_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "quest.abandon",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "quest_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "quest.abandon_result"
+    },
+    {
+      "type": "quest.abandon_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "inventory.use",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "item_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "inventory.use_result"
+    },
+    {
+      "type": "inventory.use_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "inventory.equip",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "item_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "inventory.equip_result"
+    },
+    {
+      "type": "inventory.equip_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "inventory.unequip",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "slot"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "inventory.unequip_result"
+    },
+    {
+      "type": "inventory.unequip_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "battle.command",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "battle_id",
+        "round",
+        "command"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "battle.command_result"
+    },
+    {
+      "type": "battle.command_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "battle.state",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "battle_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "battle.state_result"
+    },
+    {
+      "type": "battle.state_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.create",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "party.create_result"
+    },
+    {
+      "type": "party.create_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.invite",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "party.invite_result"
+    },
+    {
+      "type": "party.invite_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.respond",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "party_id",
+        "accept"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "party.respond_result"
+    },
+    {
+      "type": "party.respond_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.leave",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "party.leave_result"
+    },
+    {
+      "type": "party.leave_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.kick",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "party.kick_result"
+    },
+    {
+      "type": "party.kick_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.ready",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "ready"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "party.ready_result"
+    },
+    {
+      "type": "party.ready_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.transfer",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "party.transfer_result"
+    },
+    {
+      "type": "party.transfer_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "dungeon.start_stage",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "run_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "dungeon.start_stage_result"
+    },
+    {
+      "type": "dungeon.start_stage_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "dungeon.claim",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "run_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "dungeon.claim_result"
+    },
+    {
+      "type": "dungeon.claim_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "dungeon.leave",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "run_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "dungeon.leave_result"
+    },
+    {
+      "type": "dungeon.leave_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "pet.activate",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "pet_uid"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "pet.activate_result"
+    },
+    {
+      "type": "pet.activate_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "pet.rest",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "pet.rest_result"
+    },
+    {
+      "type": "pet.rest_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "pet.rename",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "pet_uid",
+        "name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "pet.rename_result"
+    },
+    {
+      "type": "pet.rename_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "partner.formation",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "partner_id",
+        "in_formation"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "partner.formation_result"
+    },
+    {
+      "type": "partner.formation_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "mount.equip",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "mount_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "mount.equip_result"
+    },
+    {
+      "type": "mount.equip_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "mount.unequip",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "mount.unequip_result"
+    },
+    {
+      "type": "mount.unequip_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "craft.make",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "recipe_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "craft.make_result"
+    },
+    {
+      "type": "craft.make_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "shop.buy",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "shop_id",
+        "item_id",
+        "quantity",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "shop.buy_result"
+    },
+    {
+      "type": "shop.buy_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "friend.list",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "friend.list_result"
+    },
+    {
+      "type": "friend.list_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "friend.request",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "friend.request_result"
+    },
+    {
+      "type": "friend.request_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "friend.respond",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id",
+        "accept"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "friend.respond_result"
+    },
+    {
+      "type": "friend.respond_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "friend.remove",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "friend.remove_result"
+    },
+    {
+      "type": "friend.remove_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.info",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "guild.info_result"
+    },
+    {
+      "type": "guild.info_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.create",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "name",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.create_result"
+    },
+    {
+      "type": "guild.create_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.apply",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "guild_name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.apply_result"
+    },
+    {
+      "type": "guild.apply_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.invite",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.invite_result"
+    },
+    {
+      "type": "guild.invite_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.respond",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "guild_id",
+        "accept"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.respond_result"
+    },
+    {
+      "type": "guild.respond_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.review",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id",
+        "accept"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.review_result"
+    },
+    {
+      "type": "guild.review_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.leave",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "guild.leave_result"
+    },
+    {
+      "type": "guild.leave_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.kick",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.kick_result"
+    },
+    {
+      "type": "guild.kick_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.set_role",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_id",
+        "role"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.set_role_result"
+    },
+    {
+      "type": "guild.set_role_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.set_notice",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "notice"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "guild.set_notice_result"
+    },
+    {
+      "type": "guild.set_notice_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.invite",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "character_name"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.invite_result"
+    },
+    {
+      "type": "trade.invite_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.respond",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "trade_id",
+        "accept"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.respond_result"
+    },
+    {
+      "type": "trade.respond_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.offer",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "trade_id",
+        "items",
+        "currency"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.offer_result"
+    },
+    {
+      "type": "trade.offer_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.lock",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "trade_id",
+        "offer_version"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.lock_result"
+    },
+    {
+      "type": "trade.lock_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.confirm",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "trade_id",
+        "offer_version"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.confirm_result"
+    },
+    {
+      "type": "trade.confirm_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.cancel",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "trade_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "trade.cancel_result"
+    },
+    {
+      "type": "trade.cancel_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "event.list",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [],
+      "optional_payload_fields": [],
+      "response_type": "event.list_result"
+    },
+    {
+      "type": "event.list_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "event.claim",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "event_id",
+        "idempotency_key"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "event.claim_result"
+    },
+    {
+      "type": "event.claim_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "event.leaderboard",
+      "direction": "client_to_server",
+      "phase": "ready",
+      "required_payload_fields": [
+        "event_id"
+      ],
+      "optional_payload_fields": [],
+      "response_type": "event.leaderboard_result"
+    },
+    {
+      "type": "event.leaderboard_result",
+      "direction": "server_to_client",
+      "phase": "ready",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.entities",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.entity_joined",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.entity_moved",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "world.entity_left",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "character.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "battle.started",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "battle.round",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "battle.ended",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "party.invited",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "dungeon.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.invited",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "trade.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "friend.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "guild.updated",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "system.release_changed",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
+    },
+    {
+      "type": "system.notice",
+      "direction": "server_to_client",
+      "phase": "push",
+      "required_payload_fields": []
     }
-  ]
+  ],
+  "push_request_id_prefix": "push-"
 }

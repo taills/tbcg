@@ -1,0 +1,25 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:encounter/slime-pack",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:encounter/slime-pack",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "青泥怪群",
+    "description": "两只青泥怪。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "demo:monster/slime",
+        "count": 2
+      }
+    ],
+    "max_rounds": 20,
+    "round_timeout_ms": 30000,
+    "allow_flee": true
+  }
+}

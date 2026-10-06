@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:sect:v1",
+  "title": "TBCG 门派 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "display_name",
+        "game_id",
+        "min_level",
+        "revision",
+        "schema_version",
+        "skills"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "description": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/text"
+        },
+        "min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        },
+        "skills": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "skill_id",
+              "unlock_level"
+            ],
+            "properties": {
+              "skill_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              },
+              "unlock_level": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "join_npc_id",
+        "stat_bonus"
+      ],
+      "properties": {
+        "stat_bonus": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/stat_bonus"
+        },
+        "join_npc_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        }
+      }
+    }
+  }
+}

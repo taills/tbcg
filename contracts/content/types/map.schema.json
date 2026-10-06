@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:map:v1",
+  "title": "TBCG 地图规则 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "display_name",
+        "game_id",
+        "geometry",
+        "portals",
+        "revision",
+        "schema_version",
+        "zones"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "geometry": {
+          "$ref": "urn:tbcg:content:map-geometry:v1"
+        },
+        "portals": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "anchor_id",
+              "target_anchor_id",
+              "target_map_id"
+            ],
+            "properties": {
+              "anchor_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/anchor_id"
+              },
+              "target_map_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              },
+              "target_anchor_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/anchor_id"
+              },
+              "required_quest_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              }
+            }
+          }
+        },
+        "zones": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "anchor_id",
+              "display_name"
+            ],
+            "properties": {
+              "anchor_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/anchor_id"
+              },
+              "display_name": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_path_cells",
+        "min_step_interval_ms",
+        "spawn_anchor_id"
+      ],
+      "properties": {
+        "spawn_anchor_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/anchor_id"
+        },
+        "max_path_cells": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "min_step_interval_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        }
+      }
+    }
+  }
+}

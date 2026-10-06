@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:skill/mend",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:skill/mend",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "回春术",
+    "description": "恢复一名友方的气血。",
+    "kind": "heal",
+    "target": "ally_single",
+    "mp_cost": 6
+  },
+  "server": {
+    "power_percent": 150,
+    "hits": 1,
+    "crit_rate_bp": 0
+  }
+}

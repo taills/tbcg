@@ -197,6 +197,52 @@ func TestValidationAndIssueHelpers(t *testing.T) {
 	}
 }
 
+func TestFingerprintTracksExactTrustedSchemaBytes(t *testing.T) {
+	definitionSchema, err := os.ReadFile("../../../../contracts/content/item.schema.json")
+	if err != nil {
+		t.Fatalf("read definition schema: %v", err)
+	}
+	publicSchema, err := os.ReadFile("../../../../contracts/content/item-public.schema.json")
+	if err != nil {
+		t.Fatalf("read public schema: %v", err)
+	}
+	base := fstest.MapFS{
+		"content/item.schema.json":        &fstest.MapFile{Data: definitionSchema},
+		"content/item-public.schema.json": &fstest.MapFile{Data: publicSchema},
+	}
+	first, err := New(base)
+	if err != nil {
+		t.Fatalf("compile initial schema: %v", err)
+	}
+	second, err := New(base)
+	if err != nil {
+		t.Fatalf("compile same schema: %v", err)
+	}
+	if first.Fingerprint() != second.Fingerprint() {
+		t.Fatal("identical trusted schema bytes produced different fingerprints")
+	}
+	if len(first.Fingerprint()) != 64 {
+		t.Fatalf("schema fingerprint length = %d, want 64 hex characters", len(first.Fingerprint()))
+	}
+	for _, value := range first.Fingerprint() {
+		if !(value >= '0' && value <= '9' || value >= 'a' && value <= 'f') {
+			t.Fatalf("schema fingerprint contains non-lowercase-hex character %q", value)
+		}
+	}
+
+	changed := fstest.MapFS{
+		"content/item.schema.json":        &fstest.MapFile{Data: append(append([]byte(nil), definitionSchema...), '\n')},
+		"content/item-public.schema.json": &fstest.MapFile{Data: publicSchema},
+	}
+	third, err := New(changed)
+	if err != nil {
+		t.Fatalf("compile schema with changed source bytes: %v", err)
+	}
+	if first.Fingerprint() == third.Fingerprint() {
+		t.Fatal("changed trusted schema bytes retained the same fingerprint")
+	}
+}
+
 func newFixtureValidator(t *testing.T) *Validator {
 	t.Helper()
 	schemaFS := os.DirFS("../../../../contracts")

@@ -97,6 +97,10 @@ func TestMigrationsInstallAndRemainIdempotent(t *testing.T) {
 	assertCharacterStateVersionConflict(t, ctx, db)
 	assertAdminControlPlaneSchema(t, ctx, db)
 	assertAdminRolePermissions(t, ctx, maintenanceConfig, databaseName, roleFixture)
+	runTernMigration(t, ctx, ternPath, findServerRoot(t), env, "migrate", "--destination", "3")
+	assertBuildSchemaAbsent(t, ctx, db)
+	runTernMigration(t, ctx, ternPath, findServerRoot(t), env, "migrate")
+	assertBuildSchemaPresent(t, ctx, db)
 	if _, err := db.ExecContext(ctx, `GRANT SELECT (display_name) ON games TO tbcg_admin_control_plane`); err != nil {
 		t.Fatalf("seed non-owned, non-overlapping Game column grant: %v", err)
 	}
@@ -366,9 +370,36 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
 		"games", "realms", "content_revisions", "releases", "owner_guards",
 		"characters", "operation_results", "wallets", "wallet_ledger", "outbox", "outbox_consumer_receipts",
 		"admin_users", "admin_sessions", "admin_role_bindings", "content_drafts", "revision_approvals", "audit_logs",
+		"game_build_profiles", "release_version_counters", "admin_build_jobs",
 	} {
 		if !tables[name] {
 			t.Errorf("required PostgreSQL table %q is missing", name)
+		}
+	}
+}
+
+func assertBuildSchemaPresent(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	for _, relation := range []string{"game_build_profiles", "release_version_counters", "admin_build_jobs"} {
+		var exists bool
+		if err := db.QueryRowContext(ctx, `SELECT to_regclass('public.' || $1) IS NOT NULL`, relation).Scan(&exists); err != nil {
+			t.Fatalf("inspect build schema relation %q: %v", relation, err)
+		}
+		if !exists {
+			t.Errorf("build schema relation %q is missing", relation)
+		}
+	}
+}
+
+func assertBuildSchemaAbsent(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	for _, relation := range []string{"game_build_profiles", "release_version_counters", "admin_build_jobs"} {
+		var exists bool
+		if err := db.QueryRowContext(ctx, `SELECT to_regclass('public.' || $1) IS NOT NULL`, relation).Scan(&exists); err != nil {
+			t.Fatalf("inspect build schema relation %q: %v", relation, err)
+		}
+		if exists {
+			t.Errorf("build schema relation %q remains after migration down", relation)
 		}
 	}
 }
@@ -379,8 +410,8 @@ func assertMigrationVersionRecorded(t *testing.T, ctx context.Context, db *sql.D
 	if err := db.QueryRowContext(ctx, "SELECT version FROM public.schema_version").Scan(&version); err != nil {
 		t.Fatalf("read Tern migration version from public.schema_version: %v", err)
 	}
-	if version < 1 {
-		t.Errorf("expected at least one recorded migration, got version %d", version)
+	if version != 5 {
+		t.Errorf("migration version = %d, want current version 5", version)
 	}
 }
 

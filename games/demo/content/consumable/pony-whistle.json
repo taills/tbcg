@@ -1,0 +1,23 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:consumable/pony-whistle",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:consumable/pony-whistle",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "demo:item/pony-whistle",
+    "description": "获得一匹小马。",
+    "usable_in_battle": false
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "grant_mount",
+        "target_id": "demo:mount/pony"
+      }
+    ]
+  }
+}

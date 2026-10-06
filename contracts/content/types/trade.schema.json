@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:trade:v1",
+  "title": "TBCG 交易规则 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "game_id",
+        "max_item_slots",
+        "revision",
+        "schema_version",
+        "tax_bp",
+        "timeout_seconds"
+      ],
+      "properties": {
+        "max_item_slots": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "tax_bp": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/basis_points"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 3600
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_currency",
+        "untradable_item_ids"
+      ],
+      "properties": {
+        "untradable_item_ids": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/refs"
+        },
+        "max_currency": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/amount"
+        }
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
@@ -39,44 +40,69 @@ func runPostgresPackageTests(m *testing.M) (int, error) {
 	if err := db.PingContext(ctx); err != nil {
 		return 0, fmt.Errorf("connect isolated maintenance database for role fixture: %w", err)
 	}
-	var roleExists bool
-	if err := db.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tbcg_admin_control_plane')`).Scan(&roleExists); err != nil {
-		return 0, fmt.Errorf("inspect control-plane role fixture: %w", err)
-	}
-	createdRole := false
-	if !roleExists {
-		if _, err := db.ExecContext(ctx, `CREATE ROLE tbcg_admin_control_plane NOLOGIN`); err != nil {
-			return 0, fmt.Errorf("create isolated test control-plane role: %w", err)
+	roleNames := []string{"tbcg_admin_control_plane", "tbcg_content_build_owner", "tbcg_content_build_worker"}
+	createdRoles := make([]string, 0, len(roleNames))
+	for _, roleName := range roleNames {
+		var exists, canLogin, superuser, createRole, createDatabase, replication, bypassRLS bool
+		if err := db.QueryRowContext(ctx, `
+SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = $1),
+       COALESCE((SELECT rolcanlogin FROM pg_roles WHERE rolname = $1), false),
+       COALESCE((SELECT rolsuper FROM pg_roles WHERE rolname = $1), false),
+       COALESCE((SELECT rolcreaterole FROM pg_roles WHERE rolname = $1), false),
+       COALESCE((SELECT rolcreatedb FROM pg_roles WHERE rolname = $1), false),
+       COALESCE((SELECT rolreplication FROM pg_roles WHERE rolname = $1), false),
+       COALESCE((SELECT rolbypassrls FROM pg_roles WHERE rolname = $1), false)`, roleName).Scan(&exists, &canLogin, &superuser, &createRole, &createDatabase, &replication, &bypassRLS); err != nil {
+			return 0, fmt.Errorf("inspect restricted PostgreSQL role fixture %q: %w", roleName, err)
 		}
-		createdRole = true
+		if !exists {
+			if _, err := db.ExecContext(ctx, "CREATE ROLE "+pgx.Identifier{roleName}.Sanitize()+" NOLOGIN"); err != nil {
+				return 0, fmt.Errorf("create isolated restricted PostgreSQL role %q: %w", roleName, err)
+			}
+			createdRoles = append(createdRoles, roleName)
+			continue
+		}
+		if canLogin || superuser || createRole || createDatabase || replication || bypassRLS {
+			return 0, fmt.Errorf("pre-provisioned PostgreSQL role %q is not restricted", roleName)
+		}
 	}
 	code := m.Run()
-	if createdRole {
-		if _, err := db.ExecContext(context.Background(), `DROP ROLE IF EXISTS tbcg_admin_control_plane`); err != nil {
-			return code, fmt.Errorf("drop test-owned control-plane role: %w", err)
+	for _, roleName := range slices.Backward(createdRoles) {
+		if _, err := db.ExecContext(context.Background(), "DROP ROLE IF EXISTS "+pgx.Identifier{roleName}.Sanitize()); err != nil {
+			return code, fmt.Errorf("drop test-owned restricted PostgreSQL role %q: %w", roleName, err)
 		}
 	}
 	return code, nil
 }
 
 type adminRoleFixture struct {
-	appRole      string
-	appPassword  string
-	externalDB   string
-	createdGroup bool
-	createdApp   bool
-	createdExtDB bool
+	appRole          string
+	appPassword      string
+	workerRole       string
+	workerPassword   string
+	externalDB       string
+	createdGroup     bool
+	createdApp       bool
+	createdWorkerApp bool
+	createdExtDB     bool
 }
 
 func prepareAdminRoleFixture(t *testing.T, ctx context.Context, maintenanceDB *sql.DB, maintenanceConfig *pgx.ConnConfig) *adminRoleFixture {
 	t.Helper()
-	fixture := &adminRoleFixture{appRole: randomTestIdentifier(t, "tbcg_admin_app_")}
+	fixture := &adminRoleFixture{
+		appRole:    randomTestIdentifier(t, "tbcg_admin_app_"),
+		workerRole: randomTestIdentifier(t, "tbcg_build_worker_app_"),
+	}
 	t.Cleanup(func() {
 		cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		if fixture.createdExtDB {
 			if _, err := maintenanceDB.ExecContext(cleanupCtx, "DROP DATABASE IF EXISTS "+pgx.Identifier{fixture.externalDB}.Sanitize()); err != nil {
 				t.Errorf("drop isolated external-ACL database: %v", err)
+			}
+		}
+		if fixture.createdWorkerApp {
+			if _, err := maintenanceDB.ExecContext(cleanupCtx, "DROP ROLE IF EXISTS "+pgx.Identifier{fixture.workerRole}.Sanitize()); err != nil {
+				t.Errorf("drop temporary build worker application role: %v", err)
 			}
 		}
 		if fixture.createdApp {
@@ -121,6 +147,19 @@ func prepareAdminRoleFixture(t *testing.T, ctx context.Context, maintenanceDB *s
 	fixture.createdApp = true
 	if _, err := maintenanceDB.ExecContext(ctx, "GRANT tbcg_admin_control_plane TO "+appIdentifier); err != nil {
 		t.Fatalf("grant NOLOGIN control-plane role to temporary app login: %v", err)
+	}
+	var workerPassword [32]byte
+	if _, err := rand.Read(workerPassword[:]); err != nil {
+		t.Fatalf("generate temporary build worker password: %v", err)
+	}
+	fixture.workerPassword = hex.EncodeToString(workerPassword[:])
+	workerIdentifier := pgx.Identifier{fixture.workerRole}.Sanitize()
+	if _, err := maintenanceDB.ExecContext(ctx, "CREATE ROLE "+workerIdentifier+" LOGIN PASSWORD '"+fixture.workerPassword+"'"); err != nil {
+		t.Fatalf("create temporary build worker login: %v", err)
+	}
+	fixture.createdWorkerApp = true
+	if _, err := maintenanceDB.ExecContext(ctx, "GRANT tbcg_content_build_worker TO "+workerIdentifier); err != nil {
+		t.Fatalf("grant NOLOGIN build worker role to temporary login: %v", err)
 	}
 
 	externalDBName, err := randomTestDatabaseName()

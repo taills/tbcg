@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:consumable:v1",
+  "title": "TBCG 可使用物品效果 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "game_id",
+        "item_id",
+        "revision",
+        "schema_version",
+        "usable_in_battle"
+      ],
+      "properties": {
+        "item_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        },
+        "description": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/text"
+        },
+        "usable_in_battle": {
+          "type": "boolean"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "effects"
+      ],
+      "properties": {
+        "effects": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "heal_hp",
+                  "heal_mp",
+                  "grant_exp",
+                  "grant_pet",
+                  "grant_mount"
+                ]
+              },
+              "amount": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/amount"
+              },
+              "target_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

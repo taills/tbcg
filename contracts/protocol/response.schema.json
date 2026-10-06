@@ -4,29 +4,138 @@
   "title": "TBCG protocol response envelope v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["protocol_version", "request_id", "type", "success", "server_seq", "state_version", "data", "error", "meta"],
+  "required": [
+    "protocol_version",
+    "request_id",
+    "type",
+    "success",
+    "server_seq",
+    "state_version",
+    "data",
+    "error",
+    "meta"
+  ],
   "properties": {
-    "protocol_version": { "const": "1" },
-    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "protocol_version": {
+      "const": "1"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
     "type": {
       "type": "string",
-      "enum": ["system.hello_ack", "system.pong"]
+      "enum": [
+        "system.hello_ack",
+        "system.pong",
+        "character.list_result",
+        "character.create_result",
+        "character.enter_result",
+        "character.state_result",
+        "world.move_result",
+        "world.teleport_result",
+        "npc.interact_result",
+        "npc.choose_result",
+        "quest.abandon_result",
+        "inventory.use_result",
+        "inventory.equip_result",
+        "inventory.unequip_result",
+        "battle.command_result",
+        "battle.state_result",
+        "party.create_result",
+        "party.invite_result",
+        "party.respond_result",
+        "party.leave_result",
+        "party.kick_result",
+        "party.ready_result",
+        "party.transfer_result",
+        "dungeon.start_stage_result",
+        "dungeon.claim_result",
+        "dungeon.leave_result",
+        "pet.activate_result",
+        "pet.rest_result",
+        "pet.rename_result",
+        "partner.formation_result",
+        "mount.equip_result",
+        "mount.unequip_result",
+        "craft.make_result",
+        "shop.buy_result",
+        "friend.list_result",
+        "friend.request_result",
+        "friend.respond_result",
+        "friend.remove_result",
+        "guild.info_result",
+        "guild.create_result",
+        "guild.apply_result",
+        "guild.invite_result",
+        "guild.respond_result",
+        "guild.review_result",
+        "guild.leave_result",
+        "guild.kick_result",
+        "guild.set_role_result",
+        "guild.set_notice_result",
+        "trade.invite_result",
+        "trade.respond_result",
+        "trade.offer_result",
+        "trade.lock_result",
+        "trade.confirm_result",
+        "trade.cancel_result",
+        "event.list_result",
+        "event.claim_result",
+        "event.leaderboard_result",
+        "world.entities",
+        "world.entity_joined",
+        "world.entity_moved",
+        "world.entity_left",
+        "character.updated",
+        "battle.started",
+        "battle.round",
+        "battle.ended",
+        "party.updated",
+        "party.invited",
+        "dungeon.updated",
+        "trade.invited",
+        "trade.updated",
+        "friend.updated",
+        "guild.updated",
+        "system.release_changed",
+        "system.notice"
+      ]
     },
-    "success": { "type": "boolean" },
-    "server_seq": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "success": {
+      "type": "boolean"
+    },
+    "server_seq": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
     "state_version": {
       "oneOf": [
-        { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
-        { "type": "null" }
+        {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "data": { "type": "object" },
+    "data": {
+      "type": "object"
+    },
     "error": {
       "oneOf": [
-        { "type": "object" },
-        { "type": "null" }
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "meta": { "type": "object" }
+    "meta": {
+      "type": "object"
+    }
   }
 }

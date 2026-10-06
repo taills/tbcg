@@ -3,9 +3,13 @@ package schema
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"sort"
 	"strings"
@@ -35,8 +39,9 @@ type Issue struct {
 
 // Validator 校验私有物品定义及公开物品投影。
 type Validator struct {
-	definition *jsonschema.Schema
-	public     *jsonschema.Schema
+	definition  *jsonschema.Schema
+	public      *jsonschema.Schema
+	fingerprint string
 }
 
 // New 编译调用方文件系统中提供的受信任物品 Schema。
@@ -45,11 +50,11 @@ func New(schemaFS fs.FS) (*Validator, error) {
 	if schemaFS == nil {
 		return nil, errors.New("schema filesystem is nil")
 	}
-	definitionDoc, err := readSchema(schemaFS, definitionSchemaPath, definitionSchemaID)
+	definitionBytes, definitionDoc, err := readSchema(schemaFS, definitionSchemaPath, definitionSchemaID)
 	if err != nil {
 		return nil, err
 	}
-	publicDoc, err := readSchema(schemaFS, publicSchemaPath, publicSchemaID)
+	publicBytes, publicDoc, err := readSchema(schemaFS, publicSchemaPath, publicSchemaID)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +76,19 @@ func New(schemaFS fs.FS) (*Validator, error) {
 	if err != nil {
 		return nil, fmt.Errorf("compile item definition schema: %w", err)
 	}
-	return &Validator{definition: definition, public: public}, nil
+	return &Validator{
+		definition:  definition,
+		public:      public,
+		fingerprint: fingerprintSchemas(definitionBytes, publicBytes),
+	}, nil
+}
+
+// Fingerprint 返回参与编译的可信 Schema 原始字节的稳定 SHA-256。
+func (v *Validator) Fingerprint() string {
+	if v == nil {
+		return ""
+	}
+	return v.fingerprint
 }
 
 // ValidateDefinition 校验完整的私有物品定义及其公开身份字段。
@@ -147,21 +164,39 @@ func (v *Validator) ProjectPublic(data []byte) ([]byte, []Issue) {
 	return append([]byte(nil), projection...), nil
 }
 
-func readSchema(schemaFS fs.FS, path, expectedID string) (any, error) {
+func readSchema(schemaFS fs.FS, path, expectedID string) ([]byte, any, error) {
 	file, err := schemaFS.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("open trusted schema %q: %w", path, err)
+		return nil, nil, fmt.Errorf("open trusted schema %q: %w", path, err)
 	}
-	defer file.Close()
-	doc, err := jsonschema.UnmarshalJSON(file)
+	data, readErr := io.ReadAll(file)
+	closeErr := file.Close()
+	if readErr != nil {
+		return nil, nil, fmt.Errorf("read trusted schema %q: %w", path, readErr)
+	}
+	if closeErr != nil {
+		return nil, nil, fmt.Errorf("close trusted schema %q: %w", path, closeErr)
+	}
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
 	if err != nil {
-		return nil, fmt.Errorf("decode trusted schema %q: %w", path, err)
+		return nil, nil, fmt.Errorf("decode trusted schema %q: %w", path, err)
 	}
 	object, ok := doc.(map[string]any)
 	if !ok || object["$id"] != expectedID {
-		return nil, fmt.Errorf("trusted schema %q must declare $id %q", path, expectedID)
+		return nil, nil, fmt.Errorf("trusted schema %q must declare $id %q", path, expectedID)
 	}
-	return doc, nil
+	return data, doc, nil
+}
+
+func fingerprintSchemas(definition, public []byte) string {
+	hash := sha256.New()
+	for _, schemaBytes := range [][]byte{definition, public} {
+		var length [8]byte
+		binary.BigEndian.PutUint64(length[:], uint64(len(schemaBytes)))
+		_, _ = hash.Write(length[:])
+		_, _ = hash.Write(schemaBytes)
+	}
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func validate(compiled *jsonschema.Schema, data []byte) []Issue {
@@ -214,6 +249,8 @@ func collectIssues(validationErr *jsonschema.ValidationError, issues *[]Issue) {
 			*issues = append(*issues, Issue{Path: jsonPointer(unknownPath), Code: code})
 		}
 		return
+	case *kind.FalseSchema:
+		code = CodeUnknownField
 	}
 	*issues = append(*issues, Issue{Path: jsonPointer(path), Code: code})
 }

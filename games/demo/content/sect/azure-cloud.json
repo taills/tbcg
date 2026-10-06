@@ -1,0 +1,32 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:sect/azure-cloud",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:sect/azure-cloud",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "青云门",
+    "description": "以剑入道，兼修回春之术。",
+    "min_level": 2,
+    "skills": [
+      {
+        "skill_id": "demo:skill/whirlwind",
+        "unlock_level": 2
+      },
+      {
+        "skill_id": "demo:skill/mend",
+        "unlock_level": 3
+      }
+    ]
+  },
+  "server": {
+    "stat_bonus": {
+      "attack": 5,
+      "defense": 3
+    },
+    "join_npc_id": "demo:npc/guide"
+  }
+}

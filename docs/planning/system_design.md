@@ -35,7 +35,7 @@
 
 OpenAPI 真源为 `contracts/admin/openapi.yaml`。所有现阶段端点只使用 `success/data/error/meta` envelope。只有 CAS `draft_version` 使用十进制字符串；Definition、public projection、Revision 和 Approval 的 revision 均是 1..2147483647 范围内的整数。CAS 不匹配返回 409 和当前服务端版本/字段快照，前端必须保留本地值并由用户明确重应用；审批请求绑定 body 中精确的 `content_id + integer revision + body_hash`，不得隐式跟随最新草稿。
 
-支持范围：session、login/logout、`POST /games/{gameId}/item-drafts`、`GET/PUT /games/{gameId}/item-drafts/{draftId}`、draftId 下 validate/submit、按 `limit/offset` 有界分页的 review queue 和 body 指定 exact revision 的审核。`content_id` 位于请求体或查询参数而非路径段。角色按 Game 绑定；Reviewer 才能审批，Publisher 只负责后续构建/激活请求，不因 Publisher 身份自动获得审核权。规划但当前无可调用实现的范围：isolated build、Release manifest/package、runtime owner activate/ack、公开 bundle read/Godot adapter；活动指针只能由真实 runtime owner 确认。
+支持范围：session、login/logout、`POST /games/{gameId}/item-drafts`、`GET/PUT /games/{gameId}/item-drafts/{draftId}`、draftId 下 validate/submit、按 `limit/offset` 有界分页的 review queue 和 body 指定 exact revision 的审核。`content_id` 位于请求体或查询参数而非路径段。角色按 Game 绑定；Reviewer 才能审批，Publisher 只负责后续构建/激活请求，不因 Publisher 身份自动获得审核权。阶段2新增支持：Publisher 的已批准构建候选、带 `Idempotency-Key` 的单物品构建入队和构建任务查询；独立受限 worker 生成 `single_item` manifest/public/private 包并登记 `built` Release。规划但当前无可调用实现的范围：完整 Game 快照、runtime owner activate/ack、公开 bundle read/Godot adapter；活动指针只能由真实 runtime owner 确认。
 
 2026-10-04 控制面第一纵切片已用真实 PostgreSQL 18.3、Tern 2.4.3、HTTPS 管理 API、React 生产构建和 Firefox 真实浏览器验证 login/edit/CAS/submit/review。验证包含 Author CAS 冲突保留与显式 reapply、Reviewer exact hash 审批、Reader/Publisher 写权限拒绝、Origin/CSRF 拒绝、Secure cookie 和未信任 CA 负向路径。该结果不代表 build/activate/runtime/Godot 公共包阶段完成。
 
@@ -117,6 +117,8 @@ Release 生命周期：Draft → Validated → Reviewed → Built → Staged →
 
 Release manifest 至少包含 `game_id`、`release_id`、内容 `schema_version`、`instance_schema_version`、`ruleset_version`、`protocol_version`、`client_min_build`、capabilities、内容 Revision 闭包、geometry revision 闭包、公开资源 hash、服务端私有包 hash 和审计信息。服务端私有 AI、掉落、奖励和规则配置不得进入公共客户端包。
 
+任务 0008 首个隔离构建只生成标记为 `single_item` 的已构建产物，不是完整 Game 快照，也不可据此激活。兼容版本来自逐 Game 受控的可信 build profile，由受控部署数据库主体 provisioning，管理/worker 应用角色没有 profile 表直接读写权限，也不存在 HTTP 修改路由；不能由浏览器或 Publisher 请求传入。enqueue 时与批准 revision、Schema fingerprint、代码固定的 builder 版本、原创资产字节及其 manifest 原始字节/hash 一起冻结。profile 含递增 `profile_version` 及资产 manifest 原始字节 SHA-256，后者必须与冻结 manifest 完全一致，避免重试时重新读取已变化素材。单物品阶段 capability 集合为空，直到运行时有实际实现与兼容验收后才声明 capability。
+
 激活时游戏进程校验当前代码对 `ruleset_version`、协议和 `instance_schema_version` 的兼容读写能力、客户端最低版本和包完整性；成功后一次性切换完整快照，失败保持旧 Release 指针。
 
 Battle、Dungeon、Quest 和 Map Instance 必须固定开始/接取时的 Release 及依赖闭包，同一 Map Instance 不得混用不同 geometry revision 或资源包。保留 JSON 不等于保留执行语义；实例格式或规则不兼容的代码/Schema 部署必须先完成可验证迁移，否则拒绝激活或排空受影响实例。旧客户端不得默认读取或写入新格式存档；必须由最低客户端版本及服务端读写兼容检查阻止。
@@ -128,3 +130,21 @@ Battle、Dungeon、Quest 和 Map Instance 必须固定开始/接取时的 Releas
 安全契约：客户端不可信；WS 校验 Origin、凭证、版本和限额；管理面 RBAC、审计和 CSRF；导入只创建可审查 revision，不清空目标、不覆盖手工内容、不执行陌生脚本；未授权素材不得进入可分发包。
 
 P0 未决项：公开/私有包存储策略；Schema 到 Go/TypeScript/GDScript 的投影范围；战斗事件 catalog 稳定 ID；PostgreSQL 本地/CI 测试服务配置的远端 CI 固化、Tern 迁移部署与备份/升级演练；build/activate 的 Publisher/runtime owner 确认细节。Go 1.26.4、PostgreSQL 18.3、Godot 4.7.1 与 Tern v2.4.3 已锁定；管理认证、CSRF 与控制面浏览器路径已有第一纵切片验证记录，但尚未覆盖完整发布链路。
+
+## 运行面实现（2026-10-07，任务 0008 收尾–0015）
+
+- **进程与 owner**：`server/cmd/game-server` 以 `pg_try_advisory_lock` 独占一个 Realm 并递增 `owner_guards.owner_epoch`；
+  所有运行面写事务先 `FOR SHARE` 锁定 guard 行并核对 epoch，所有权连接丢失即退出进程。每个 Realm 一个单写者循环
+  （`modules/runtime.Realm`），连接读循环只做信封/白名单校验，业务处理全部投递到该循环。
+- **内容**：激活请求由 runtime owner 处理：读取私有产物、校验哈希与身份、以自身 Schema/catalog 规则和固定的
+  ruleset/protocol/instance/content 版本复核，成功后同一事务切换 `realms.active_release_id`、标记 Release 与请求；
+  失败只把请求记为 `rejected`。战斗与副本实例固定开战/创建时的 Release（旧版本按需从私有产物加载缓存）。
+- **事务**：无幂等键的状态写（移动、装备、组队外的关系变更）以 `state_version`/行锁 CAS 提交；涉及资产或进度的写
+  经 `Realm.Operation`：`operation_results` 预留 → 业务写入 → 账本（`wallet_ledger` 外键到操作）→ outbox → 提交，
+  同键同载荷重放返回原结果。跨模块的领域事实（区域进入、战斗胜利、副本完成）以同事务钩子消费，并用
+  `progress_facts` 去重。
+- **模块**：`world`、`quest`、`inventory`、`character`、`battle`/`combat`、`party`、`dungeon`、`companion`、
+  `crafting`、`shop`、`social`、`guild`、`trade`、`event` 位于 `server/modules/`；队伍与交易会话是内存 owner，
+  副本、任务、背包、经济、社交、公会持久化在 PostgreSQL（迁移 005）。
+- **客户端**：Godot `client/framework/{network,content,state,presentation,app}`；公开包校验 SHA-256 并拒绝任何私有形状；
+  客户端寻路使用与地图契约一致的 `spatial_grid`，只提交意图路径。

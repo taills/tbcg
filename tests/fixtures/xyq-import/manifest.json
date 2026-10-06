@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "description": "虚构的 xyq 风格源数据，仅用于导入器测试；不包含任何真实 xyq 素材或数据。",
+  "target_game_id": "demo",
+  "placeholder_icon_id": "demo:icon/placeholder",
+  "sources": [
+    { "path": "source/items.json", "kind": "item", "license": "authorized", "origin": "原创虚构 fixture，2026-10-07 编写" },
+    { "path": "source/monsters.json", "kind": "monster", "license": "authorized", "origin": "原创虚构 fixture，2026-10-07 编写" },
+    { "path": "source/skills.json", "kind": "skill", "license": "authorized", "origin": "原创虚构 fixture，2026-10-07 编写" },
+    { "path": "source/unlicensed.json", "kind": "item", "license": "unknown", "origin": "来源未登记" }
+  ]
+}

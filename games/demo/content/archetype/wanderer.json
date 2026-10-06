@@ -1,0 +1,54 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:archetype/wanderer",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:archetype/wanderer",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "游侠",
+    "description": "初入江湖的游侠。",
+    "appearance_id": "demo:appearance/wanderer"
+  },
+  "server": {
+    "base_stats": {
+      "max_hp": 120,
+      "max_mp": 40,
+      "attack": 18,
+      "defense": 8,
+      "speed": 10
+    },
+    "growth_per_level": {
+      "max_hp": 20,
+      "max_mp": 5,
+      "attack": 4,
+      "defense": 2,
+      "speed": 1
+    },
+    "level_exp": [
+      100,
+      250,
+      450,
+      700,
+      1000,
+      1400,
+      1900,
+      2500,
+      3200
+    ],
+    "start_map_id": "demo:map/training-ground",
+    "start_anchor_id": "arrival",
+    "start_currency": 100,
+    "start_items": [
+      {
+        "item_id": "demo:item/healing-potion",
+        "quantity": 3
+      }
+    ],
+    "default_skill_ids": [
+      "demo:skill/strike"
+    ]
+  }
+}

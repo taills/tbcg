@@ -102,7 +102,7 @@ func TestAdminControlPlaneHTTPSPostgresUserJourney(t *testing.T) {
 	if err != nil {
 		t.Fatalf("compile trusted item schemas for admin API: %v", err)
 	}
-	assets := os.DirFS(filepath.Join(filepath.Dir(findServerRoot(t)), "games", "demo", "assets"))
+	assets := os.DirFS(filepath.Join(filepath.Dir(findServerRoot(t)), "games"))
 	appURL, err := url.Parse(maintenanceURL)
 	if err != nil {
 		t.Fatalf("parse disposable admin test DSN: %v", err)
@@ -502,8 +502,8 @@ VALUES ($1, $2, 1, 1, 'map', $3::jsonb)`, gameID, nonItemID, nonItemBody); err !
 	nonItemReview := sendAdminJSON(t, reviewerClient, server.URL, http.MethodPost, "/api/v1/games/demo/revision-approvals", map[string]any{
 		"content_id": nonItemID, "revision": 1, "body_hash": hex.EncodeToString(nonItemHash[:]), "decision": "approved",
 	}, reviewerCSRF)
-	if nonItemReview.StatusCode != http.StatusNotFound {
-		t.Fatalf("Reviewer API approved a non-item content family: status %d", nonItemReview.StatusCode)
+	if nonItemReview.StatusCode != http.StatusUnprocessableEntity {
+		t.Fatalf("Reviewer API approved a revision whose body does not match its content family: status %d", nonItemReview.StatusCode)
 	}
 	closeAdminResponse(t, nonItemReview)
 	var nonItemApprovalCount int

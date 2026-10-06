@@ -1,0 +1,25 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:encounter/den-alpha",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:encounter/den-alpha",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "狼王",
+    "description": "副本第二阶段。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "demo:monster/wolf",
+        "count": 2
+      }
+    ],
+    "max_rounds": 25,
+    "round_timeout_ms": 30000,
+    "allow_flee": false
+  }
+}

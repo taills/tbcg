@@ -1,0 +1,40 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:pet/sprite",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:pet/sprite",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "灵狐",
+    "appearance_id": "demo:appearance/sprite",
+    "skill_ids": [
+      "demo:skill/strike"
+    ]
+  },
+  "server": {
+    "base_stats": {
+      "max_hp": 60,
+      "max_mp": 20,
+      "attack": 10,
+      "defense": 4,
+      "speed": 11
+    },
+    "growth_per_level": {
+      "max_hp": 10,
+      "max_mp": 3,
+      "attack": 2,
+      "defense": 1,
+      "speed": 1
+    },
+    "level_exp": [
+      80,
+      200,
+      380,
+      620,
+      900
+    ]
+  }
+}

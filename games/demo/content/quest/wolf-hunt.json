@@ -1,0 +1,46 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:quest/wolf-hunt",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:quest/wolf-hunt",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "林间狼患",
+    "description": "与同伴一起驱赶林间的狼群。",
+    "min_level": 2,
+    "stage_descriptions": [
+      "与队友一起击败林间狼影两次"
+    ]
+  },
+  "server": {
+    "giver_npc_id": "demo:npc/merchant",
+    "turn_in_npc_id": "demo:npc/merchant",
+    "prerequisites": [
+      "demo:quest/first-steps"
+    ],
+    "repeat_policy": "repeatable",
+    "stages": [
+      {
+        "objective": {
+          "kind": "defeat_encounter",
+          "encounter_id": "demo:encounter/wolf-den",
+          "count": 2,
+          "progress_scope": "party"
+        }
+      }
+    ],
+    "rewards": {
+      "currency": 40,
+      "exp": 150,
+      "items": [
+        {
+          "item_id": "demo:item/pony-whistle",
+          "quantity": 1
+        }
+      ]
+    }
+  }
+}

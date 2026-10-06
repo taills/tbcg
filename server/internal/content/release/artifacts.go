@@ -15,7 +15,15 @@ func writeImmutable(path string, content []byte, mode os.FileMode) (resultErr er
 		return err
 	}
 	defer func() { resultErr = errors.Join(resultErr, wrapCleanupError("close artifact root", root.Close())) }()
-	name := filepath.Base(path)
+	return InstallImmutable(root, filepath.Base(path), content, mode)
+}
+
+// InstallImmutable atomically installs name inside root without replacing an existing file.
+// An existing regular, owner-only file with identical bytes is reused; anything else is a conflict.
+func InstallImmutable(root *os.Root, name string, content []byte, mode os.FileMode) (resultErr error) {
+	if name == "" || name == "." || name == ".." || filepath.Base(name) != name {
+		return fmt.Errorf("artifact name %q must be a single path element: %w", name, ErrReleaseIDInvalid)
+	}
 	temporary := "." + name + "." + rand.Text() + ".tmp"
 	file, err := root.OpenFile(temporary, os.O_WRONLY|os.O_CREATE|os.O_EXCL, mode)
 	if err != nil {

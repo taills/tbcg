@@ -260,23 +260,9 @@ func (h *handler) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	if !ok || !h.requireRole(w, r, current, gameID, RoleReviewer) {
 		return
 	}
-	limit := 50
-	if value := r.URL.Query().Get("limit"); value != "" {
-		parsed, err := strconv.Atoi(value)
-		if err != nil || parsed < 1 || parsed > 100 {
-			writeFailure(w, http.StatusBadRequest, "invalid_limit", "分页大小必须介于 1 和 100 之间", nil)
-			return
-		}
-		limit = parsed
-	}
-	offset := 0
-	if value := r.URL.Query().Get("offset"); value != "" {
-		parsed, err := strconv.Atoi(value)
-		if err != nil || parsed < 0 || parsed > 1000000 {
-			writeFailure(w, http.StatusBadRequest, "invalid_offset", "分页偏移必须介于 0 和 1000000 之间", nil)
-			return
-		}
-		offset = parsed
+	limit, offset, ok := parsePage(w, r)
+	if !ok {
+		return
 	}
 	revisions, total, err := h.store.ReviewQueue(r.Context(), gameID, limit, offset)
 	if err != nil {
@@ -313,6 +299,9 @@ func (h *handler) reviewRevision(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, http.StatusBadRequest, "invalid_review", "审核请求无效", []fieldIssue{{Pointer: "/revision", Code: "invalid_value", Message: "必须指定合法的 revision、hash 和审核结论"}})
 		return
 	}
+	if input.Decision == "approved" && !h.reviewableRevision(w, r, gameID, input.ContentID, input.Revision) {
+		return
+	}
 	approval, err := h.store.ReviewRevision(r.Context(), gameID, input.ContentID, input.Revision, bodyHash, input.Decision, input.Comment, current.value.AdminID)
 	if errors.Is(err, ErrNotFound) {
 		writeFailure(w, http.StatusNotFound, "not_found", "找不到待审核的确切 revision", nil)
@@ -338,6 +327,17 @@ func (h *handler) requireAuthenticated(w http.ResponseWriter, r *http.Request) (
 }
 
 func (h *handler) prepareDefinition(gameID, contentID string, revision int32, input []byte) ([]byte, []fieldIssue) {
+	contentType, err := schema.ContentTypeOf(contentID)
+	if err != nil {
+		return nil, []fieldIssue{{Pointer: "/content_id", Code: "invalid_value", Message: "内容 ID 必须形如 <game>:<类型>/<名称>，且类型受支持"}}
+	}
+	validator := h.validator
+	if contentType != schema.ContentTypeItem {
+		validator, err = h.registry.For(contentType)
+		if err != nil {
+			validator = nil
+		}
+	}
 	var definition map[string]json.RawMessage
 	if err := json.Unmarshal(input, &definition); err != nil || definition == nil {
 		return nil, []fieldIssue{{Pointer: "", Code: "invalid_json", Message: "物品定义必须是 JSON 对象"}}
@@ -392,11 +392,14 @@ func (h *handler) prepareDefinition(gameID, contentID string, revision int32, in
 	if len(issues) != 0 {
 		return nil, issues
 	}
-	if h.validator == nil {
+	if validator == nil {
 		return nil, []fieldIssue{{Pointer: "", Code: "validator_unavailable", Message: "内容校验器暂不可用"}}
 	}
-	for _, issue := range h.validator.ValidateDefinition(encoded) {
+	for _, issue := range validator.ValidateDefinition(encoded) {
 		issues = append(issues, fieldIssue{Pointer: issue.Path, Code: issue.Code, Message: validationMessage(issue.Code)})
+	}
+	if contentType != schema.ContentTypeItem {
+		return encoded, issues
 	}
 	var value struct {
 		Public struct {
@@ -407,7 +410,7 @@ func (h *handler) prepareDefinition(gameID, contentID string, revision int32, in
 		issues = append(issues, fieldIssue{Pointer: "", Code: "invalid_json", Message: "物品定义无效"})
 		return nil, issues
 	}
-	issues = append(issues, validateIconReference(value.Public.IconID, h.assets)...)
+	issues = append(issues, validateIconReference(value.Public.IconID, assetsForGame(h.assets, gameID))...)
 	return encoded, issues
 }
 
@@ -465,4 +468,41 @@ func writeFailureWithData(w http.ResponseWriter, status int, code, message strin
 		Error:   &apiError{Code: code, Message: message, Fields: nonNilFields(fields)},
 		Meta:    map[string]any{},
 	})
+}
+
+// reviewableRevision 在批准前用该内容类型的可信 Schema 复核不可变 revision；类型与内容不符的 revision 不能被批准。
+func (h *handler) reviewableRevision(w http.ResponseWriter, r *http.Request, gameID, contentID string, revision int32) bool {
+	content, ok := h.store.(ContentStore)
+	if !ok {
+		return true
+	}
+	definition, err := content.RevisionDefinition(r.Context(), gameID, contentID, revision)
+	if errors.Is(err, ErrNotFound) {
+		writeFailure(w, http.StatusNotFound, "not_found", "找不到待审核的确切 revision", nil)
+		return false
+	}
+	if err != nil {
+		h.internalError(w, "read revision for review validation", err)
+		return false
+	}
+	contentType, err := schema.ContentTypeOf(contentID)
+	validator, validatorErr := h.validator, error(nil)
+	if h.registry != nil {
+		validator, validatorErr = h.registry.For(contentType)
+	} else if contentType != schema.ContentTypeItem {
+		validatorErr = schema.ErrUnknownContentType
+	}
+	if err != nil || validatorErr != nil || validator == nil {
+		writeFailure(w, http.StatusUnprocessableEntity, "revision_invalid", "revision 的内容类型不受支持", nil)
+		return false
+	}
+	if issues := validator.ValidateDefinition(definition); len(issues) != 0 {
+		fields := make([]fieldIssue, 0, len(issues))
+		for _, issue := range issues {
+			fields = append(fields, fieldIssue{Pointer: issue.Path, Code: issue.Code, Message: validationMessage(issue.Code)})
+		}
+		writeFailure(w, http.StatusUnprocessableEntity, "revision_invalid", "revision 不符合其内容类型的 Schema，不能批准", fields)
+		return false
+	}
+	return true
 }

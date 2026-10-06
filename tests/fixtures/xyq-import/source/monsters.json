@@ -1,0 +1,4 @@
+[
+  { "id": 2001, "name": "虚构野猪", "level": 2, "hp": 70, "mp": 0, "atk": 12, "def": 4, "spd": 7, "exp": 40, "money": 8, "skills": [3001], "drops": [{ "item": 1003, "rate": 0.5 }] },
+  { "id": 2002, "name": "虚构树妖", "level": 4, "hp": 120, "mp": 30, "atk": 15, "def": 6, "spd": 5, "exp": 90, "money": 15, "skills": [3999], "drops": [{ "item": 1999, "rate": 0.2 }], "ai_script": "fake_ai()" }
+]

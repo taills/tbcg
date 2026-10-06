@@ -1,0 +1,20 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:mount/pony",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:mount/pony",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "小马",
+    "appearance_id": "demo:appearance/pony",
+    "min_level": 2,
+    "stat_bonus": {
+      "speed": 5,
+      "max_hp": 10
+    }
+  },
+  "server": {}
+}

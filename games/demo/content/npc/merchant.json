@@ -1,0 +1,98 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:npc/merchant",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:npc/merchant",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "行商",
+    "appearance_id": "demo:appearance/merchant",
+    "map_id": "demo:map/forest-edge",
+    "anchor_id": "merchant"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "路过的少侠，看看货？还是想去狼穴碰碰运气？",
+        "options": [
+          {
+            "option_id": "shop",
+            "text": "看看货物",
+            "action": {
+              "kind": "open_shop",
+              "target_id": "demo:shop/merchant"
+            }
+          },
+          {
+            "option_id": "craft",
+            "text": "请帮我打造兵器",
+            "action": {
+              "kind": "open_crafting"
+            }
+          },
+          {
+            "option_id": "hunt",
+            "text": "接取：林间狼患",
+            "condition": {
+              "quest_id": "demo:quest/wolf-hunt",
+              "quest_status": "available"
+            },
+            "action": {
+              "kind": "accept_quest",
+              "target_id": "demo:quest/wolf-hunt"
+            }
+          },
+          {
+            "option_id": "fight",
+            "text": "去林间驱狼（林间狼影）",
+            "action": {
+              "kind": "start_encounter",
+              "target_id": "demo:encounter/wolf-den"
+            }
+          },
+          {
+            "option_id": "hunt-claim",
+            "text": "领取林间狼患的奖励",
+            "condition": {
+              "quest_id": "demo:quest/wolf-hunt",
+              "quest_status": "objectives_done"
+            },
+            "action": {
+              "kind": "claim_quest",
+              "target_id": "demo:quest/wolf-hunt"
+            }
+          },
+          {
+            "option_id": "dungeon",
+            "text": "带队进入狼穴（双人副本）",
+            "action": {
+              "kind": "enter_dungeon",
+              "target_id": "demo:dungeon/wolf-den"
+            }
+          },
+          {
+            "option_id": "partner",
+            "text": "招募剑客为伙伴",
+            "action": {
+              "kind": "recruit_partner",
+              "target_id": "demo:partner/swordsman"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

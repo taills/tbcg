@@ -1,0 +1,4 @@
+[
+  { "id": 3001, "name": "虚构冲撞", "desc": "冲撞一名敌人。", "target": "single", "mp": 0, "power": 1.2, "hits": 1, "crit": 0.05 },
+  { "id": 3002, "name": "虚构群攻", "desc": "攻击全部敌人。", "target": "all", "mp": 10, "power": 0.6, "hits": 1, "crit": 0, "formula": "fake_formula()" }
+]

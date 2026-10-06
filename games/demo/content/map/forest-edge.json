@@ -1,0 +1,210 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:map/forest-edge",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:map/forest-edge",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "林间小径",
+    "geometry": {
+      "schema_version": 1,
+      "map_id": "demo:map/forest-edge",
+      "geometry_revision": 1,
+      "width": 10,
+      "height": 8,
+      "tile_size": 32,
+      "origin": {
+        "x": 64,
+        "y": 96
+      },
+      "axis": "x_right_y_down",
+      "order": "row_major",
+      "diagonal_policy": "no_corner_cutting",
+      "grid": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "anchors": [
+        {
+          "placement_id": "arrival",
+          "kind": "spawn",
+          "cell": {
+            "x": 0,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "dungeon-gate",
+          "kind": "region",
+          "cell": {
+            "x": 9,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "grove",
+          "kind": "trigger",
+          "cell": {
+            "x": 6,
+            "y": 3
+          },
+          "extent": {
+            "x": 2,
+            "y": 2
+          }
+        },
+        {
+          "placement_id": "merchant",
+          "kind": "npc",
+          "cell": {
+            "x": 3,
+            "y": 2
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "portal-back",
+          "kind": "portal",
+          "cell": {
+            "x": 0,
+            "y": 7
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      ]
+    },
+    "portals": [
+      {
+        "anchor_id": "portal-back",
+        "target_map_id": "demo:map/training-ground",
+        "target_anchor_id": "arrival"
+      }
+    ],
+    "zones": [
+      {
+        "anchor_id": "grove",
+        "display_name": "幽静林地"
+      },
+      {
+        "anchor_id": "dungeon-gate",
+        "display_name": "狼穴入口"
+      }
+    ]
+  },
+  "server": {
+    "spawn_anchor_id": "arrival",
+    "max_path_cells": 24,
+    "min_step_interval_ms": 120
+  }
+}

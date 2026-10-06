@@ -279,72 +279,291 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/RevisionConflict' }
+  /api/v1/games/{gameId}/build-candidates:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [release]
+      operationId: listBuildCandidates
+      x-tbcg-status: supported
+      summary: List approved immutable item revisions available to a Publisher
+      description: |
+        Returns only exact approved revision identities and hashes, not private
+        Definition fields. Publisher permission is independent from Reviewer.
+        Only revisions whose schema version matches the trusted per-Game build
+        profile are listed; compatibility values never come from browser input.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 }
+      responses:
+        '200': { $ref: '#/components/responses/BuildCandidateListResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /api/v1/games/{gameId}/builds:
     parameters:
       - $ref: '#/components/parameters/GameId'
     post:
       tags: [release]
       operationId: startBuild
-      x-tbcg-status: planned
-      summary: PLANNED — start an isolated Publisher build; not available in this slice
+      x-tbcg-status: supported
+      summary: Enqueue an isolated single-item Publisher build
       description: |
-        Requires the Publisher role, which is distinct from Reviewer. The build worker
-        creates a deterministic manifest and immutable package. No handler is exposed
-        until the isolated build phase is implemented.
+        Requires the Publisher role, distinct from Reviewer. The request binds an
+        exact approved item revision and its body hash. Idempotency is scoped by
+        Game, actor, operation, and key: replaying the same canonical request returns
+        the same job and Release identity; a different request under that key returns
+        409 `idempotency_conflict`. The approved Definition, trusted per-Game
+        compatibility profile, schema fingerprint, builder version, and licensed asset
+        bytes are frozen at enqueue time. Each Game may hold at most 20 queued, running, or
+        retry_wait jobs; beyond that the request returns 429 `build_queue_full` without
+        creating a job or consuming a Release version. 202 is returned only after the job is durably
+        committed. A separate restricted worker produces a `single_item` built package;
+        it is not a complete Game snapshot and not an activation.
       security: [{ AdminSession: [] }]
       parameters:
         - $ref: '#/components/parameters/Origin'
         - $ref: '#/components/parameters/CSRF'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required: [content_id, revision]
-              properties:
-                content_id: { type: string }
-                revision: { $ref: '#/components/schemas/RevisionNumber' }
+            schema: { $ref: '#/components/schemas/StartBuildRequest' }
       responses:
-        '202': { description: Planned response — isolated build job }
+        '202': { $ref: '#/components/responses/BuildJobResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
-        '501': { description: Not implemented until the isolated build phase }
-  /api/v1/games/{gameId}/releases/{releaseId}/activation:
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/BuildConflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/BuildOutcomeUnknown' }
+  /api/v1/games/{gameId}/builds/{jobId}:
     parameters:
       - $ref: '#/components/parameters/GameId'
-      - $ref: '#/components/parameters/ReleaseId'
-    post:
+      - $ref: '#/components/parameters/BuildJobId'
+    get:
       tags: [release]
-      operationId: requestActivation
-      x-tbcg-status: planned
-      summary: PLANNED — request activation from the real runtime owner
-      description: |
-        Publisher may request activation; only the game runtime owner can acknowledge
-        and move the active pointer. The admin control-plane database role cannot write
-        realms, releases runtime state, or owner_guards.
+      operationId: getBuildJob
+      x-tbcg-status: supported
+      summary: Read a Publisher build job without exposing private artifacts
+      description: Publisher permission for the same Game is required. The response includes only the public artifact hash and a safe error code; no private bytes, storage path, claim token, or job input snapshot is returned. `built` means built and registered, not activated.
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/BuildJobResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/content-types:
+    get:
+      tags: [content]
+      operationId: listContentTypes
+      x-tbcg-status: supported
+      summary: List every supported content type (item, map, archetype, sect, skill, monster, encounter, npc, quest, equipment, consumable, dungeon, pet, partner, mount, recipe, shop, social, guild, trade, event)
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/games/{gameId}/content-drafts:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [content]
+      operationId: createContentDraft
+      x-tbcg-status: supported
+      summary: Create a draft for any content type; the type is derived from `<game>:<type>/<slug>` and validated with that type's trusted Schema
+      description: Same CAS/identity/validation rules as item drafts. Item drafts additionally require a licensed icon. The alias `GET` lists drafts for one exact content id.
       security: [{ AdminSession: [] }]
       parameters:
         - $ref: '#/components/parameters/Origin'
         - $ref: '#/components/parameters/CSRF'
       responses:
-        '202': { description: Planned response — activation request accepted for runtime owner }
+        '201': { $ref: '#/components/responses/EmptySuccess' }
         '403': { $ref: '#/components/responses/Forbidden' }
-        '501': { description: Not implemented until the runtime owner phase }
-  /api/v1/public/games/{gameId}/releases/{releaseId}/bundle:
+        '409': { $ref: '#/components/responses/ValidationError' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/games/{gameId}/content-drafts/{draftId}:
     parameters:
       - $ref: '#/components/parameters/GameId'
-      - $ref: '#/components/parameters/ReleaseId'
+      - $ref: '#/components/parameters/DraftId'
+    get:
+      tags: [content]
+      operationId: getContentDraft
+      x-tbcg-status: supported
+      summary: Read a draft of any content type (also served at `/item-drafts/{draftId}`); PUT/validate/submit mirror the item-draft routes
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/games/{gameId}/content:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [content]
+      operationId: searchContent
+      x-tbcg-status: supported
+      summary: Stable-ID search across drafts and revisions (`q`, optional `type`); any Game role
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/content-references:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [content]
+      operationId: contentReferences
+      x-tbcg-status: supported
+      summary: Incoming, outgoing and broken references for `content_id` computed over the draft view
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/games/{gameId}/content-diff:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [content]
+      operationId: contentDiff
+      x-tbcg-status: supported
+      summary: JSON-pointer diff between two revisions or a revision and the current draft (`from`/`to` = integer or `draft`)
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/games/{gameId}/content-revisions:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [content]
+      operationId: getContentRevision
+      x-tbcg-status: supported
+      summary: Read one immutable revision definition by `content_id` and integer `revision`
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/games/{gameId}/content-imports:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [content]
+      operationId: importContent
+      x-tbcg-status: supported
+      summary: Batch import (≤200) that only creates new drafts; existing drafts are reported as `conflict` and never overwritten; `dry_run` writes nothing
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/validation-report:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [content]
+      operationId: validationReport
+      x-tbcg-status: supported
+      summary: Full cross-reference validation of the draft or approved view with the same Go catalog rules used by builds and the runtime
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/previews/battle:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [content]
+      operationId: previewBattle
+      x-tbcg-status: supported
+      summary: Battle preview executed by the same Go battle engine version as the runtime (`rules_version` echoed); never a front-end approximation
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/games/{gameId}/snapshot-builds:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [release]
+      operationId: startSnapshotBuild
+      x-tbcg-status: supported
+      summary: Enqueue a full Game snapshot build of the latest approved revision of every content id
+      description: Publisher only, `Idempotency-Key` required, empty body. The enqueue transaction freezes every approved definition, the controlled profile, schema fingerprint and licensed icon bytes, and reserves the Release version. The isolated worker builds deterministic public/private bundles and registers a `built` Release with all entries; nothing is activated.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202': { $ref: '#/components/responses/EmptySuccess' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/ValidationError' }
+        '503': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/games/{gameId}/snapshot-builds/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/BuildJobId'
     get:
       tags: [release]
-      operationId: getPublicBundle
-      x-tbcg-status: planned
-      summary: PLANNED — read the allowlisted public bundle; no route in this slice
-      description: No response may expose server-private reward/drop fields. Godot reader validation is a later phase.
+      operationId: getSnapshotBuild
+      x-tbcg-status: supported
+      summary: Read a snapshot job (status, Release identity, public hash, safe error code)
+      security: [{ AdminSession: [] }]
       responses:
-        '200': { description: Planned response — public bundle and manifest }
+        '200': { $ref: '#/components/responses/EmptySuccess' }
         '404': { $ref: '#/components/responses/NotFound' }
-        '501': { description: Not implemented until the public bundle phase }
+  /api/v1/games/{gameId}/releases:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [release]
+      operationId: listReleases
+      x-tbcg-status: supported
+      summary: Releases, Realm active pointers, recent snapshot jobs and activation requests; any Game role
+      security: [{ AdminSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/EmptySuccess' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/games/{gameId}/realms/{realmId}/activations:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - name: realmId
+        in: path
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 64 }
+    post:
+      tags: [release]
+      operationId: requestActivation
+      x-tbcg-status: supported
+      summary: Request activation of a built Game snapshot; the runtime owner validates and confirms
+      description: |
+        Publisher only, `Idempotency-Key` required, body `{"release_id": "..."}`. The request is recorded as
+        `pending`; the game runtime (realm owner holding the current owner_epoch) loads the private artifact,
+        revalidates it with its own Schema/catalog rules and compatibility versions, then atomically switches
+        `realms.active_release_id`. Failure records `rejected` with a code and leaves the previous pointer serving.
+        A second pending request for the same Realm returns 409 `activation_pending`.
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Origin'
+        - $ref: '#/components/parameters/CSRF'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202': { $ref: '#/components/responses/EmptySuccess' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/ValidationError' }
 components:
   securitySchemes:
     AdminSession:
@@ -362,11 +581,20 @@ components:
       in: path
       required: true
       schema: { type: string, format: uuid }
-    ReleaseId:
-      name: releaseId
+    BuildJobId:
+      name: jobId
       in: path
       required: true
-      schema: { type: string, minLength: 1, maxLength: 128 }
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+        pattern: '^[A-Za-z0-9._~-]+$'
     Origin:
       name: Origin
       in: header
@@ -397,6 +625,58 @@ components:
     SHA256:
       type: string
       pattern: '^[a-f0-9]{64}$'
+    StartBuildRequest:
+      type: object
+      additionalProperties: false
+      required: [content_id, revision, body_hash]
+      properties:
+        content_id: { type: string, minLength: 1, maxLength: 128 }
+        revision: { $ref: '#/components/schemas/RevisionNumber' }
+        body_hash: { $ref: '#/components/schemas/SHA256' }
+    BuildCandidate:
+      type: object
+      additionalProperties: false
+      required: [game_id, content_id, revision, body_hash, submitted_at]
+      properties:
+        game_id: { type: string }
+        content_id: { type: string, minLength: 1, maxLength: 128 }
+        revision: { $ref: '#/components/schemas/RevisionNumber' }
+        body_hash: { $ref: '#/components/schemas/SHA256' }
+        submitted_at: { type: string, format: date-time }
+    BuildStatus:
+      type: string
+      enum: [queued, running, retry_wait, built, failed]
+    BuildJob:
+      type: object
+      additionalProperties: false
+      required: [job_id, game_id, content_id, revision, body_hash, release_id, release_version, status, created_at, updated_at, public_artifact_sha256, error_code]
+      properties:
+        job_id: { type: string, format: uuid }
+        game_id: { type: string }
+        content_id: { type: string }
+        revision: { $ref: '#/components/schemas/RevisionNumber' }
+        body_hash: { $ref: '#/components/schemas/SHA256' }
+        release_id: { type: string, minLength: 1, maxLength: 128 }
+        release_version: { type: integer, format: int32, minimum: 1, maximum: 2147483647 }
+        status: { $ref: '#/components/schemas/BuildStatus' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        public_artifact_sha256: { oneOf: [{ type: 'null' }, { $ref: '#/components/schemas/SHA256' }] }
+        error_code: { oneOf: [{ type: 'null' }, { type: string, maxLength: 64 }] }
+    BuildCandidatePageEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/BuildCandidate' }
+    BuildJobEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/BuildJob' }
     SessionEnvelope:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
@@ -593,6 +873,46 @@ components:
               - type: object
                 properties:
                   data: { $ref: '#/components/schemas/Approval' }
+    BuildCandidateListResponse:
+      description: Exact approved item revisions available for Publisher builds; no private Definition fields
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EnvelopeBase'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BuildCandidate' }
+                  meta:
+                    type: object
+                    required: [total, limit, offset]
+                    properties:
+                      total: { type: integer, minimum: 0 }
+                      limit: { type: integer, minimum: 1, maximum: 100 }
+                      offset: { type: integer, minimum: 0 }
+    BuildJobResponse:
+      description: Current build job state; never returns private package bytes or storage paths
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/BuildJobEnvelope' }
+    BuildConflict:
+      description: |
+        Stable error codes: `idempotency_conflict` (key bound to another request),
+        `build_conflict` (trusted profile changed or concurrent enqueue; re-read and retry),
+        `build_already_active` (the exact revision already has a queued, running, or retry_wait job),
+        `build_profile_unavailable` (no trusted per-Game profile or incompatible schema),
+        `asset_unavailable` / `asset_manifest_mismatch` (licensed asset closure does not
+        match the trusted profile), `build_input_rejected` (frozen input failed validation).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
+    BuildOutcomeUnknown:
+      description: The commit acknowledgement was lost; retry with the same Idempotency-Key and body (`build_outcome_unknown`).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeBase' }
     ValidationError:
       description: Invalid request or item definition, with JSON Pointer field errors
       content:

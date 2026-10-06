@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:recipe:v1",
+  "title": "TBCG 制作配方 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "display_name",
+        "game_id",
+        "materials",
+        "min_level",
+        "outputs",
+        "revision",
+        "schema_version"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "materials": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "urn:tbcg:content:common:v1#/$defs/stack"
+          },
+          "minItems": 1
+        },
+        "outputs": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "$ref": "urn:tbcg:content:common:v1#/$defs/stack"
+          },
+          "minItems": 1
+        },
+        "min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        },
+        "sect_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success_rate_bp"
+      ],
+      "properties": {
+        "success_rate_bp": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/basis_points"
+        }
+      }
+    }
+  }
+}

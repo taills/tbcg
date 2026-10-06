@@ -1,0 +1,5 @@
+[
+  { "id": 1001, "name": "虚构金疮药", "desc": "恢复少量气血。", "kind": "drug", "stack": 30, "price": 120, "icon": "fake/icon-1001.png" },
+  { "id": 1002, "name": "虚构铁剑", "desc": "普通兵器。", "kind": "weapon", "stack": 1, "price": 800, "use_script": "fake_script_weapon()" },
+  { "id": 1003, "name": "虚构灵草", "desc": "材料。", "kind": "material", "stack": 99, "price": 15, "glow": true }
+]

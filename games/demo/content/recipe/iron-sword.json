@@ -1,0 +1,33 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:recipe/iron-sword",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:recipe/iron-sword",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "打造青锋铁剑",
+    "materials": [
+      {
+        "item_id": "demo:item/wolf-fang",
+        "quantity": 3
+      },
+      {
+        "item_id": "demo:item/herb",
+        "quantity": 2
+      }
+    ],
+    "outputs": [
+      {
+        "item_id": "demo:item/iron-sword",
+        "quantity": 1
+      }
+    ],
+    "min_level": 2
+  },
+  "server": {
+    "success_rate_bp": 10000
+  }
+}

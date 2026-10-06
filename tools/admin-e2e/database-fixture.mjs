@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
@@ -11,6 +11,8 @@ const bootstrapConfirmation = "I_UNDERSTAND_LOCAL_ADMIN_BOOTSTRAP";
 
 const ternPath = "/tmp/tbcg-tern-bin/tern";
 const noLoginRole = "tbcg_admin_control_plane";
+const buildOwnerRole = "tbcg_content_build_owner";
+const buildWorkerRole = "tbcg_content_build_worker";
 const pgURLParameters = new Map([
   ["sslmode", "PGSSLMODE"],
   ["sslrootcert", "PGSSLROOTCERT"],
@@ -293,20 +295,20 @@ function psql(config, database, query, options = {}) {
   );
 }
 
-function ensureNoLoginRole(config, state) {
+function ensureNoLoginRole(config, state, roleName = noLoginRole) {
   const roleStatus = psql(
     config,
     "postgres",
-    `SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${noLoginRole}') THEN 'missing' WHEN EXISTS (SELECT 1 FROM pg_roles g WHERE g.rolname = '${noLoginRole}' AND (g.rolcanlogin OR g.rolsuper OR g.rolcreatedb OR g.rolcreaterole OR g.rolbypassrls OR g.rolreplication)) THEN 'unsafe' WHEN EXISTS (SELECT 1 FROM pg_roles g JOIN pg_roles member ON pg_has_role(g.oid, member.oid, 'MEMBER') WHERE g.rolname = '${noLoginRole}' AND (member.rolsuper OR member.rolcreatedb OR member.rolcreaterole OR member.rolbypassrls OR member.rolreplication)) THEN 'unsafe' WHEN has_database_privilege('${noLoginRole}', 'postgres', 'CREATE') OR has_schema_privilege('${noLoginRole}', 'public', 'CREATE') THEN 'unsafe' ELSE 'restricted' END;`,
+    `SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${roleName}') THEN 'missing' WHEN EXISTS (SELECT 1 FROM pg_roles g WHERE g.rolname = '${roleName}' AND (g.rolcanlogin OR g.rolsuper OR g.rolcreatedb OR g.rolcreaterole OR g.rolbypassrls OR g.rolreplication)) THEN 'unsafe' WHEN EXISTS (SELECT 1 FROM pg_roles g JOIN pg_roles member ON pg_has_role(g.oid, member.oid, 'MEMBER') WHERE g.rolname = '${roleName}' AND (member.rolsuper OR member.rolcreatedb OR member.rolcreaterole OR member.rolbypassrls OR member.rolreplication)) THEN 'unsafe' WHEN has_database_privilege('${roleName}', 'postgres', 'CREATE') OR has_schema_privilege('${roleName}', 'public', 'CREATE') THEN 'unsafe' ELSE 'restricted' END;`,
     { scalar: true },
   );
   if (roleStatus === "unsafe") {
-    throw new Error("Existing control-plane group has unsafe role attributes.");
+    throw new Error(`Existing ${roleName} group has unsafe role attributes.`);
   }
   if (roleStatus === "missing") {
-    state.attemptedGroup = true;
-    psql(config, "postgres", `CREATE ROLE ${noLoginRole} NOLOGIN;`, {
-      stage: "NOLOGIN control-plane role creation",
+    state.ownedGroups.push(roleName);
+    psql(config, "postgres", `CREATE ROLE ${roleName} NOLOGIN;`, {
+      stage: `NOLOGIN ${roleName} role creation`,
     });
   }
 }
@@ -332,6 +334,36 @@ function createRestrictedAppLogin(config, state, appPassword) {
   psql(config, "postgres", `GRANT ${noLoginRole} TO ${appRole};`, {
     stage: "restricted app role membership",
   });
+}
+
+function createRestrictedWorkerLogin(config, state, workerPassword) {
+  state.attemptedWorkerRole = true;
+  const workerRole = quoteGeneratedIdentifier(state.workerRole);
+  psql(config, "postgres", undefined, {
+    input: [
+      "\\getenv worker_password TBCG_E2E_WORKER_ROLE_PASSWORD",
+      `CREATE ROLE ${workerRole} LOGIN PASSWORD :'worker_password';`,
+    ].join("\n"),
+    environment: { TBCG_E2E_WORKER_ROLE_PASSWORD: workerPassword },
+    stage: "restricted build worker login creation",
+  });
+  psql(config, "postgres", `GRANT ${buildWorkerRole} TO ${workerRole};`, {
+    stage: "restricted build worker role membership",
+  });
+}
+
+function seedBuildProfile(config, databaseName) {
+  // The trusted per-Game profile pins the exact bytes of the repository's original asset manifest.
+  const manifest = readFileSync(
+    resolve(projectRoot, "games/demo/assets/manifest.json"),
+  );
+  const manifestHash = createHash("sha256").update(manifest).digest("hex");
+  psql(
+    config,
+    databaseName,
+    `INSERT INTO game_build_profiles (game_id, content_schema_version, instance_schema_version, ruleset_version, protocol_version, client_min_build, asset_manifest_sha256) VALUES ('demo', 1, 1, 1, 1, '1.0.0', decode('${manifestHash}', 'hex'));`,
+    { stage: "trusted build profile seed" },
+  );
 }
 
 function validatePostgreSQL18(config) {
@@ -488,13 +520,25 @@ function cleanupFixture(config, state) {
       failures.push("app login role");
     }
   }
-  if (state.attemptedGroup) {
+  if (state.attemptedWorkerRole) {
     try {
-      psql(config, "postgres", `DROP ROLE IF EXISTS ${noLoginRole};`, {
-        stage: "owned NOLOGIN role cleanup",
+      psql(
+        config,
+        "postgres",
+        `DROP ROLE IF EXISTS ${quoteGeneratedIdentifier(state.workerRole)};`,
+        { stage: "build worker role cleanup" },
+      );
+    } catch {
+      failures.push("build worker login role");
+    }
+  }
+  for (const roleName of [...state.ownedGroups].reverse()) {
+    try {
+      psql(config, "postgres", `DROP ROLE IF EXISTS ${roleName};`, {
+        stage: `owned NOLOGIN ${roleName} cleanup`,
       });
     } catch {
-      failures.push("owned NOLOGIN role");
+      failures.push(`owned NOLOGIN role ${roleName}`);
     }
   }
   if (failures.length > 0) {
@@ -513,8 +557,10 @@ export function createAdminDatabaseFixture(
   const state = {
     databaseName: randomIdentifier("tbcg_e2e_"),
     appRole: randomIdentifier("tbcg_admin_e2e_"),
-    attemptedGroup: false,
+    workerRole: randomIdentifier("tbcg_build_worker_e2e_"),
+    ownedGroups: [],
     attemptedAppRole: false,
+    attemptedWorkerRole: false,
     attemptedDatabase: false,
     cleaned: false,
   };
@@ -525,14 +571,20 @@ export function createAdminDatabaseFixture(
     ...credentials("PUBLISHER"),
   };
   const appPassword = randomBytes(32).toString("hex");
+  const workerPassword = randomBytes(32).toString("hex");
   let stage = "maintenance target validation";
   try {
     validatePostgreSQL18(config);
     validateTern(config);
     stage = "control-plane group preparation";
     ensureNoLoginRole(config, state);
+    stage = "build function owner and worker group preparation";
+    ensureNoLoginRole(config, state, buildOwnerRole);
+    ensureNoLoginRole(config, state, buildWorkerRole);
     stage = "restricted app login preparation";
     createRestrictedAppLogin(config, state, appPassword);
+    stage = "restricted build worker login preparation";
+    createRestrictedWorkerLogin(config, state, workerPassword);
     stage = "random app database creation";
     state.attemptedDatabase = true;
     psql(
@@ -545,6 +597,8 @@ export function createAdminDatabaseFixture(
     runMigrations(config, state.databaseName);
     stage = "test Game fixture seed";
     seedGames(config, state.databaseName);
+    stage = "trusted build profile seed";
+    seedBuildProfile(config, state.databaseName);
     for (const role of ["READER", "AUTHOR", "REVIEWER", "PUBLISHER"]) {
       stage = `controlled bootstrap ${role} account`;
       bootstrapAccount(config, state.databaseName, accounts, role);
@@ -559,8 +613,12 @@ export function createAdminDatabaseFixture(
     appURL.pathname = `/${state.databaseName}`;
     appURL.username = state.appRole;
     appURL.password = appPassword;
+    const workerURL = new URL(appURL.toString());
+    workerURL.username = state.workerRole;
+    workerURL.password = workerPassword;
     const businessEnvironment = {
       TBCG_ADMIN_DATABASE_URL: appURL.toString(),
+      TBCG_BUILD_WORKER_DATABASE_URL: workerURL.toString(),
       ...accounts,
     };
     const businessEnvironmentPath = writePrivateBusinessEnvironment(

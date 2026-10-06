@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"example.com/tbcg/server/internal/admin"
+	"example.com/tbcg/server/internal/content/schema"
 	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -69,7 +70,7 @@ SELECT session_user, current_user,
          SELECT 1 FROM pg_class c
          CROSS JOIN unnest(ARRAY[current_user, session_user]) AS principals(role_name)
          WHERE c.relnamespace = 'public'::regnamespace
-           AND c.relname = ANY(ARRAY['games','realms','owner_guards','players','characters','wallets','wallet_ledger','outbox','outbox_consumer_receipts','operation_results','releases','admin_users','admin_role_bindings'])
+           AND c.relname = ANY(ARRAY['games','realms','owner_guards','players','characters','wallets','wallet_ledger','outbox','outbox_consumer_receipts','operation_results','releases','release_entries','admin_users','admin_role_bindings'])
            AND (has_any_column_privilege(principals.role_name, c.oid, 'INSERT')
              OR has_any_column_privilege(principals.role_name, c.oid, 'UPDATE')
              OR has_table_privilege(principals.role_name, c.oid, 'DELETE')
@@ -80,12 +81,27 @@ SELECT session_user, current_user,
          CROSS JOIN unnest(ARRAY['public.content_revisions','public.audit_logs','public.revision_approvals']) AS immutable_relations(relation_name)
          WHERE has_any_column_privilege(principals.role_name, immutable_relations.relation_name, 'UPDATE')
             OR has_table_privilege(principals.role_name, immutable_relations.relation_name, 'DELETE, TRUNCATE')),
+       EXISTS (
+         SELECT 1 FROM pg_class c
+         CROSS JOIN unnest(ARRAY[current_user, session_user]) AS principals(role_name)
+         WHERE c.relnamespace = 'public'::regnamespace
+           AND c.relname = ANY(ARRAY['game_build_profiles','admin_build_jobs','release_version_counters'])
+           AND (has_any_column_privilege(principals.role_name, c.oid, 'SELECT')
+             OR has_any_column_privilege(principals.role_name, c.oid, 'INSERT')
+             OR has_any_column_privilege(principals.role_name, c.oid, 'UPDATE')
+             OR has_table_privilege(principals.role_name, c.oid, 'DELETE')
+             OR has_table_privilege(principals.role_name, c.oid, 'TRUNCATE'))),
        has_any_column_privilege(current_user, 'public.audit_logs', 'SELECT')
-         OR has_any_column_privilege(session_user, 'public.audit_logs', 'SELECT')`).ReadAll()
+         OR has_any_column_privilege(session_user, 'public.audit_logs', 'SELECT'),
+       EXISTS (
+         SELECT 1 FROM pg_roles r
+         CROSS JOIN unnest(ARRAY[current_user, session_user]) AS principals(role_name)
+         WHERE r.rolname IN ('tbcg_content_build_owner', 'tbcg_content_build_worker')
+           AND pg_has_role(principals.role_name, r.oid, 'MEMBER'))`).ReadAll()
 		if err != nil {
 			return fmt.Errorf("inspect admin PostgreSQL connection roles: %w", err)
 		}
-		if len(result) != 1 || len(result[0].Rows) != 1 || len(result[0].Rows[0]) != 12 {
+		if len(result) != 1 || len(result[0].Rows) != 1 || len(result[0].Rows[0]) != 14 {
 			return errors.New("admin PostgreSQL role verification returned an unexpected result")
 		}
 		row := result[0].Rows[0]
@@ -505,12 +521,16 @@ SELECT COALESCE(MAX(revision), 0) FROM content_revisions WHERE game_id = $1 AND 
 	if err := json.Unmarshal(extractJSONField(definition, "schema_version"), &schemaVersion); err != nil || schemaVersion < 1 {
 		return admin.Revision{}, errors.New("item Definition schema_version is invalid")
 	}
+	contentType, err := schema.ContentTypeOf(draft.ContentID)
+	if err != nil {
+		return admin.Revision{}, fmt.Errorf("derive content type: %w", err)
+	}
 	var storedBody []byte
 	var submittedAt time.Time
 	if err := tx.QueryRowContext(ctx, `
 INSERT INTO content_revisions (game_id, content_id, revision, schema_version, content_type, body)
-VALUES ($1, $2, $3, $4, 'item', $5::jsonb)
-RETURNING body, created_at`, gameID, draft.ContentID, revision, schemaVersion, definition).Scan(&storedBody, &submittedAt); err != nil {
+VALUES ($1, $2, $3, $4, $6, $5::jsonb)
+RETURNING body, created_at`, gameID, draft.ContentID, revision, schemaVersion, definition, contentType).Scan(&storedBody, &submittedAt); err != nil {
 		return admin.Revision{}, fmt.Errorf("insert immutable item revision: %w", err)
 	}
 	canonicalBody, err := canonicalJSON(storedBody)
@@ -552,7 +572,7 @@ SELECT count(*)
 FROM content_revisions c
 LEFT JOIN revision_approvals a
   ON a.game_id = c.game_id AND a.content_id = c.content_id AND a.revision = c.revision
-WHERE c.game_id = $1 AND c.content_type = 'item' AND a.revision IS NULL`, gameID).Scan(&total); err != nil {
+WHERE c.game_id = $1 AND a.revision IS NULL`, gameID).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count pending item revisions: %w", err)
 	}
 	rows, err := r.db.QueryContext(ctx, `
@@ -560,7 +580,7 @@ SELECT c.content_id, c.revision, c.body, c.created_at
 FROM content_revisions c
 LEFT JOIN revision_approvals a
   ON a.game_id = c.game_id AND a.content_id = c.content_id AND a.revision = c.revision
-WHERE c.game_id = $1 AND c.content_type = 'item' AND a.revision IS NULL
+WHERE c.game_id = $1 AND a.revision IS NULL
 ORDER BY c.created_at DESC, c.content_id, c.revision DESC
 LIMIT $2 OFFSET $3`, gameID, limit, offset)
 	if err != nil {
@@ -599,7 +619,7 @@ func (r *AdminRepository) ReviewRevision(ctx context.Context, gameID, contentID 
 	var body []byte
 	err = tx.QueryRowContext(ctx, `
 SELECT body FROM content_revisions
-WHERE game_id = $1 AND content_id = $2 AND revision = $3 AND content_type = 'item'`, gameID, contentID, revision).Scan(&body)
+WHERE game_id = $1 AND content_id = $2 AND revision = $3`, gameID, contentID, revision).Scan(&body)
 	if errors.Is(err, sql.ErrNoRows) {
 		if rollbackErr := rollbackAdminTransaction(tx); rollbackErr != nil {
 			return admin.Approval{}, fmt.Errorf("rollback missing revision review: %w", rollbackErr)

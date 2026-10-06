@@ -1,0 +1,229 @@
+{
+  "events": [
+    {
+      "event_seq": 1,
+      "action_id": 1,
+      "round": 1,
+      "kind": "damage",
+      "actor_id": "c:preview-1",
+      "target_id": "m:1",
+      "hit": 1,
+      "damage": 21,
+      "hp_before": 40,
+      "hp_after": 19,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 2,
+      "action_id": 2,
+      "round": 1,
+      "kind": "damage",
+      "actor_id": "m:1",
+      "target_id": "c:preview-1",
+      "hit": 1,
+      "damage": 4,
+      "hp_before": 140,
+      "hp_after": 136,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 3,
+      "action_id": 3,
+      "round": 1,
+      "kind": "damage",
+      "actor_id": "m:2",
+      "target_id": "c:preview-1",
+      "hit": 1,
+      "damage": 4,
+      "hp_before": 136,
+      "hp_after": 132,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 4,
+      "action_id": 4,
+      "round": 2,
+      "kind": "damage",
+      "actor_id": "c:preview-1",
+      "target_id": "m:1",
+      "hit": 1,
+      "damage": 19,
+      "hp_before": 19,
+      "hp_after": 0,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 5,
+      "action_id": 4,
+      "round": 2,
+      "kind": "death",
+      "target_id": "m:1",
+      "hp_before": 0,
+      "hp_after": 0,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 6,
+      "action_id": 5,
+      "round": 2,
+      "kind": "damage",
+      "actor_id": "m:2",
+      "target_id": "c:preview-1",
+      "hit": 1,
+      "damage": 4,
+      "hp_before": 132,
+      "hp_after": 128,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 7,
+      "action_id": 6,
+      "round": 3,
+      "kind": "damage",
+      "actor_id": "c:preview-1",
+      "target_id": "m:2",
+      "hit": 1,
+      "damage": 21,
+      "hp_before": 40,
+      "hp_after": 19,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 8,
+      "action_id": 7,
+      "round": 3,
+      "kind": "damage",
+      "actor_id": "m:2",
+      "target_id": "c:preview-1",
+      "hit": 1,
+      "damage": 4,
+      "hp_before": 128,
+      "hp_after": 124,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 9,
+      "action_id": 8,
+      "round": 4,
+      "kind": "damage",
+      "actor_id": "c:preview-1",
+      "target_id": "m:2",
+      "hit": 1,
+      "damage": 19,
+      "hp_before": 19,
+      "hp_after": 0,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 10,
+      "action_id": 8,
+      "round": 4,
+      "kind": "death",
+      "target_id": "m:2",
+      "hp_before": 0,
+      "hp_after": 0,
+      "mp_after": 0,
+      "crit": false
+    },
+    {
+      "event_seq": 11,
+      "action_id": 8,
+      "round": 4,
+      "kind": "battle_end",
+      "hp_before": 0,
+      "hp_after": 0,
+      "mp_after": 0,
+      "crit": false,
+      "outcome": "victory"
+    }
+  ],
+  "outcome": "victory",
+  "release_scope": "draft_or_approved_preview",
+  "rounds": 4,
+  "rules_version": "battle-engine-v1",
+  "spoils": [
+    {
+      "character_id": "preview-1",
+      "exp": 60,
+      "currency": 10,
+      "items": [
+        {
+          "item_id": "demo:item/herb",
+          "quantity": 2
+        }
+      ]
+    }
+  ],
+  "units": [
+    {
+      "id": "c:preview-1",
+      "side": 0,
+      "kind": "character",
+      "owner_id": "preview-1",
+      "definition_id": "preview-1",
+      "name": "预览成员1",
+      "level": 2,
+      "stats": {
+        "max_hp": 140,
+        "max_mp": 45,
+        "attack": 22,
+        "defense": 10,
+        "speed": 11
+      },
+      "hp": 124,
+      "mp": 0,
+      "skill_ids": [
+        "demo:skill/strike"
+      ],
+      "buffs": null,
+      "defending": false
+    },
+    {
+      "id": "m:1",
+      "side": 1,
+      "kind": "monster",
+      "definition_id": "demo:monster/slime",
+      "name": "青泥怪",
+      "level": 1,
+      "stats": {
+        "max_hp": 40,
+        "attack": 9,
+        "defense": 2,
+        "speed": 6
+      },
+      "hp": 0,
+      "mp": 0,
+      "skill_ids": null,
+      "buffs": null,
+      "defending": false
+    },
+    {
+      "id": "m:2",
+      "side": 1,
+      "kind": "monster",
+      "definition_id": "demo:monster/slime",
+      "name": "青泥怪",
+      "level": 1,
+      "stats": {
+        "max_hp": 40,
+        "attack": 9,
+        "defense": 2,
+        "speed": 6
+      },
+      "hp": 0,
+      "mp": 0,
+      "skill_ids": null,
+      "buffs": null,
+      "defending": false
+    }
+  ]
+}

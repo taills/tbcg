@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:common:v1",
+  "title": "TBCG 内容通用定义 v1",
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "required": ["game_id", "content_id", "revision", "schema_version"],
+      "properties": {
+        "game_id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "content_id": { "$ref": "#/$defs/ref" },
+        "revision": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "schema_version": { "const": 1 }
+      }
+    },
+    "ref": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._:/-]*$" },
+    "refs": { "type": "array", "maxItems": 64, "uniqueItems": true, "items": { "$ref": "#/$defs/ref" } },
+    "anchor_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "local_id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "text": { "type": "string", "maxLength": 1024 },
+    "appearance_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._:/-]*$" },
+    "count": { "type": "integer", "minimum": 1, "maximum": 999 },
+    "amount": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+    "basis_points": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "level": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "stat_value": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_hp", "max_mp", "attack", "defense", "speed"],
+      "properties": {
+        "max_hp": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "max_mp": { "$ref": "#/$defs/stat_value" },
+        "attack": { "$ref": "#/$defs/stat_value" },
+        "defense": { "$ref": "#/$defs/stat_value" },
+        "speed": { "$ref": "#/$defs/stat_value" }
+      }
+    },
+    "stat_bonus": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_hp": { "$ref": "#/$defs/stat_value" },
+        "max_mp": { "$ref": "#/$defs/stat_value" },
+        "attack": { "$ref": "#/$defs/stat_value" },
+        "defense": { "$ref": "#/$defs/stat_value" },
+        "speed": { "$ref": "#/$defs/stat_value" }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "quantity"],
+      "properties": { "item_id": { "$ref": "#/$defs/ref" }, "quantity": { "$ref": "#/$defs/count" } }
+    },
+    "stacks": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/stack" } },
+    "rewards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "exp", "items"],
+      "properties": {
+        "currency": { "$ref": "#/$defs/amount" },
+        "exp": { "$ref": "#/$defs/amount" },
+        "items": { "$ref": "#/$defs/stacks" }
+      }
+    },
+    "level_exp": { "type": "array", "minItems": 1, "maxItems": 199, "items": { "type": "integer", "minimum": 1, "maximum": 2000000000 } },
+    "timestamp": { "type": "string", "format": "date-time", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "empty": { "type": "object", "additionalProperties": false, "properties": {} }
+  }
+}

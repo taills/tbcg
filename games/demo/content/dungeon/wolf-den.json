@@ -1,0 +1,43 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:dungeon/wolf-den",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:dungeon/wolf-den",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "狼穴",
+    "description": "两人一同深入狼穴，先破守卫，再战狼王。",
+    "min_players": 2,
+    "max_players": 2,
+    "min_level": 2,
+    "daily_limit": 3,
+    "stage_names": [
+      "狼穴守卫",
+      "狼王巢穴"
+    ]
+  },
+  "server": {
+    "entry_npc_id": "demo:npc/merchant",
+    "stages": [
+      {
+        "encounter_id": "demo:encounter/den-guard"
+      },
+      {
+        "encounter_id": "demo:encounter/den-alpha"
+      }
+    ],
+    "rewards": {
+      "currency": 120,
+      "exp": 200,
+      "items": [
+        {
+          "item_id": "demo:item/healing-potion",
+          "quantity": 2
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:consumable/spirit-egg",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:consumable/spirit-egg",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "demo:item/spirit-egg",
+    "description": "孵化一只灵狐。",
+    "usable_in_battle": false
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "grant_pet",
+        "target_id": "demo:pet/sprite"
+      }
+    ]
+  }
+}

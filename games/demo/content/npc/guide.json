@@ -1,0 +1,113 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:npc/guide",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:npc/guide",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "引路人",
+    "appearance_id": "demo:appearance/guide",
+    "map_id": "demo:map/training-ground",
+    "anchor_id": "guide"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "少侠初来乍到？演武场里有不少事情可做。",
+        "options": [
+          {
+            "option_id": "accept",
+            "text": "我想学些本事（接取：初入江湖）",
+            "condition": {
+              "quest_id": "demo:quest/first-steps",
+              "quest_status": "available"
+            },
+            "action": {
+              "kind": "accept_quest",
+              "target_id": "demo:quest/first-steps"
+            }
+          },
+          {
+            "option_id": "deliver",
+            "text": "交付两株青叶草",
+            "condition": {
+              "quest_id": "demo:quest/first-steps",
+              "quest_status": "active"
+            },
+            "action": {
+              "kind": "deliver_item",
+              "target_id": "demo:quest/first-steps"
+            }
+          },
+          {
+            "option_id": "train",
+            "text": "开始实战训练（青泥怪群）",
+            "action": {
+              "kind": "start_encounter",
+              "target_id": "demo:encounter/slime-pack"
+            }
+          },
+          {
+            "option_id": "claim",
+            "text": "领取初入江湖的奖励",
+            "condition": {
+              "quest_id": "demo:quest/first-steps",
+              "quest_status": "objectives_done"
+            },
+            "action": {
+              "kind": "claim_quest",
+              "target_id": "demo:quest/first-steps"
+            }
+          },
+          {
+            "option_id": "sect",
+            "text": "拜入青云门",
+            "condition": {
+              "min_level": 2,
+              "no_sect": true
+            },
+            "action": {
+              "kind": "join_sect",
+              "target_id": "demo:sect/azure-cloud"
+            }
+          },
+          {
+            "option_id": "about",
+            "text": "这里是哪里？",
+            "action": {
+              "kind": "goto",
+              "next_node": "about"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      },
+      {
+        "node_id": "about",
+        "text": "此处是演武场。完成初入江湖后，东南角的传送阵会带你去林间小径。",
+        "options": [
+          {
+            "option_id": "back",
+            "text": "明白了",
+            "action": {
+              "kind": "goto",
+              "next_node": "root"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

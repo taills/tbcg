@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,18 +40,27 @@ func TestRunStopsBeforeDatabaseForMissingTrustedSchema(t *testing.T) {
 
 func TestRunRejectsPlaintextDatabaseAfterPreparingTrustedRoots(t *testing.T) {
 	projectRoot := t.TempDir()
-	for _, name := range []string{"item.schema.json", "item-public.schema.json"} {
-		data, err := os.ReadFile(filepath.Join("../../../contracts/content", name))
+	sourceRoot := "../../../contracts/content"
+	err := filepath.WalkDir(sourceRoot, func(source string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() || !strings.HasSuffix(source, ".json") {
+			return walkErr
+		}
+		relative, err := filepath.Rel(sourceRoot, source)
 		if err != nil {
-			t.Fatalf("read trusted test schema %s: %v", name, err)
+			return err
 		}
-		path := filepath.Join(projectRoot, "contracts", "content", name)
+		data, err := os.ReadFile(source)
+		if err != nil {
+			return err
+		}
+		path := filepath.Join(projectRoot, "contracts", "content", relative)
 		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-			t.Fatalf("create temporary trusted schema root: %v", err)
+			return err
 		}
-		if err := os.WriteFile(path, data, 0o600); err != nil {
-			t.Fatalf("copy trusted test schema %s: %v", name, err)
-		}
+		return os.WriteFile(path, data, 0o600)
+	})
+	if err != nil {
+		t.Fatalf("copy trusted test schemas: %v", err)
 	}
 	assetRoot := filepath.Join(projectRoot, "games", "demo", "assets")
 	if err := os.MkdirAll(assetRoot, 0o700); err != nil {
@@ -65,7 +75,7 @@ func TestRunRejectsPlaintextDatabaseAfterPreparingTrustedRoots(t *testing.T) {
 		"TBCG_ADMIN_TLS_KEY":      "/tmp/not-loaded-before-db-policy.key",
 		"TBCG_PROJECT_ROOT":       projectRoot,
 	}
-	err := run(context.Background(), func(key string) (string, bool) {
+	err = run(context.Background(), func(key string) (string, bool) {
 		value, ok := values[key]
 		return value, ok
 	})

@@ -15,8 +15,10 @@ import (
 	"time"
 
 	"example.com/tbcg/server/internal/admin"
+	"example.com/tbcg/server/internal/content/mapdata"
 	"example.com/tbcg/server/internal/content/schema"
 	"example.com/tbcg/server/internal/persistence/postgres"
+	battlepreview "example.com/tbcg/server/modules/battle/preview"
 )
 
 var adminEnvironmentKeys = []string{
@@ -128,13 +130,17 @@ func run(ctx context.Context, lookupEnv func(string) (string, bool)) error {
 			log.Printf("admin schema root close failed: %v", err)
 		}
 	}()
-	validator, err := schema.New(schemaRoot.FS())
+	registry, err := schema.NewRegistry(schemaRoot.FS())
 	if err != nil {
-		return fmt.Errorf("initialize trusted item schemas: %w", err)
+		return fmt.Errorf("initialize trusted content schemas: %w", err)
 	}
-	assetRoot, err := os.OpenRoot(filepath.Join(projectRoot, "games", "demo", "assets"))
+	geometry, err := mapdata.NewValidator(schemaRoot.FS())
 	if err != nil {
-		return fmt.Errorf("open trusted demo asset root: %w", err)
+		return fmt.Errorf("initialize trusted map geometry schema: %w", err)
+	}
+	assetRoot, err := os.OpenRoot(filepath.Join(projectRoot, "games"))
+	if err != nil {
+		return fmt.Errorf("open trusted Game assets root: %w", err)
 	}
 	defer func() {
 		if err := assetRoot.Close(); err != nil {
@@ -153,12 +159,12 @@ func run(ctx context.Context, lookupEnv func(string) (string, bool)) error {
 	}()
 	stopSessionCleanup := startSessionCleanup(ctx, repository)
 	defer stopSessionCleanup()
-	api := admin.NewHandler(repository, admin.Config{
+	api := admin.NewContentHandler(repository, admin.Config{
 		ExpectedOrigin: config.Origin,
 		SessionTTL:     config.SessionTTL,
 		IdleTTL:        config.IdleTTL,
 		MaxBodyBytes:   config.MaxBodyBytes,
-	}, validator, assets)
+	}, registry, assets, admin.Extensions{Geometry: geometry, Preview: battlepreview.Runner{}})
 	web, err := newWebHandler(api, projectRoot)
 	if err != nil {
 		return fmt.Errorf("initialize built admin application: %w", err)

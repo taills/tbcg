@@ -1,0 +1,23 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:equipment/iron-sword",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:equipment/iron-sword",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "demo:item/iron-sword",
+    "slot": "weapon",
+    "min_level": 3,
+    "sect_ids": [
+      "demo:sect/azure-cloud"
+    ],
+    "stats": {
+      "attack": 14,
+      "speed": 1
+    }
+  },
+  "server": {}
+}

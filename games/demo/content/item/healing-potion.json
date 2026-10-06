@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/healing-potion",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/healing-potion",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "回复药剂",
+    "description": "恢复 60 点气血，可在战斗中使用。",
+    "icon_id": "demo:icon/placeholder",
+    "stack_limit": 20,
+    "price_minor": "20"
+  },
+  "server": {
+    "reward_value_minor": "20",
+    "drop_weight_basis_points": 1500
+  }
+}

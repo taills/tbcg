@@ -116,11 +116,13 @@ pnpm e2e
 
 ## 8. 任务 0008 控制面实施阶段边界
 
-任务 0008 分为契约、控制面、隔离构建、真实 runtime owner 激活、Godot 公开包读取五阶段。当前分支只交付并验证控制面第一纵切片，不把其局部测试结果当作 0008 完成。控制面完整 API 轮廓与错误 envelope 以 `contracts/admin/openapi.yaml` 为准；创建使用 `POST /games/{gameId}/item-drafts`，读写/校验/提交通过 opaque `draftId` 定址；`content_id` 放请求体/查询参数，不占资源路径。只有 `draft_version` 使用十进制字符串并限制为 PostgreSQL signed bigint `0..9223372036854775807`；所有 Definition、public projection、Revision、Approval revision 均为 1..2147483647 整数。build/activate/runtime ack/公开读取标记 planned，不创建伪接口。
+任务 0008 分为契约、控制面、隔离构建、真实 runtime owner 激活、Godot 公开包读取五阶段。控制面第一纵切片已验证；阶段2已实现单物品隔离构建纵切片：确定性 builder、逐 Game 受控 build profile、durable job 与受限 worker 进程，build candidates/start/job 三个 HTTP 路由在 OpenAPI 中标记 supported；activation、公共 bundle 与 Godot 读取仍为 planned。任何局部结果都不代表 0008 完成。控制面完整 API 轮廓与错误 envelope 以 `contracts/admin/openapi.yaml` 为准；创建使用 `POST /games/{gameId}/item-drafts`，读写/校验/提交通过 opaque `draftId` 定址；`content_id` 放请求体/查询参数，不占资源路径。只有 `draft_version` 使用十进制字符串并限制为 PostgreSQL signed bigint `0..9223372036854775807`；所有 Definition、public projection、Revision、Approval revision 均为 1..2147483647 整数。build/activate/runtime ack/公开读取标记 planned，不创建伪接口。
 
-本阶段 migration 003 追加 admin_users、admin_sessions、admin_role_bindings、content_drafts、revision_approvals、audit_logs，并继续复用 001 的 content_revisions；草稿含 opaque `draft_id`、absolute/idle session expiry 以及 `submitted_draft_version`，阻止同一 CAS 快照被重复固化。迁移前由部署/隔离测试集群预置 `NOLOGIN tbcg_admin_control_plane` 权限组和应用登录成员；迁移只授予/撤销当前数据库对象权限，down 不删除集群级角色或触碰其他数据库 ACL。应用连接在每个连接建立后 `SET ROLE tbcg_admin_control_plane`。权限组用列级 grants 只开放控制面所需字段，不得写 runtime/player 数据、Realm active pointer、owner guards 或角色绑定；`admin_users`/`admin_role_bindings` 只读，draft 不授 DELETE，revision/approval/audit 不授 UPDATE，账号和角色通过受控 bootstrap 维护。Reviewer 专属审批，Publisher 未来构建/激活；角色不隐式继承，活动指针只能由真实 runtime owner 确认。提交 revision、审批及成功审计同事务；失败/拒绝操作审计独立提交。revision 插入触发器强制 DB 主键与顶层/public game/content/integer revision identity 一致，数据库阻止已提交 revision 的 UPDATE/DELETE/TRUNCATE。
+本阶段 migration 003 追加 admin_users、admin_sessions、admin_role_bindings、content_drafts、revision_approvals、audit_logs，并继续复用 001 的 content_revisions；草稿含 opaque `draft_id`、absolute/idle session expiry 以及 `submitted_draft_version`，阻止同一 CAS 快照被重复固化。迁移前由部署/隔离测试集群预置 `NOLOGIN tbcg_admin_control_plane` 权限组和应用登录成员；迁移只授予/撤销当前数据库对象权限，down 不删除集群级角色或触碰其他数据库 ACL。应用连接在每个连接建立后 `SET ROLE tbcg_admin_control_plane`。权限组用列级 grants 只开放控制面所需字段，不得写 runtime/player 数据、Realm active pointer、owner guards 或角色绑定；`admin_users`/`admin_role_bindings` 只读，draft 不授 DELETE，revision/approval/audit 不授 UPDATE，账号和角色通过受控 bootstrap 维护。Reviewer 专属审批，Publisher 未来构建/激活；角色不隐式继承，活动指针只能由真实 runtime owner 确认。提交 revision、审批及成功审计同事务；失败/拒绝操作审计独立提交。revision 插入触发器强制 DB 主键与顶层/public game/content/integer revision identity 一致，数据库阻止已提交 revision 的 UPDATE/DELETE/TRUNCATE。阶段2 migration 004 新增逐 Game 受控 `game_build_profiles`（含递增 profile_version 和 asset manifest SHA-256）、`admin_build_jobs` 与 release version counter；build profile/job 快照及 version allocation 不对 admin/worker 直接授权。独立 `tbcg_content_build_owner` 和 `tbcg_content_build_worker` 均由部署预置且为 NOLOGIN；migration 预检角色继承/现存 ACL。admin 角色只获 candidate/read/find/get/enqueue 五个 SECURITY DEFINER 函数的 EXECUTE，worker 角色只获 claim/renew/fail/finish 四个函数的 EXECUTE，两者均无 build、Release 或 runtime 表的直接权限；owner 角色除迁移执行者外不得有成员，worker 登录不得同时属于 admin/owner。函数固定 `search_path`，由函数体推导 Release 身份/版本，只能登记 `built` 且 `activated_at` 为空的 Release；`release_entries` 插入对父 Release 加共享锁以与激活串行化，已登记 entry 不可更新/删除/截断。
 
 管理进程入口为 `server/cmd/admin-server`，默认只监听 `127.0.0.1:8443`，无 TLS 证书时拒绝启动。浏览器管理面按 HTTPS-only 验证，cookie 为 Secure、HttpOnly、SameSite、无 Domain；文档不再承诺 HTTP loopback 浏览器例外。运行需提供 `TBCG_ADMIN_DATABASE_URL`（登录成员继承部署预置 `tbcg_admin_control_plane` 后连接钩子 `SET ROLE`）、TLS cert/key、`TBCG_ADMIN_ORIGIN`，并在项目根构建 `admin/dist`。本地账号通过 `server/cmd/admin-bootstrap` 一次性创建，输入使用 env 和确认标记；bootstrap/业务 E2E 使用受控维护文件、PostgreSQL `verify-full` CA 与受限 app login，密码不打印，不存在账号 CRUD/HTTP route。
+
+内容构建进程入口为 `server/cmd/content-build-worker`，与 admin-server 分离部署、使用独立 OS 身份（生产要求，本地测试不自动创建）与独立数据库登录。需要 `TBCG_BUILD_WORKER_DATABASE_URL`（登录成员只继承预置 `tbcg_content_build_worker`，连接后 `SET ROLE` 并在每个连接上校验无 DDL/表权限/跨角色成员资格，强制 verify-full TLS）、稳定的小写 UUID `TBCG_BUILD_WORKER_ID`（重启后用于取回本 worker 未过期的认领）、绝对路径 `TBCG_BUILD_ARTIFACT_DIR`（必须是非符号链接的 0700 目录，位于 Web 根之外）与 `TBCG_PROJECT_ROOT`（只读取 `contracts` 可信 Schema）。可选 `TBCG_BUILD_WORKER_POLL_INTERVAL`（100ms–1m，默认 5s）与 `TBCG_BUILD_WORKER_LEASE_SECONDS`（5–300，默认 30）。单执行槽：每个作业在租约一半时间内完成，失去租约时不写完成状态；连续 5 次非租约失败后退出交由外部 supervisor 重启。该进程只运行仓库内可信构建代码，不是恶意输入沙箱。
 
 ### 0008 控制面验证记录
 
@@ -161,3 +163,26 @@ pnpm e2e
 - Release 身份和定义按 game 共享，realm 持各自活动指针；跨 realm 复用不降级已激活状态、不重置首次激活时间。注册和激活均核对全部版本、manifest 与公开/私有产物 hash。
 - 2026-10-04 最终真实 PG 18.3 全量 Go race、build、vet、staticcheck 通过；全部 Go 语句覆盖 87.8%，经济模块 83.1%、Release 84.9%。gosec 扫描生产代码 0 条问题。奖励和 Release 均验证真实 COMMIT 成功、测试 driver 丢弃确认后的 pending/恢复路径。
 - 本切片不代表管理平台或真实运行进程发布确认已经完成；artifact root 是运维控制的私有目录，尚无公共 HTTP 路由。任务 0008 必须交付真实运行进程加载/确认、管理权限及公开白名单路由。详细故障、复审与未运行项见 [`../verification/0007.md`](../verification/0007.md)。
+
+## 游戏运行进程（2026-10-07）
+
+```sh
+cd server
+# 开发联调（loopback、无 TLS、直接加载 games/demo/content，标记 dev-local）
+TBCG_GAME_DATABASE_URL='postgresql://…@127.0.0.1:55432/<db>?sslmode=…' \
+TBCG_GAME_DEV_CONTENT=1 TBCG_GAME_BOOTSTRAP_REALM=1 TBCG_PROJECT_ROOT=.. \
+go run ./cmd/game-server
+# 生产形态：TLS 证书 + 私有产物目录（只读使用 worker 写入的 0700/0600 产物）
+TBCG_GAME_TLS_CERT=… TBCG_GAME_TLS_KEY=… TBCG_BUILD_ARTIFACT_DIR=/abs/private/artifacts …
+```
+
+环境变量：`TBCG_GAME_ID`（默认 demo）、`TBCG_REALM_ID`（默认 main）、`TBCG_GAME_WS_BIND`（127.0.0.1:7443）、
+`TBCG_GAME_HTTP_BIND`（127.0.0.1:7080）、`TBCG_GAME_CLIENT_MIN_BUILD`、`TBCG_GAME_ALLOWED_ORIGINS`。无 TLS 时只允许 loopback
+绑定；非 loopback 的 PostgreSQL 必须 TLS。数据库角色：迁移 005 在存在 `tbcg_game_runtime` NOLOGIN 组时授予运行面所需的
+最小表/列权限，生产应为 game-server 使用该组的专用登录。
+
+Godot 客户端：`/Applications/Godot.app/Contents/MacOS/Godot --path client` 运行主场景（登录 → 角色 → 地图/HUD/战斗）。
+headless 测试：`--headless --path client --script res://tests/<path>.gd`。真实客户端联调由 Go 测试
+`TestGodotClientAgainstGameServer` 启动服务端后调用 Godot 执行 `tests/network/game_client_probe.gd`。
+
+内容构建 worker 现在同时处理单物品与完整 Game 快照作业（同一受限进程与权限组）。

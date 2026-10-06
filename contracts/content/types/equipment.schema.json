@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:equipment:v1",
+  "title": "TBCG 装备模板 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "game_id",
+        "item_id",
+        "min_level",
+        "revision",
+        "schema_version",
+        "sect_ids",
+        "slot",
+        "stats"
+      ],
+      "properties": {
+        "item_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        },
+        "slot": {
+          "enum": [
+            "weapon",
+            "armor",
+            "accessory"
+          ]
+        },
+        "min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        },
+        "sect_ids": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/refs"
+        },
+        "stats": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/stat_bonus"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {}
+    }
+  }
+}

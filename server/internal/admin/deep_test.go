@@ -148,8 +148,8 @@ func TestPrepareDefinitionEnforcesServerIdentityAndCanonicalSchema(t *testing.T)
 	icon := []byte("<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>")
 	assetHash := sha256.Sum256(icon)
 	assetFS := fstest.MapFS{
-		"manifest.json":         {Data: []byte(`{"schema_version":1,"assets":[{"asset_id":"demo:icon/placeholder","path":"icons/placeholder.svg","sha256":"` + hex.EncodeToString(assetHash[:]) + `","source":"Original test asset","license":"TBCG original"}]}`)},
-		"icons/placeholder.svg": {Data: icon},
+		"demo/assets/manifest.json":         {Data: []byte(`{"schema_version":1,"assets":[{"asset_id":"demo:icon/placeholder","path":"icons/placeholder.svg","sha256":"` + hex.EncodeToString(assetHash[:]) + `","source":"Original test asset","license":"TBCG original"}]}`)},
+		"demo/assets/icons/placeholder.svg": {Data: icon},
 	}
 	server := &handler{validator: validator, assets: assetFS}
 	fixturePath := filepath.Join("../../../tests/fixtures/content", "item.valid.json")

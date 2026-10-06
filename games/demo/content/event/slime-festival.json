@@ -1,0 +1,43 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:event/slime-festival",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:event/slime-festival",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "青泥节",
+    "description": "活动期间击败青泥怪群三次即可领取节庆奖励。",
+    "windows": [
+      {
+        "start": "2026-01-01T00:00:00Z",
+        "end": "2026-01-02T00:00:00Z"
+      },
+      {
+        "start": "2026-06-01T00:00:00Z",
+        "end": "2027-12-31T23:59:59Z"
+      }
+    ],
+    "objective": {
+      "kind": "defeat_encounter",
+      "target_id": "demo:encounter/slime-pack",
+      "count": 3
+    },
+    "max_claims_per_window": 1,
+    "leaderboard": true
+  },
+  "server": {
+    "rewards": {
+      "currency": 60,
+      "exp": 50,
+      "items": [
+        {
+          "item_id": "demo:item/healing-potion",
+          "quantity": 1
+        }
+      ]
+    }
+  }
+}

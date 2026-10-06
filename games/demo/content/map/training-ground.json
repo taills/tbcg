@@ -1,0 +1,139 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:map/training-ground",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:map/training-ground",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "演武场",
+    "geometry": {
+      "schema_version": 1,
+      "map_id": "demo:map/training-ground",
+      "geometry_revision": 1,
+      "width": 6,
+      "height": 5,
+      "tile_size": 32,
+      "origin": {
+        "x": 64,
+        "y": 96
+      },
+      "axis": "x_right_y_down",
+      "order": "row_major",
+      "diagonal_policy": "no_corner_cutting",
+      "grid": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "anchors": [
+        {
+          "placement_id": "arrival",
+          "kind": "spawn",
+          "cell": {
+            "x": 0,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "guide",
+          "kind": "npc",
+          "cell": {
+            "x": 2,
+            "y": 2
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "portal",
+          "kind": "portal",
+          "cell": {
+            "x": 5,
+            "y": 4
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "training-area",
+          "kind": "trigger",
+          "cell": {
+            "x": 0,
+            "y": 3
+          },
+          "extent": {
+            "x": 2,
+            "y": 2
+          }
+        }
+      ]
+    },
+    "portals": [
+      {
+        "anchor_id": "portal",
+        "target_map_id": "demo:map/forest-edge",
+        "target_anchor_id": "arrival",
+        "required_quest_id": "demo:quest/first-steps"
+      }
+    ],
+    "zones": [
+      {
+        "anchor_id": "training-area",
+        "display_name": "练武区"
+      }
+    ]
+  },
+  "server": {
+    "spawn_anchor_id": "arrival",
+    "max_path_cells": 16,
+    "min_step_interval_ms": 120
+  }
+}

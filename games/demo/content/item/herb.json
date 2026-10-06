@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/herb",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/herb",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "material",
+    "display_name": "青叶草",
+    "description": "常见草药，可交给引路人或用于制作。",
+    "icon_id": "demo:icon/placeholder",
+    "stack_limit": 99,
+    "price_minor": "8"
+  },
+  "server": {
+    "reward_value_minor": "5",
+    "drop_weight_basis_points": 6000
+  }
+}

@@ -24,3 +24,22 @@
 端到端验证命令 `python3 tools/verify_protocol.py` 构建临时 Go probe，生成一天有效期的 loopback 测试证书及随机令牌，启动 WSS 后调用 Godot headless probe。客户端只信任本次临时证书，保留证书和主机名验证；错误令牌和无受信证书连接必须失败。工具只停止自己启动的进程，临时私钥/令牌不入库。
 
 协议 spike 不等于完整网关：持久化会话恢复、账号/角色授权、运行态快照和正式限流策略由后续任务交付。Leaf 的连接层 API 对消息帧元数据和读 deadline 的暴露范围须在网关深化时单独验证，不能以 Hello/Ping 联调成功冒充生产容量或防护验收。
+
+## 运行面 v1（任务 0009–0015）
+
+`message_catalog.json` 现在登记全部运行面消息：每个客户端请求声明 `required_payload_fields`（可选字段在
+`optional_payload_fields`）与 `response_type`（统一为 `<请求类型>_result`）；`phase: "push"` 的服务端消息是推送。
+
+- **握手**：`system.hello` 的 `session_token` 由 game-server 的 `POST /api/v1/sessions` 签发（只存 SHA-256），
+  `release_id` 必须等于当前服务中的 Release；不一致返回 `release_mismatch` 并附当前 `release_id`，客户端须先下载新公开包。
+- **推送**：`request_id` 以 `push-` 开头、按连接递增；客户端按 `type` 合并到本地镜像，绝不据此本地推进权威状态。
+- **幂等**：涉及资产/进度的请求携带 `idempotency_key`（8–128 个安全字符），服务端以 `operation_results` 去重；
+  `outcome_unknown` 时必须用同一键重试核验，不能换键。
+- **权威**：移动只接受逐步合法的网格路径与当前 `state_version`；战斗只接受本回合授权单位的意图，事件以 `event_seq` 严格排序，
+  客户端回放时 HP 只取 `hp_after`。
+- 服务端严格解码各载荷（拒绝未知字段）；错误为 `{code, message}`，常见码：`invalid_path`、`too_fast`、`state_conflict`、
+  `forbidden`、`not_leader`、`party_busy`、`already_claimed`、`not_participant`、`insufficient_items`、`insufficient_currency`、
+  `idempotency_conflict`、`outcome_unknown`、`owner_lost`。
+
+game-server 另提供 HTTP（非管理）接口：`POST /api/v1/accounts`、`POST /api/v1/sessions`、`GET /api/v1/realm`、
+`GET /api/v1/releases/{releaseId}/public`（仅当前服务中 Release 的公开白名单包，响应头带 `X-TBCG-Bundle-SHA256`）。私有包没有任何 HTTP 路由。

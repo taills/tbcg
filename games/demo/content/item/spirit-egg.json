@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/spirit-egg",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/spirit-egg",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "灵狐蛋",
+    "description": "孵化后获得一只灵狐。",
+    "icon_id": "demo:icon/placeholder",
+    "stack_limit": 5,
+    "price_minor": "150"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

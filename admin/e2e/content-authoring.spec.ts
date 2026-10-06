@@ -168,7 +168,7 @@ test('untrusted Firefox profile rejects the private CA certificate', async () =>
 test('trusted Firefox sessions cover draft CAS, immutable review, role denial, and Game scope safety', async ({
   baseURL,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
   const author = credentials('AUTHOR');
   const reviewer = credentials('REVIEWER');
   const reader = credentials('READER');
@@ -351,6 +351,66 @@ test('trusted Firefox sessions cover draft CAS, immutable review, role denial, a
       return response.status;
     }, csrfSession.data.csrf_token);
     expect(publisherDraftForbidden).toBe(403);
+
+    // Publisher builds the exact approved revision through the real restricted worker process.
+    await expect(reviewClient.page.getByRole('heading', { name: '单物品构建' })).toHaveCount(0);
+    const buildPanel = publisherClient.page.getByRole('region', { name: '单物品构建' });
+    await buildPanel.getByRole('button', { name: '刷新候选' }).click();
+    const buildRow = buildPanel.getByRole('listitem').filter({ hasText: contentID });
+    await expect(buildRow).toContainText(bodyHash);
+    await buildRow.getByRole('button', { name: '构建 revision 1' }).click();
+    const buildStatus = buildRow.getByRole('status');
+    await expect(buildStatus).toContainText('已构建，尚未激活', { timeout: 90_000 });
+    await expect(buildRow).toContainText('公开包 SHA-256：');
+    const releaseID = /Release (\S+)（/.exec(await buildStatus.innerText())?.[1];
+    expect(releaseID).toMatch(/^build-[a-f0-9]{32}$/);
+    // Private packages live outside every served root: SPA routes fall back to the HTML shell
+    // and the demo asset route returns 404, never package JSON.
+    for (const privatePath of [`/${releaseID}.private.json`, `/demo/${releaseID}.private.json`]) {
+      const exposed = await publisherClient.context.request.get(
+        new URL(privatePath, publisherClient.page.url()).toString(),
+      );
+      expect(exposed.status()).toBe(200);
+      expect(exposed.headers()['content-type']).toContain('text/html');
+      const body = await exposed.text();
+      expect(body).not.toContain(String(releaseID));
+      expect(body).not.toContain('"server"');
+    }
+    const assetProbe = await publisherClient.context.request.get(
+      new URL(`/assets/demo/${releaseID}.private.json`, publisherClient.page.url()).toString(),
+    );
+    expect(assetProbe.status()).toBe(404);
+
+    const nonPublisherBuildStatuses = await Promise.all(
+      [authorA, reviewClient, readerClient].map(({ page }) =>
+        page.evaluate(
+          async ({ contentID, bodyHash }) => {
+            const sessionResponse = await fetch('/api/v1/session', { credentials: 'same-origin' });
+            const session = (await sessionResponse.json()) as { data: { csrf_token: string } };
+            const candidates = await fetch('/api/v1/games/demo/build-candidates', {
+              credentials: 'same-origin',
+            });
+            const start = await fetch('/api/v1/games/demo/builds', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': session.data.csrf_token,
+                'Idempotency-Key': crypto.randomUUID(),
+              },
+              body: JSON.stringify({ content_id: contentID, revision: 1, body_hash: bodyHash }),
+            });
+            return [candidates.status, start.status];
+          },
+          { contentID, bodyHash },
+        ),
+      ),
+    );
+    expect(nonPublisherBuildStatuses).toEqual([
+      [403, 403],
+      [403, 403],
+      [403, 403],
+    ]);
   } finally {
     await Promise.all(owned.map(({ context }) => context.close()));
   }

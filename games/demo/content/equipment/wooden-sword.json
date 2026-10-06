@@ -1,0 +1,20 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:equipment/wooden-sword",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:equipment/wooden-sword",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "demo:item/wooden-sword",
+    "slot": "weapon",
+    "min_level": 1,
+    "sect_ids": [],
+    "stats": {
+      "attack": 6
+    }
+  },
+  "server": {}
+}

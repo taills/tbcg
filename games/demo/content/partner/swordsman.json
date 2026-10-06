@@ -1,0 +1,30 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:partner/swordsman",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:partner/swordsman",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "剑客",
+    "appearance_id": "demo:appearance/swordsman",
+    "skill_ids": [
+      "demo:skill/strike",
+      "demo:skill/whirlwind"
+    ],
+    "min_level": 2,
+    "required_quest_id": "demo:quest/first-steps",
+    "recruit_cost": 80
+  },
+  "server": {
+    "stats": {
+      "max_hp": 110,
+      "max_mp": 30,
+      "attack": 16,
+      "defense": 7,
+      "speed": 9
+    }
+  }
+}

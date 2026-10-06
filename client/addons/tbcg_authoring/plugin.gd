@@ -4,10 +4,12 @@ extends EditorPlugin
 const MENU_LABEL := "校验/导出当前地图"
 const Exporter = preload("res://addons/tbcg_authoring/map_geometry_exporter.gd")
 const FileWriter = preload("res://addons/tbcg_authoring/map_file_writer.gd")
+const ContentDock = preload("res://addons/tbcg_authoring/content_dock.gd")
 
 var _file_dialog: FileDialog
 var _message_dialog: AcceptDialog
 var _pending_json := ""
+var _content_dock: Control
 
 func _enter_tree() -> void:
 	_file_dialog = FileDialog.new()
@@ -19,9 +21,15 @@ func _enter_tree() -> void:
 	_message_dialog = AcceptDialog.new()
 	add_child(_message_dialog)
 	add_tool_menu_item(MENU_LABEL, _on_export_menu)
+	_content_dock = ContentDock.new()
+	_content_dock.editor = get_editor_interface()
+	add_control_to_dock(DOCK_SLOT_RIGHT_UL, _content_dock)
 
 func _exit_tree() -> void:
 	remove_tool_menu_item(MENU_LABEL)
+	if is_instance_valid(_content_dock):
+		remove_control_from_docks(_content_dock)
+		_content_dock.queue_free()
 	if is_instance_valid(_file_dialog):
 		_file_dialog.queue_free()
 	if is_instance_valid(_message_dialog):

@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/wolf-fang",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/wolf-fang",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "material",
+    "display_name": "狼牙",
+    "description": "野狼的牙齿，铁匠的好材料。",
+    "icon_id": "demo:icon/placeholder",
+    "stack_limit": 99,
+    "price_minor": "15"
+  },
+  "server": {
+    "reward_value_minor": "10",
+    "drop_weight_basis_points": 7000
+  }
+}

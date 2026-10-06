@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:shop:v1",
+  "title": "TBCG 商店 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "currency_code",
+        "display_name",
+        "game_id",
+        "goods",
+        "npc_id",
+        "revision",
+        "schema_version"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "npc_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        },
+        "currency_code": {
+          "enum": [
+            "coin"
+          ]
+        },
+        "goods": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item_id",
+              "price",
+              "purchase_limit"
+            ],
+            "properties": {
+              "item_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              },
+              "price": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000000
+              },
+              "purchase_limit": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 999
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stock"
+      ],
+      "properties": {
+        "stock": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item_id",
+              "quantity"
+            ],
+            "properties": {
+              "item_id": {
+                "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

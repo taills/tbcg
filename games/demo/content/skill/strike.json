@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:skill/strike",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:skill/strike",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "劈砍",
+    "description": "对单个敌人造成伤害。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 0
+  },
+  "server": {
+    "power_percent": 100,
+    "hits": 1,
+    "crit_rate_bp": 1000
+  }
+}

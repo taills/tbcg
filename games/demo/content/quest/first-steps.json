@@ -1,0 +1,63 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:quest/first-steps",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:quest/first-steps",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "初入江湖",
+    "description": "跟随引路人熟悉演武场。",
+    "min_level": 1,
+    "stage_descriptions": [
+      "前往演武场的练武区",
+      "向引路人交付两株青叶草",
+      "击败一群青泥怪"
+    ]
+  },
+  "server": {
+    "giver_npc_id": "demo:npc/guide",
+    "turn_in_npc_id": "demo:npc/guide",
+    "prerequisites": [],
+    "repeat_policy": "once",
+    "stages": [
+      {
+        "objective": {
+          "kind": "enter_zone",
+          "map_id": "demo:map/training-ground",
+          "anchor_id": "training-area",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "deliver_item",
+          "item_id": "demo:item/herb",
+          "count": 2,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "defeat_encounter",
+          "encounter_id": "demo:encounter/slime-pack",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      }
+    ],
+    "rewards": {
+      "currency": 50,
+      "exp": 120,
+      "items": [
+        {
+          "item_id": "demo:item/wooden-sword",
+          "quantity": 1
+        }
+      ]
+    }
+  }
+}

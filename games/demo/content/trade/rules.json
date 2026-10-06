@@ -1,0 +1,21 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:trade/rules",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:trade/rules",
+    "revision": 1,
+    "schema_version": 1,
+    "max_item_slots": 6,
+    "tax_bp": 500,
+    "timeout_seconds": 120
+  },
+  "server": {
+    "untradable_item_ids": [
+      "demo:item/wooden-sword"
+    ],
+    "max_currency": 100000
+  }
+}

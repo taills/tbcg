@@ -91,6 +91,37 @@ export interface Page<T> {
   offset: number;
 }
 
+export type BuildStatus = 'queued' | 'running' | 'retry_wait' | 'built' | 'failed';
+
+export interface BuildCandidate {
+  game_id: string;
+  content_id: string;
+  revision: number;
+  body_hash: string;
+  submitted_at: string;
+}
+
+export interface BuildJob {
+  job_id: string;
+  game_id: string;
+  content_id: string;
+  revision: number;
+  body_hash: string;
+  release_id: string;
+  release_version: number;
+  status: BuildStatus;
+  created_at: string;
+  updated_at: string;
+  public_artifact_sha256: string | null;
+  error_code: string | null;
+}
+
+export interface StartBuildRequest {
+  content_id: string;
+  revision: number;
+  body_hash: string;
+}
+
 export class AdminApiError extends Error {
   public readonly status: number;
   public readonly code: string;
@@ -287,12 +318,113 @@ function parseValidationResult(value: unknown): ValidationResult {
   return { valid: value.valid, errors };
 }
 
-async function requestEnvelope(
+const sha256Pattern = /^[a-f0-9]{64}$/;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const idempotencyKeyPattern = /^[A-Za-z0-9._~-]{16,128}$/;
+const buildStatuses: readonly BuildStatus[] = [
+  'queued',
+  'running',
+  'retry_wait',
+  'built',
+  'failed',
+];
+function isBuildStatus(value: unknown): value is BuildStatus {
+  return typeof value === 'string' && (buildStatuses as readonly string[]).includes(value);
+}
+
+const buildJobKeys = new Set([
+  'job_id',
+  'game_id',
+  'content_id',
+  'revision',
+  'body_hash',
+  'release_id',
+  'release_version',
+  'status',
+  'created_at',
+  'updated_at',
+  'public_artifact_sha256',
+  'error_code',
+]);
+
+function isRevisionNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 2147483647;
+}
+
+function parseBuildCandidate(value: unknown): BuildCandidate {
+  if (
+    !isRecord(value) ||
+    typeof value.game_id !== 'string' ||
+    typeof value.content_id !== 'string' ||
+    !isRevisionNumber(value.revision) ||
+    typeof value.body_hash !== 'string' ||
+    !sha256Pattern.test(value.body_hash) ||
+    typeof value.submitted_at !== 'string' ||
+    Object.keys(value).length !== 5
+  ) {
+    throw new Error('管理服务返回了无效构建候选');
+  }
+  return {
+    game_id: value.game_id,
+    content_id: value.content_id,
+    revision: value.revision,
+    body_hash: value.body_hash,
+    submitted_at: value.submitted_at,
+  };
+}
+
+function parseBuildJob(value: unknown): BuildJob {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).some((key) => !buildJobKeys.has(key)) ||
+    typeof value.job_id !== 'string' ||
+    !uuidPattern.test(value.job_id) ||
+    typeof value.game_id !== 'string' ||
+    typeof value.content_id !== 'string' ||
+    !isRevisionNumber(value.revision) ||
+    typeof value.body_hash !== 'string' ||
+    !sha256Pattern.test(value.body_hash) ||
+    typeof value.release_id !== 'string' ||
+    value.release_id.length === 0 ||
+    !isRevisionNumber(value.release_version) ||
+    !isBuildStatus(value.status) ||
+    typeof value.created_at !== 'string' ||
+    typeof value.updated_at !== 'string' ||
+    !(
+      value.public_artifact_sha256 === null ||
+      (typeof value.public_artifact_sha256 === 'string' &&
+        sha256Pattern.test(value.public_artifact_sha256))
+    ) ||
+    !(
+      value.error_code === null ||
+      (typeof value.error_code === 'string' && value.error_code.length <= 64)
+    )
+  ) {
+    throw new Error('管理服务返回了无效构建任务');
+  }
+  return {
+    job_id: value.job_id,
+    game_id: value.game_id,
+    content_id: value.content_id,
+    revision: value.revision,
+    body_hash: value.body_hash,
+    release_id: value.release_id,
+    release_version: value.release_version,
+    status: value.status,
+    created_at: value.created_at,
+    updated_at: value.updated_at,
+    public_artifact_sha256: value.public_artifact_sha256,
+    error_code: value.error_code,
+  };
+}
+
+export async function requestEnvelope(
   path: string,
   options: {
     method?: 'GET' | 'POST' | 'PUT';
     body?: unknown;
     csrfToken?: string;
+    idempotencyKey?: string;
   } = {},
 ): Promise<{ data: unknown; meta: Record<string, unknown> }> {
   const method = options.method ?? 'GET';
@@ -305,6 +437,9 @@ async function requestEnvelope(
       throw new Error('此操作需要当前会话的 CSRF token');
     }
     headers.set('X-CSRF-Token', options.csrfToken);
+  }
+  if (options.idempotencyKey !== undefined) {
+    headers.set('Idempotency-Key', options.idempotencyKey);
   }
 
   let response: Response;
@@ -341,6 +476,7 @@ async function request(
     method?: 'GET' | 'POST' | 'PUT';
     body?: unknown;
     csrfToken?: string;
+    idempotencyKey?: string;
   } = {},
 ): Promise<unknown> {
   return (await requestEnvelope(path, options)).data;
@@ -545,5 +681,76 @@ export const adminApi = {
       throw new Error('管理服务返回了超出审批请求范围的记录');
     }
     return approval;
+  },
+  async listBuildCandidates(gameId: string, limit = 50, offset = 0): Promise<Page<BuildCandidate>> {
+    const query = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    const response = await requestEnvelope(
+      `/api/v1/games/${encodeURIComponent(gameId)}/build-candidates?${query}`,
+    );
+    const { total, limit: pageLimit, offset: pageOffset } = response.meta;
+    if (
+      !Array.isArray(response.data) ||
+      typeof total !== 'number' ||
+      !Number.isSafeInteger(total) ||
+      total < 0 ||
+      pageLimit !== limit ||
+      pageOffset !== offset
+    ) {
+      throw new Error('管理服务返回了无效构建候选分页');
+    }
+    const items = response.data.map(parseBuildCandidate);
+    if (items.length > limit || items.some((candidate) => candidate.game_id !== gameId)) {
+      throw new Error('管理服务返回了跨 Game 的构建候选');
+    }
+    return { items, total, limit, offset };
+  },
+
+  async startBuild(
+    gameId: string,
+    input: StartBuildRequest,
+    idempotencyKey: string,
+    csrfToken: string,
+  ): Promise<BuildJob> {
+    if (!idempotencyKeyPattern.test(idempotencyKey)) {
+      throw new Error('Idempotency-Key 必须是 16–128 个安全字符');
+    }
+    const job = parseBuildJob(
+      await request(`/api/v1/games/${encodeURIComponent(gameId)}/builds`, {
+        method: 'POST',
+        body: input,
+        csrfToken,
+        idempotencyKey,
+      }),
+    );
+    if (
+      job.game_id !== gameId ||
+      job.content_id !== input.content_id ||
+      job.revision !== input.revision ||
+      job.body_hash !== input.body_hash
+    ) {
+      throw new Error('管理服务返回了超出构建请求范围的任务');
+    }
+    return job;
+  },
+
+  /** Reads a job and requires every immutable identity field to match the job being tracked. */
+  async getBuildJob(gameId: string, expected: BuildJob): Promise<BuildJob> {
+    const job = parseBuildJob(
+      await request(
+        `/api/v1/games/${encodeURIComponent(gameId)}/builds/${encodeURIComponent(expected.job_id)}`,
+      ),
+    );
+    if (
+      job.game_id !== gameId ||
+      job.job_id !== expected.job_id ||
+      job.content_id !== expected.content_id ||
+      job.revision !== expected.revision ||
+      job.body_hash !== expected.body_hash ||
+      job.release_id !== expected.release_id ||
+      job.release_version !== expected.release_version
+    ) {
+      throw new Error('管理服务返回了超出读取范围的构建任务');
+    }
+    return job;
   },
 };

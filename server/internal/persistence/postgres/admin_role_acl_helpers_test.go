@@ -20,6 +20,7 @@ type adminACLFixture struct {
 	db         *sql.DB
 	roles      *adminRoleFixture
 	appDSN     string
+	workerDSN  string
 	ternPath   string
 	ternEnv    []string
 	serverRoot string
@@ -74,6 +75,9 @@ func newAdminACLFixture(t *testing.T, version string) *adminACLFixture {
 	appURL.Path = "/" + databaseName
 	appURL.User = url.UserPassword(roles.appRole, roles.appPassword)
 	fixture.appDSN = appURL.String()
+	workerURL := *appURL
+	workerURL.User = url.UserPassword(roles.workerRole, roles.workerPassword)
+	fixture.workerDSN = workerURL.String()
 	return fixture
 }
 

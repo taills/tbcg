@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:skill/whirlwind",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:skill/whirlwind",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "旋风斩",
+    "description": "攻击全部敌人。",
+    "kind": "damage",
+    "target": "enemy_all",
+    "mp_cost": 8
+  },
+  "server": {
+    "power_percent": 70,
+    "hits": 1,
+    "crit_rate_bp": 500
+  }
+}

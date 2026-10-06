@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:mount:v1",
+  "title": "TBCG 坐骑 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "appearance_id",
+        "content_id",
+        "display_name",
+        "game_id",
+        "min_level",
+        "revision",
+        "schema_version",
+        "stat_bonus"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "appearance_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/appearance_id"
+        },
+        "min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        },
+        "stat_bonus": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/stat_bonus"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {}
+    }
+  }
+}

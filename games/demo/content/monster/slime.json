@@ -1,0 +1,40 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:monster/slime",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:monster/slime",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "青泥怪",
+    "appearance_id": "demo:appearance/slime",
+    "level": 1
+  },
+  "server": {
+    "stats": {
+      "max_hp": 40,
+      "max_mp": 0,
+      "attack": 9,
+      "defense": 2,
+      "speed": 6
+    },
+    "skill_ids": [],
+    "skill_chance_bp": 0,
+    "exp_reward": 30,
+    "currency_reward": 5,
+    "loot": [
+      {
+        "item_id": "demo:item/herb",
+        "chance_bp": 6000,
+        "quantity": 1
+      },
+      {
+        "item_id": "demo:item/healing-potion",
+        "chance_bp": 1500,
+        "quantity": 1
+      }
+    ]
+  }
+}

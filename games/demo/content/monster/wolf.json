@@ -1,0 +1,37 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:monster/wolf",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:monster/wolf",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "灰狼",
+    "appearance_id": "demo:appearance/wolf",
+    "level": 3
+  },
+  "server": {
+    "stats": {
+      "max_hp": 90,
+      "max_mp": 20,
+      "attack": 16,
+      "defense": 5,
+      "speed": 12
+    },
+    "skill_ids": [
+      "demo:skill/whirlwind"
+    ],
+    "skill_chance_bp": 2500,
+    "exp_reward": 70,
+    "currency_reward": 12,
+    "loot": [
+      {
+        "item_id": "demo:item/wolf-fang",
+        "chance_bp": 7000,
+        "quantity": 1
+      }
+    ]
+  }
+}

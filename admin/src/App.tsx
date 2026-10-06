@@ -6,7 +6,11 @@ import ItemWorkspace from './features/content/ItemWorkspace';
 import type { WorkspaceStatus } from './features/content/ItemWorkspace';
 import { clearPendingCreateRecovery } from './features/content/item-workspace-utils';
 import LoginForm from './features/session/LoginForm';
+import BuildPanel from './features/build/BuildPanel';
 import ReviewQueue from './features/review/ReviewQueue';
+import ContentLibrary from './features/library/ContentLibrary';
+import AuthoringTools from './features/library/AuthoringTools';
+import ReleasePanel from './features/releases/ReleasePanel';
 
 function getMessage(error: unknown): string {
   if (error instanceof AdminApiError) {
@@ -25,6 +29,7 @@ export default function App(): ReactElement {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showStudio, setShowStudio] = useState(false);
   const [workspaceStatuses, setWorkspaceStatuses] = useState<
     Readonly<Record<string, WorkspaceStatus>>
   >({});
@@ -166,6 +171,7 @@ export default function App(): ReactElement {
   const gameId = gameRole?.game_id ?? '';
   const canAuthor = roles.includes('Author');
   const canReview = roles.includes('Reviewer');
+  const canPublish = roles.includes('Publisher');
   const storageOwnerId = session.user?.admin_id ?? 'anonymous';
   const currentWorkspaceStatus = workspaceStatuses[gameId] ?? {
     dirty: false,
@@ -271,6 +277,45 @@ export default function App(): ReactElement {
           <>
             {canReview && (
               <ReviewQueue key={gameId} gameId={gameId} csrfToken={session.csrf_token} />
+            )}
+            {canPublish && (
+              <BuildPanel
+                key={`${gameId}:${session.user?.admin_id ?? 'anonymous'}`}
+                gameId={gameId}
+                csrfToken={session.csrf_token}
+              />
+            )}
+            <section className="rounded-xl border border-slate-200 bg-white p-4">
+              <button
+                aria-expanded={showStudio}
+                className="rounded-md border border-teal-700 px-3 py-1.5 text-sm font-medium text-teal-800 hover:bg-teal-50"
+                onClick={() => setShowStudio((value) => !value)}
+                type="button"
+              >
+                {showStudio ? '收起全类型内容库与发布工具' : '打开全类型内容库与发布工具'}
+              </button>
+            </section>
+            {showStudio && (
+              <>
+                <ReleasePanel
+                  key={`releases:${gameId}`}
+                  gameId={gameId}
+                  csrfToken={session.csrf_token}
+                  canPublish={canPublish}
+                />
+                <ContentLibrary
+                  key={`library:${gameId}`}
+                  gameId={gameId}
+                  csrfToken={session.csrf_token}
+                  canEdit={canAuthor}
+                />
+                <AuthoringTools
+                  key={`tools:${gameId}`}
+                  gameId={gameId}
+                  csrfToken={session.csrf_token}
+                  canEdit={canAuthor}
+                />
+              </>
             )}
             <ItemWorkspace
               gameId={gameId}

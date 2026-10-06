@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:guild:v1",
+  "title": "TBCG 公会规则 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "create_cost",
+        "create_min_level",
+        "game_id",
+        "max_members",
+        "notice_max_length",
+        "revision",
+        "schema_version"
+      ],
+      "properties": {
+        "max_members": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 500
+        },
+        "create_cost": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/amount"
+        },
+        "create_min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        },
+        "notice_max_length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1024
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "officer_can_invite",
+        "officer_can_kick"
+      ],
+      "properties": {
+        "officer_can_invite": {
+          "type": "boolean"
+        },
+        "officer_can_kick": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import {
   chmodSync,
+  readdirSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -11,6 +12,7 @@ import {
   writeFileSync,
   closeSync,
 } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
@@ -25,6 +27,7 @@ const openssl = "/usr/bin/openssl";
 const tempRoot = mkdtempSync(resolve(tmpdir(), "tbcg-admin-e2e-"));
 chmodSync(tempRoot, 0o700);
 let child;
+let workerChild;
 let databaseFixture;
 let interrupted = false;
 
@@ -71,8 +74,9 @@ function readPrivateEnvironment(path) {
   if (
     entries.some(
       ([key, value]) =>
-        !/^(TBCG_ADMIN_DATABASE_URL|TBCG_ADMIN_E2E_[A-Z0-9_]+)$/.test(key) ||
-        typeof value !== "string",
+        !/^(TBCG_ADMIN_DATABASE_URL|TBCG_BUILD_WORKER_DATABASE_URL|TBCG_ADMIN_E2E_[A-Z0-9_]+)$/.test(
+          key,
+        ) || typeof value !== "string",
     )
   ) {
     throw new Error(
@@ -90,6 +94,7 @@ function readPrivateEnvironment(path) {
   }
   const allowedKeys = new Set([
     "TBCG_ADMIN_DATABASE_URL",
+    "TBCG_BUILD_WORKER_DATABASE_URL",
     "TBCG_ADMIN_E2E_BASE_URL",
     ...["READER", "AUTHOR", "REVIEWER", "PUBLISHER"].flatMap((role) => [
       `TBCG_ADMIN_E2E_${role}_USERNAME`,
@@ -107,6 +112,14 @@ function readPrivateEnvironment(path) {
   ) {
     throw new Error(
       "Missing TBCG_ADMIN_DATABASE_URL in the private environment JSON.",
+    );
+  }
+  if (
+    typeof parsed.TBCG_BUILD_WORKER_DATABASE_URL !== "string" ||
+    parsed.TBCG_BUILD_WORKER_DATABASE_URL.length === 0
+  ) {
+    throw new Error(
+      "Missing TBCG_BUILD_WORKER_DATABASE_URL in the private environment JSON.",
     );
   }
   return Object.fromEntries(entries);
@@ -202,6 +215,67 @@ function createNssProfile(name, caCert, includeCA) {
   return profile;
 }
 
+function stopWorker(signal = "SIGTERM") {
+  if (
+    !workerChild ||
+    workerChild.exitCode !== null ||
+    workerChild.signalCode !== null
+  )
+    return;
+  try {
+    process.kill(-workerChild.pid, signal);
+  } catch {
+    workerChild.kill(signal);
+  }
+}
+
+async function waitForWorkerExit(timeoutMs) {
+  if (
+    !workerChild ||
+    workerChild.exitCode !== null ||
+    workerChild.signalCode !== null
+  )
+    return;
+  await new Promise((resolveExit) => {
+    const timer = setTimeout(() => {
+      stopWorker("SIGKILL");
+      resolveExit();
+    }, timeoutMs);
+    workerChild.once("close", () => {
+      clearTimeout(timer);
+      resolveExit();
+    });
+  });
+}
+
+// The worker must leave only owner-only artifact files in its private store, outside the web root.
+function verifyPrivateArtifacts(artifactDirectory) {
+  if ((statSync(artifactDirectory).mode & 0o077) !== 0) {
+    throw new Error(
+      "The build artifact directory became group/other accessible.",
+    );
+  }
+  const gameDirectory = resolve(artifactDirectory, "demo");
+  if (!existsSync(gameDirectory)) {
+    throw new Error("The build worker did not install any demo artifacts.");
+  }
+  if ((statSync(gameDirectory).mode & 0o077) !== 0) {
+    throw new Error("The Game artifact directory is group/other accessible.");
+  }
+  const files = readdirSync(gameDirectory);
+  const manifests = files.filter((name) => name.endsWith(".manifest.json"));
+  if (manifests.length === 0) {
+    throw new Error("The build worker did not install a Release manifest.");
+  }
+  for (const name of files) {
+    const mode = statSync(resolve(gameDirectory, name)).mode;
+    if ((mode & 0o077) !== 0) {
+      throw new Error(`Build artifact ${name} is group/other accessible.`);
+    }
+  }
+  return manifests.length;
+}
+
 function stopChild(signal = "SIGTERM") {
   if (!child || child.exitCode !== null || child.signalCode !== null) return;
   try {
@@ -262,8 +336,13 @@ async function main() {
   );
   const {
     TBCG_ADMIN_DATABASE_URL: serverDatabaseURL,
+    TBCG_BUILD_WORKER_DATABASE_URL: workerDatabaseURL,
     ...playwrightEnvironment
   } = privateEnvironment;
+  const workerEnvironmentPath = resolve(tempRoot, "build-worker-env.json");
+  const artifactDirectory = resolve(tempRoot, "build-artifacts");
+  mkdirSync(artifactDirectory, { mode: 0o700 });
+  chmodSync(artifactDirectory, 0o700);
   const serverEnvironmentPath = resolve(tempRoot, "admin-server-env.json");
   const inheritedEnvironment = Object.fromEntries(
     Object.entries(process.env).filter(
@@ -302,6 +381,11 @@ async function main() {
     JSON.stringify({ TBCG_ADMIN_DATABASE_URL: serverDatabaseURL }),
     { mode: 0o600 },
   );
+  writeFileSync(
+    workerEnvironmentPath,
+    JSON.stringify({ TBCG_BUILD_WORKER_DATABASE_URL: workerDatabaseURL }),
+    { mode: 0o600 },
+  );
   mkdirSync(logDirectory, { recursive: true, mode: 0o700 });
   if ((statSync(logDirectory).mode & 0o077) !== 0) {
     throw new Error(
@@ -311,6 +395,27 @@ async function main() {
   const logPath = resolve(logDirectory, `run-${runID}.log`);
   const logFD = openSync(logPath, "wx", 0o600);
   const output = [];
+  const workerOutput = [];
+  workerChild = spawn(
+    "node",
+    [resolve(projectRoot, "tools/admin-e2e/start-worker.mjs")],
+    {
+      cwd: resolve(projectRoot, "server"),
+      env: {
+        ...inheritedEnvironment,
+        GOTOOLCHAIN: "go1.26.4",
+        TBCG_BUILD_WORKER_ENV_FILE: workerEnvironmentPath,
+        TBCG_BUILD_WORKER_ID: randomUUID(),
+        TBCG_BUILD_ARTIFACT_DIR: artifactDirectory,
+        TBCG_BUILD_WORKER_POLL_INTERVAL: "500ms",
+        TBCG_PROJECT_ROOT: projectRoot,
+      },
+      detached: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  workerChild.stdout.on("data", (chunk) => workerOutput.push(chunk));
+  workerChild.stderr.on("data", (chunk) => workerOutput.push(chunk));
   child = spawn(
     "pnpm",
     ["exec", "playwright", "test", "--config", "playwright.config.ts"],
@@ -329,15 +434,29 @@ async function main() {
       resolveExit(code ?? (signal ? 1 : 0)),
     );
   });
+  stopWorker();
+  await waitForWorkerExit(15_000);
+  let artifactCheck;
+  try {
+    artifactCheck = `Private build artifacts verified: ${verifyPrivateArtifacts(artifactDirectory)} Release manifest(s), owner-only modes.\n`;
+  } catch (error) {
+    artifactCheck = `Private build artifact check failed: ${error instanceof Error ? error.message : "unknown"}\n`;
+  }
   const redactedOutput = Object.values(privateEnvironment).reduce(
     (current, secret) =>
       secret.length > 0 ? current.replaceAll(secret, "[REDACTED]") : current,
-    Buffer.concat(output).toString(),
+    `${Buffer.concat(output).toString()}\n--- content build worker ---\n${Buffer.concat(workerOutput).toString()}\n${artifactCheck}`,
   );
   writeFileSync(logFD, redactedOutput);
   closeSync(logFD);
   process.stdout.write(redactedOutput);
   if (interrupted) return 130;
+  if (
+    exitCode === 0 &&
+    artifactCheck.startsWith("Private build artifact check failed")
+  ) {
+    return 1;
+  }
   process.stdout.write(
     `E2E exit code: ${exitCode}; private run log: ${logPath}\n`,
   );
@@ -353,6 +472,7 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, () => {
     interrupted = true;
     stopChild(signal);
+    stopWorker(signal);
   });
 }
 
@@ -366,6 +486,8 @@ try {
   process.exitCode = 1;
 } finally {
   stopChild();
+  stopWorker();
+  await waitForWorkerExit(15_000);
   if (databaseFixture !== undefined) {
     try {
       databaseFixture.cleanup();

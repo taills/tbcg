@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tbcg:content:quest:v1",
+  "title": "TBCG 任务 Definition v1",
+  "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "content_id",
+    "game_id",
+    "public",
+    "revision",
+    "schema_version",
+    "server"
+  ],
+  "properties": {
+    "public": {
+      "$ref": "#/$defs/public"
+    },
+    "server": {
+      "$ref": "#/$defs/server"
+    }
+  },
+  "$defs": {
+    "public": {
+      "$ref": "urn:tbcg:content:common:v1#/$defs/identity",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "content_id",
+        "display_name",
+        "game_id",
+        "min_level",
+        "revision",
+        "schema_version",
+        "stage_descriptions"
+      ],
+      "properties": {
+        "display_name": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/name"
+        },
+        "description": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/text"
+        },
+        "stage_descriptions": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "urn:tbcg:content:common:v1#/$defs/text"
+          },
+          "minItems": 1
+        },
+        "min_level": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/level"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "giver_npc_id",
+        "prerequisites",
+        "repeat_policy",
+        "rewards",
+        "stages",
+        "turn_in_npc_id"
+      ],
+      "properties": {
+        "giver_npc_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        },
+        "turn_in_npc_id": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+        },
+        "prerequisites": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/refs"
+        },
+        "repeat_policy": {
+          "enum": [
+            "once",
+            "repeatable"
+          ]
+        },
+        "stages": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "objective"
+            ],
+            "properties": {
+              "objective": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "kind",
+                  "progress_scope"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "enter_zone",
+                      "deliver_item",
+                      "defeat_encounter",
+                      "talk_npc"
+                    ]
+                  },
+                  "map_id": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+                  },
+                  "anchor_id": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/anchor_id"
+                  },
+                  "item_id": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+                  },
+                  "npc_id": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+                  },
+                  "encounter_id": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/ref"
+                  },
+                  "count": {
+                    "$ref": "urn:tbcg:content:common:v1#/$defs/count"
+                  },
+                  "progress_scope": {
+                    "enum": [
+                      "personal",
+                      "party"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "rewards": {
+          "$ref": "urn:tbcg:content:common:v1#/$defs/rewards"
+        }
+      }
+    }
+  }
+}

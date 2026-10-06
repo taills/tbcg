@@ -1,0 +1,990 @@
+{
+  "format_version": 1,
+  "scope": "public",
+  "game_id": "demo",
+  "release_id": "dev-local",
+  "release_version": 0,
+  "entries": [
+    {
+      "content_id": "demo:archetype/wanderer",
+      "content_type": "archetype",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:archetype/wanderer",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "游侠",
+        "description": "初入江湖的游侠。",
+        "appearance_id": "demo:appearance/wanderer"
+      }
+    },
+    {
+      "content_id": "demo:consumable/healing-potion",
+      "content_type": "consumable",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:consumable/healing-potion",
+        "revision": 1,
+        "schema_version": 1,
+        "item_id": "demo:item/healing-potion",
+        "description": "恢复 60 点气血。",
+        "usable_in_battle": true
+      }
+    },
+    {
+      "content_id": "demo:consumable/pony-whistle",
+      "content_type": "consumable",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:consumable/pony-whistle",
+        "revision": 1,
+        "schema_version": 1,
+        "item_id": "demo:item/pony-whistle",
+        "description": "获得一匹小马。",
+        "usable_in_battle": false
+      }
+    },
+    {
+      "content_id": "demo:consumable/spirit-egg",
+      "content_type": "consumable",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:consumable/spirit-egg",
+        "revision": 1,
+        "schema_version": 1,
+        "item_id": "demo:item/spirit-egg",
+        "description": "孵化一只灵狐。",
+        "usable_in_battle": false
+      }
+    },
+    {
+      "content_id": "demo:dungeon/wolf-den",
+      "content_type": "dungeon",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:dungeon/wolf-den",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "狼穴",
+        "description": "两人一同深入狼穴，先破守卫，再战狼王。",
+        "min_players": 2,
+        "max_players": 2,
+        "min_level": 2,
+        "daily_limit": 3,
+        "stage_names": [
+          "狼穴守卫",
+          "狼王巢穴"
+        ]
+      }
+    },
+    {
+      "content_id": "demo:encounter/den-alpha",
+      "content_type": "encounter",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:encounter/den-alpha",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "狼王",
+        "description": "副本第二阶段。"
+      }
+    },
+    {
+      "content_id": "demo:encounter/den-guard",
+      "content_type": "encounter",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:encounter/den-guard",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "狼穴守卫",
+        "description": "副本第一阶段。"
+      }
+    },
+    {
+      "content_id": "demo:encounter/slime-pack",
+      "content_type": "encounter",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:encounter/slime-pack",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "青泥怪群",
+        "description": "两只青泥怪。"
+      }
+    },
+    {
+      "content_id": "demo:encounter/wolf-den",
+      "content_type": "encounter",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:encounter/wolf-den",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "林间狼影",
+        "description": "一只灰狼带着青泥怪。"
+      }
+    },
+    {
+      "content_id": "demo:equipment/iron-sword",
+      "content_type": "equipment",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:equipment/iron-sword",
+        "revision": 1,
+        "schema_version": 1,
+        "item_id": "demo:item/iron-sword",
+        "slot": "weapon",
+        "min_level": 3,
+        "sect_ids": [
+          "demo:sect/azure-cloud"
+        ],
+        "stats": {
+          "attack": 14,
+          "speed": 1
+        }
+      }
+    },
+    {
+      "content_id": "demo:equipment/wooden-sword",
+      "content_type": "equipment",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:equipment/wooden-sword",
+        "revision": 1,
+        "schema_version": 1,
+        "item_id": "demo:item/wooden-sword",
+        "slot": "weapon",
+        "min_level": 1,
+        "sect_ids": [],
+        "stats": {
+          "attack": 6
+        }
+      }
+    },
+    {
+      "content_id": "demo:event/slime-festival",
+      "content_type": "event",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:event/slime-festival",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "青泥节",
+        "description": "活动期间击败青泥怪群三次即可领取节庆奖励。",
+        "windows": [
+          {
+            "start": "2026-01-01T00:00:00Z",
+            "end": "2026-01-02T00:00:00Z"
+          },
+          {
+            "start": "2026-06-01T00:00:00Z",
+            "end": "2027-12-31T23:59:59Z"
+          }
+        ],
+        "objective": {
+          "kind": "defeat_encounter",
+          "target_id": "demo:encounter/slime-pack",
+          "count": 3
+        },
+        "max_claims_per_window": 1,
+        "leaderboard": true
+      }
+    },
+    {
+      "content_id": "demo:guild/rules",
+      "content_type": "guild",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:guild/rules",
+        "revision": 1,
+        "schema_version": 1,
+        "max_members": 30,
+        "create_cost": 100,
+        "create_min_level": 2,
+        "notice_max_length": 200
+      }
+    },
+    {
+      "content_id": "demo:item/healing-potion",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/healing-potion",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "consumable",
+        "display_name": "回复药剂",
+        "description": "恢复 60 点气血，可在战斗中使用。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 20,
+        "price_minor": "20"
+      }
+    },
+    {
+      "content_id": "demo:item/herb",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/herb",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "material",
+        "display_name": "青叶草",
+        "description": "常见草药，可交给引路人或用于制作。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 99,
+        "price_minor": "8"
+      }
+    },
+    {
+      "content_id": "demo:item/iron-sword",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/iron-sword",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "equipment",
+        "display_name": "青锋铁剑",
+        "description": "青云门弟子惯用的铁剑。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 1,
+        "price_minor": "120"
+      }
+    },
+    {
+      "content_id": "demo:item/pony-whistle",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/pony-whistle",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "consumable",
+        "display_name": "小马哨",
+        "description": "吹响后获得一匹小马。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 5,
+        "price_minor": "200"
+      }
+    },
+    {
+      "content_id": "demo:item/spirit-egg",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/spirit-egg",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "consumable",
+        "display_name": "灵狐蛋",
+        "description": "孵化后获得一只灵狐。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 5,
+        "price_minor": "150"
+      }
+    },
+    {
+      "content_id": "demo:item/wolf-fang",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/wolf-fang",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "material",
+        "display_name": "狼牙",
+        "description": "野狼的牙齿，铁匠的好材料。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 99,
+        "price_minor": "15"
+      }
+    },
+    {
+      "content_id": "demo:item/wooden-sword",
+      "content_type": "item",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:item/wooden-sword",
+        "revision": 1,
+        "schema_version": 1,
+        "item_type": "equipment",
+        "display_name": "木剑",
+        "description": "练习用木剑。",
+        "icon_id": "demo:icon/placeholder",
+        "stack_limit": 1,
+        "price_minor": "30"
+      }
+    },
+    {
+      "content_id": "demo:map/forest-edge",
+      "content_type": "map",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:map/forest-edge",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "林间小径",
+        "geometry": {
+          "schema_version": 1,
+          "map_id": "demo:map/forest-edge",
+          "geometry_revision": 1,
+          "width": 10,
+          "height": 8,
+          "tile_size": 32,
+          "origin": {
+            "x": 64,
+            "y": 96
+          },
+          "axis": "x_right_y_down",
+          "order": "row_major",
+          "diagonal_policy": "no_corner_cutting",
+          "grid": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "anchors": [
+            {
+              "placement_id": "arrival",
+              "kind": "spawn",
+              "cell": {
+                "x": 0,
+                "y": 0
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "dungeon-gate",
+              "kind": "region",
+              "cell": {
+                "x": 9,
+                "y": 0
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "grove",
+              "kind": "trigger",
+              "cell": {
+                "x": 6,
+                "y": 3
+              },
+              "extent": {
+                "x": 2,
+                "y": 2
+              }
+            },
+            {
+              "placement_id": "merchant",
+              "kind": "npc",
+              "cell": {
+                "x": 3,
+                "y": 2
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "portal-back",
+              "kind": "portal",
+              "cell": {
+                "x": 0,
+                "y": 7
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            }
+          ]
+        },
+        "portals": [
+          {
+            "anchor_id": "portal-back",
+            "target_map_id": "demo:map/training-ground",
+            "target_anchor_id": "arrival"
+          }
+        ],
+        "zones": [
+          {
+            "anchor_id": "grove",
+            "display_name": "幽静林地"
+          },
+          {
+            "anchor_id": "dungeon-gate",
+            "display_name": "狼穴入口"
+          }
+        ]
+      }
+    },
+    {
+      "content_id": "demo:map/training-ground",
+      "content_type": "map",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:map/training-ground",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "演武场",
+        "geometry": {
+          "schema_version": 1,
+          "map_id": "demo:map/training-ground",
+          "geometry_revision": 1,
+          "width": 6,
+          "height": 5,
+          "tile_size": 32,
+          "origin": {
+            "x": 64,
+            "y": 96
+          },
+          "axis": "x_right_y_down",
+          "order": "row_major",
+          "diagonal_policy": "no_corner_cutting",
+          "grid": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "anchors": [
+            {
+              "placement_id": "arrival",
+              "kind": "spawn",
+              "cell": {
+                "x": 0,
+                "y": 0
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "guide",
+              "kind": "npc",
+              "cell": {
+                "x": 2,
+                "y": 2
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "portal",
+              "kind": "portal",
+              "cell": {
+                "x": 5,
+                "y": 4
+              },
+              "extent": {
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "placement_id": "training-area",
+              "kind": "trigger",
+              "cell": {
+                "x": 0,
+                "y": 3
+              },
+              "extent": {
+                "x": 2,
+                "y": 2
+              }
+            }
+          ]
+        },
+        "portals": [
+          {
+            "anchor_id": "portal",
+            "target_map_id": "demo:map/forest-edge",
+            "target_anchor_id": "arrival",
+            "required_quest_id": "demo:quest/first-steps"
+          }
+        ],
+        "zones": [
+          {
+            "anchor_id": "training-area",
+            "display_name": "练武区"
+          }
+        ]
+      }
+    },
+    {
+      "content_id": "demo:monster/slime",
+      "content_type": "monster",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:monster/slime",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "青泥怪",
+        "appearance_id": "demo:appearance/slime",
+        "level": 1
+      }
+    },
+    {
+      "content_id": "demo:monster/wolf",
+      "content_type": "monster",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:monster/wolf",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "灰狼",
+        "appearance_id": "demo:appearance/wolf",
+        "level": 3
+      }
+    },
+    {
+      "content_id": "demo:mount/pony",
+      "content_type": "mount",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:mount/pony",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "小马",
+        "appearance_id": "demo:appearance/pony",
+        "min_level": 2,
+        "stat_bonus": {
+          "speed": 5,
+          "max_hp": 10
+        }
+      }
+    },
+    {
+      "content_id": "demo:npc/guide",
+      "content_type": "npc",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:npc/guide",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "引路人",
+        "appearance_id": "demo:appearance/guide",
+        "map_id": "demo:map/training-ground",
+        "anchor_id": "guide"
+      }
+    },
+    {
+      "content_id": "demo:npc/merchant",
+      "content_type": "npc",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:npc/merchant",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "行商",
+        "appearance_id": "demo:appearance/merchant",
+        "map_id": "demo:map/forest-edge",
+        "anchor_id": "merchant"
+      }
+    },
+    {
+      "content_id": "demo:partner/swordsman",
+      "content_type": "partner",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:partner/swordsman",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "剑客",
+        "appearance_id": "demo:appearance/swordsman",
+        "skill_ids": [
+          "demo:skill/strike",
+          "demo:skill/whirlwind"
+        ],
+        "min_level": 2,
+        "required_quest_id": "demo:quest/first-steps",
+        "recruit_cost": 80
+      }
+    },
+    {
+      "content_id": "demo:pet/sprite",
+      "content_type": "pet",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:pet/sprite",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "灵狐",
+        "appearance_id": "demo:appearance/sprite",
+        "skill_ids": [
+          "demo:skill/strike"
+        ]
+      }
+    },
+    {
+      "content_id": "demo:quest/first-steps",
+      "content_type": "quest",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:quest/first-steps",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "初入江湖",
+        "description": "跟随引路人熟悉演武场。",
+        "min_level": 1,
+        "stage_descriptions": [
+          "前往演武场的练武区",
+          "向引路人交付两株青叶草",
+          "击败一群青泥怪"
+        ]
+      }
+    },
+    {
+      "content_id": "demo:quest/wolf-hunt",
+      "content_type": "quest",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:quest/wolf-hunt",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "林间狼患",
+        "description": "与同伴一起驱赶林间的狼群。",
+        "min_level": 2,
+        "stage_descriptions": [
+          "与队友一起击败林间狼影两次"
+        ]
+      }
+    },
+    {
+      "content_id": "demo:recipe/iron-sword",
+      "content_type": "recipe",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:recipe/iron-sword",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "打造青锋铁剑",
+        "materials": [
+          {
+            "item_id": "demo:item/wolf-fang",
+            "quantity": 3
+          },
+          {
+            "item_id": "demo:item/herb",
+            "quantity": 2
+          }
+        ],
+        "outputs": [
+          {
+            "item_id": "demo:item/iron-sword",
+            "quantity": 1
+          }
+        ],
+        "min_level": 2
+      }
+    },
+    {
+      "content_id": "demo:sect/azure-cloud",
+      "content_type": "sect",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:sect/azure-cloud",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "青云门",
+        "description": "以剑入道，兼修回春之术。",
+        "min_level": 2,
+        "skills": [
+          {
+            "skill_id": "demo:skill/whirlwind",
+            "unlock_level": 2
+          },
+          {
+            "skill_id": "demo:skill/mend",
+            "unlock_level": 3
+          }
+        ]
+      }
+    },
+    {
+      "content_id": "demo:shop/merchant",
+      "content_type": "shop",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:shop/merchant",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "行商货摊",
+        "npc_id": "demo:npc/merchant",
+        "currency_code": "coin",
+        "goods": [
+          {
+            "item_id": "demo:item/healing-potion",
+            "price": 20,
+            "purchase_limit": 0
+          },
+          {
+            "item_id": "demo:item/herb",
+            "price": 8,
+            "purchase_limit": 0
+          },
+          {
+            "item_id": "demo:item/spirit-egg",
+            "price": 150,
+            "purchase_limit": 1
+          },
+          {
+            "item_id": "demo:item/pony-whistle",
+            "price": 200,
+            "purchase_limit": 1
+          }
+        ]
+      }
+    },
+    {
+      "content_id": "demo:skill/mend",
+      "content_type": "skill",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:skill/mend",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "回春术",
+        "description": "恢复一名友方的气血。",
+        "kind": "heal",
+        "target": "ally_single",
+        "mp_cost": 6
+      }
+    },
+    {
+      "content_id": "demo:skill/strike",
+      "content_type": "skill",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:skill/strike",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "劈砍",
+        "description": "对单个敌人造成伤害。",
+        "kind": "damage",
+        "target": "enemy_single",
+        "mp_cost": 0
+      }
+    },
+    {
+      "content_id": "demo:skill/whirlwind",
+      "content_type": "skill",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:skill/whirlwind",
+        "revision": 1,
+        "schema_version": 1,
+        "display_name": "旋风斩",
+        "description": "攻击全部敌人。",
+        "kind": "damage",
+        "target": "enemy_all",
+        "mp_cost": 8
+      }
+    },
+    {
+      "content_id": "demo:social/rules",
+      "content_type": "social",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:social/rules",
+        "revision": 1,
+        "schema_version": 1,
+        "max_friends": 50
+      }
+    },
+    {
+      "content_id": "demo:trade/rules",
+      "content_type": "trade",
+      "revision": 1,
+      "public": {
+        "game_id": "demo",
+        "content_id": "demo:trade/rules",
+        "revision": 1,
+        "schema_version": 1,
+        "max_item_slots": 6,
+        "tax_bp": 500,
+        "timeout_seconds": 120
+      }
+    }
+  ],
+  "assets": null
+}

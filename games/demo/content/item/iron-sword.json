@@ -1,0 +1,22 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:item/iron-sword",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:item/iron-sword",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "equipment",
+    "display_name": "青锋铁剑",
+    "description": "青云门弟子惯用的铁剑。",
+    "icon_id": "demo:icon/placeholder",
+    "stack_limit": 1,
+    "price_minor": "120"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

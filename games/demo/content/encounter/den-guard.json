@@ -1,0 +1,29 @@
+{
+  "game_id": "demo",
+  "content_id": "demo:encounter/den-guard",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "demo",
+    "content_id": "demo:encounter/den-guard",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "狼穴守卫",
+    "description": "副本第一阶段。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "demo:monster/wolf",
+        "count": 1
+      },
+      {
+        "monster_id": "demo:monster/slime",
+        "count": 2
+      }
+    ],
+    "max_rounds": 25,
+    "round_timeout_ms": 30000,
+    "allow_flee": false
+  }
+}

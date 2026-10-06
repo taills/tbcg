@@ -1,6 +1,6 @@
 # 0008 第一个内容编辑及发布纵切片
 
-**状态：**进行中（控制面第一纵切片已于 2026-10-04 验证；隔离构建、runtime 激活、Godot 公开包读取未完成）
+**状态：**开发完成（待评审）——控制面（2026-10-04）、单物品隔离构建（2026-10-07）、完整 Game 快照构建、runtime owner 激活与 Godot 公开包读取（2026-10-07）均已实现并本机验证；独立评审与 Firefox E2E 扩展未完成
 **目标：**完成一个物品 Definition 从网页草稿、校验、审批到 Go/Godot 可读取 Release 的端到端内容路径。按“契约 → 控制面 → 隔离构建 → 真实 runtime owner 激活 → Godot 公开包读取”分阶段验收。
 
 ## 范围
@@ -13,24 +13,24 @@
 ## 验收标准
 
 - [x] 控制面阶段：Game 绑定 Reader/Author/Reviewer/Publisher 可分离或兼任；Reviewer 才能审批；Publisher 不隐式获得 Reviewer 权限。
-- [ ] 后续阶段：只有 Publisher 可请求构建/激活，且 runtime owner 独占活动指针确认。
+- [x] 后续阶段：只有 Publisher 可请求构建/激活，且 runtime owner 独占活动指针确认。
 - [x] 控制面阶段：同一草稿 revision 冲突返回可操作错误，浏览器保留本地输入并要求用户显式 reapply；审批后 revision 数据不可原地改写。
-- [ ] 后续阶段：Release manifest/hash 可重现，并由隔离构建产物证明。
-- [ ] 后续阶段：Godot 客户端只获取公开数据；私有 drop/reward 字段通过 API/静态路径均不可访问。
+- [x] 后续阶段：Release manifest/hash 可重现，并由隔离构建产物证明。
+- [x] 后续阶段：Godot 客户端只获取公开数据；私有 drop/reward 字段通过 API/静态路径均不可访问。
 
 ## 验证
 
 - [x] 控制面：Go API/PostgreSQL 集成测试、ACL/迁移/受控 bootstrap 测试、React 单测与 Firefox 真实浏览器 E2E 覆盖登录、编辑、CAS 冲突、提交、审批、权限拒绝、Origin/CSRF 和 TLS 负向路径。
-- [ ] 后续阶段：staging 运行中修改草稿，确认旧激活版本持续服务到新版本被 runtime owner 确认。
-- [ ] 后续阶段：公开白名单 bundle/Godot adapter 读取验证，确认私有字段不可达。
+- [x] 后续阶段：staging 运行中修改草稿，确认旧激活版本持续服务到新版本被 runtime owner 确认。
+- [x] 后续阶段：公开白名单 bundle/Godot adapter 读取验证，确认私有字段不可达。
 
 ## 阶段与本轮范围
 
 1. **契约冻结**：以 `contracts/admin/openapi.yaml` 维护完整 API 轮廓并标明 `supported`/`planned`。当前支持 session/login/logout、`POST /games/{gameId}/item-drafts`、`GET/PUT /games/{gameId}/item-drafts/{draftId}`、draftId 下的 validate/submit、review queue 与 body 指定 `content_id + integer revision + body_hash` 的审核；content_id 不作资源路径段。build/activation/runtime owner 确认/public bundle/Godot 读取仅为 planned。除 CAS `draft_version` 使用十进制字符串外，所有 revision（Definition/public/Approval）均为 1..2147483647 的整数。
 2. **控制面（已验证）**：003 迁移、受控 NOLOGIN PostgreSQL 权限组、认证/CSRF/RBAC、Game 绑定、opaque draftId/CAS 草稿、schema/许可 manifest 引用校验、服务器分配并由数据库身份触发器保护的不可变 revision、Reviewer exact hash 审批、成功事务审计与拒绝独立审计。migration 用 submitted_draft_version CAS 防止同一草稿快照被重复固化。Go/真实 PG/可信 TLS 管理 API、React 单测与 Firefox 浏览器用例已分层验收；记录见 [`../docs/verification/0008-stage1.md`](../docs/verification/0008-stage1.md)。
-3. **隔离构建（后续）**：Publisher 权限、构建作业、确定性私有/公开 Release 产物与 manifest。
-4. **runtime 激活（后续）**：真实游戏 owner 校验并确认，失败保持原活动 Release。
-5. **Godot 读取（后续）**：客户端真实读取公开白名单包并验证私有字段不可访问，补完整链路验收。
+3. **隔离构建（单物品纵切片已验证）**：Publisher 在 `GET /games/{gameId}/build-candidates` 选择已批准的 exact `content_id + revision + body_hash`，`POST /games/{gameId}/builds` 以 Game/actor/key 作用域的 `Idempotency-Key` 入队；同一请求重放返回同一 job/Release，不同请求 409，提交确认丢失返回 503 并要求同 key 重试。入队在同一事务内冻结 canonical Definition、逐 Game 受控 build profile（`profile_version` 行锁线性化，固定原始资产 manifest SHA-256）、Schema fingerprint、代码固定 builder 版本与原创资产字节，并在 Game 计数器行锁内预留 Release 版本（允许空洞，不重编号）。独立 `content-build-worker` 进程以 NOLOGIN worker 角色、verify-full TLS 和四个 SECURITY DEFINER 函数认领（claim token/lease/有界 attempt）、构建确定性 `single_item` public/private 包，原子 no-replace 写入 Web 根之外的 0700/0600 私有目录，再在同一事务登记 `built` Release、单条 entry 与审计；不激活、不改 Realm 指针。profile 不由浏览器传入；无 profile、身份/hash/许可不一致均 fail-closed；capabilities 为空，不称完整 Game 快照。Publisher UI 显示“已构建，尚未激活”。验证记录见 [`../docs/verification/0008-stage2.md`](../docs/verification/0008-stage2.md)。
+4. **runtime 激活（已实现）**：Publisher 经 `POST /games/{gameId}/realms/{realmId}/activations`（Idempotency-Key）登记激活请求；持有 owner_epoch 的 game-server 读取私有产物、复核哈希/Schema/跨引用/版本后在同一事务切换 `realms.active_release_id`；失败记 `rejected`（如 `artifact_missing`），旧指针与内存内容继续服务。完整 Game 快照由 005 迁移的 `admin_snapshot_jobs` 与同一受限 worker 构建。
+5. **Godot 读取（已实现）**：game-server 只提供当前服务中 Release 的公开包 HTTP 路由；Godot `framework/content/public_bundle.gd` 校验 SHA-256、scope 与条目白名单形状，真实 headless 客户端联调确认私有字段与私有包均不可达。验证见 [`../docs/verification/0008-0015-runtime.md`](../docs/verification/0008-0015-runtime.md)。
 
 控制面 partial 不得将任务 0008 标记完成，也不得宣称完整发布链路 E2E。首次资产闭包限定原创占位 icon，manifest 记录来源、SHA-256 与许可；缺失或无许可的 `public.icon_id` 必须校验失败。不得引入任意上传或 xyq 素材。
 
