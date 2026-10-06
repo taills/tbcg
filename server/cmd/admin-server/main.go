@@ -14,11 +14,11 @@ import (
 	"syscall"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
-	"example.com/tbcg/server/internal/persistence/postgres"
-	battlepreview "example.com/tbcg/server/modules/battle/preview"
+	"github.com/taills/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/persistence/postgres"
+	battlepreview "github.com/taills/tbcg/server/modules/battle/preview"
 )
 
 var adminEnvironmentKeys = []string{

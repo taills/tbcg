@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"example.com/tbcg/server/internal/persistence"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 const matchingRelease = `game_id=$1 AND release_id=$2 AND release_version=$3

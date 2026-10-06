@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 // Entry 是 Release 中一个已批准的不可变 Definition。

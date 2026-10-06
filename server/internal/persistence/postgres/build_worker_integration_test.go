@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"example.com/tbcg/server/internal/admin"
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/buildworker"
+	"github.com/taills/tbcg/server/internal/admin"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
 )
 
 func TestBuildWorkerTurnsApprovedJobIntoUnactivatedBuiltRelease(t *testing.T) {

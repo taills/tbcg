@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 func run(t *testing.T, options Options) (Report, Bundle) {

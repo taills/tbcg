@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	contentbuild "example.com/tbcg/server/internal/content/build"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
 )
 
 var (

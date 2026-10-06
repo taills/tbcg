@@ -6,9 +6,9 @@ import (
 	"encoding/binary"
 	"sort"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 func init() {

@@ -16,11 +16,11 @@ import (
 	"syscall"
 	"time"
 
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/buildworker"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
-	"example.com/tbcg/server/internal/persistence/postgres"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/persistence/postgres"
 )
 
 const (

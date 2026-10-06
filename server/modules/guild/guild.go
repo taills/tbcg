@@ -8,8 +8,8 @@ import (
 	"errors"
 	"unicode/utf8"
 
-	rt "example.com/tbcg/server/modules/runtime"
 	"github.com/jackc/pgx/v5/pgconn"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 func init() {

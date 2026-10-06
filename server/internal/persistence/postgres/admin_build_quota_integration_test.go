@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"example.com/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/admin"
 )
 
 func TestEnqueueBuildRejectsWhenGameQueueIsFull(t *testing.T) {

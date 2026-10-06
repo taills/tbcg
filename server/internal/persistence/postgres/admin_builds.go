@@ -11,11 +11,11 @@ import (
 	"math"
 	"strings"
 
-	"example.com/tbcg/server/internal/admin"
-	"example.com/tbcg/server/internal/content/assets"
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/taills/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/content/assets"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 // AdminRepository must keep satisfying the narrow build port so the admin API registers build routes.

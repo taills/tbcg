@@ -9,10 +9,10 @@ import (
 	"sort"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/dungeon"
-	"example.com/tbcg/server/modules/quest"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/dungeon"
+	"github.com/taills/tbcg/server/modules/quest"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 func init() {

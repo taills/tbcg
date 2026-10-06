@@ -10,11 +10,11 @@ import (
 	"os"
 	"path/filepath"
 
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
-	"example.com/tbcg/server/modules/battle/preview"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/modules/battle/preview"
 )
 
 func main() {

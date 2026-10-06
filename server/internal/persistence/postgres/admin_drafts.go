@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"example.com/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/admin"
 )
 
 func (r *AdminRepository) GetDraft(ctx context.Context, gameID, draftID string) (admin.Draft, error) {

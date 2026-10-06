@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"example.com/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
 )
 
 func run(args []string, stdout, stderr io.Writer) error {

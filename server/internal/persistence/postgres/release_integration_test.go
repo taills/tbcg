@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	release "example.com/tbcg/server/internal/content/release"
+	release "github.com/taills/tbcg/server/internal/content/release"
 )
 
 func TestReleaseValidationRejectsInvalidDefinitionsAndMissingDependencies(t *testing.T) {

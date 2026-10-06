@@ -1,6 +1,6 @@
 package runtime
 
-import "example.com/tbcg/server/internal/content/catalog"
+import "github.com/taills/tbcg/server/internal/content/catalog"
 
 // DialogAction 是 NPC 对话选项触发的领域动作；npc 与 option 均来自当前 Release。
 type DialogAction func(c *Ctx, npc *catalog.NPC, option catalog.DialogOption, key string) (any, *ProtocolError)

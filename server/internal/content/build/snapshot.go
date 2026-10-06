@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"sort"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const (

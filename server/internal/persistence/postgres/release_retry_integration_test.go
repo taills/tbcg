@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	release "example.com/tbcg/server/internal/content/release"
-	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
+	release "github.com/taills/tbcg/server/internal/content/release"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 func TestConcurrentIdenticalReleasePublishesAreIdempotent(t *testing.T) {

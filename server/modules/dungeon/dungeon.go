@@ -9,12 +9,12 @@ import (
 	"errors"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/battle"
-	"example.com/tbcg/server/modules/combat"
-	"example.com/tbcg/server/modules/party"
-	"example.com/tbcg/server/modules/quest"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/battle"
+	"github.com/taills/tbcg/server/modules/combat"
+	"github.com/taills/tbcg/server/modules/party"
+	"github.com/taills/tbcg/server/modules/quest"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 // RunRow 是 dungeon_runs 的权威行。

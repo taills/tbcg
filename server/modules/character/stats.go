@@ -4,7 +4,7 @@ package character
 import (
 	"sort"
 
-	"example.com/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/catalog"
 )
 
 // Loadout 是计算属性所需的已提交角色状态。

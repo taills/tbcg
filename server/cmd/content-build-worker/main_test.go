@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/content/buildworker"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
 )
 
 func validEnvironment(t *testing.T) map[string]string {

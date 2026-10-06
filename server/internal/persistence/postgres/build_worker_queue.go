@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"example.com/tbcg/server/internal/content/buildworker"
-	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 // buildWorkerQueue adapts the restricted worker repository to the worker's narrow queue port.

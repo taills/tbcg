@@ -8,8 +8,8 @@ import (
 	"sort"
 	"time"
 
-	"example.com/tbcg/server/internal/content/mapdata"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 const inviteDistance = 5

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/taills/tbcg/server/internal/admin"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -10,12 +10,12 @@ import (
 	"sort"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/battle"
-	"example.com/tbcg/server/modules/character"
-	"example.com/tbcg/server/modules/party"
-	"example.com/tbcg/server/modules/quest"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/battle"
+	"github.com/taills/tbcg/server/modules/character"
+	"github.com/taills/tbcg/server/modules/party"
+	"github.com/taills/tbcg/server/modules/quest"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 // Run 是一场进行中的战斗；Content 固定为开战时的 Release。

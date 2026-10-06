@@ -12,11 +12,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/modules/character"
-	rt "example.com/tbcg/server/modules/runtime"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/modules/character"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 const (

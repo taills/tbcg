@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	leaftransport "example.com/tbcg/server/internal/transport/leaf"
 	"github.com/taills/leaf/v2/network"
+	leaftransport "github.com/taills/tbcg/server/internal/transport/leaf"
 )
 
 func runProbe(getenv func(string) string, stopped <-chan os.Signal) error {

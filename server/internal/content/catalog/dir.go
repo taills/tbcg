@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const maxDefinitionBytes = 1 << 20

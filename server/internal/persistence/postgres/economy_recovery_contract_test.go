@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"example.com/tbcg/server/internal/economy"
+	"github.com/taills/tbcg/server/internal/economy"
 )
 
 func TestEconomyRecoveryAndIdempotentReplayRespectOwnerEpochContract(t *testing.T) {

@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"time"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/release"
-	"example.com/tbcg/server/internal/content/schema"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/release"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const (

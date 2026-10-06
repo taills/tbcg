@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"example.com/tbcg/server/internal/persistence"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 const (

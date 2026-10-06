@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 var readableRoles = []Role{RoleReader, RoleAuthor, RoleReviewer, RolePublisher}

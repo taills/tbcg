@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
-	contentassets "example.com/tbcg/server/internal/content/assets"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/taills/tbcg/server/internal/admin"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
 )
 
 func TestAdminBuildCandidateFunctionsRequirePublisherAndReturnExactApprovedRevision(t *testing.T) {

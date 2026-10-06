@@ -1,4 +1,4 @@
-module example.com/tbcg/server
+module github.com/taills/tbcg/server
 
 go 1.26.4
 

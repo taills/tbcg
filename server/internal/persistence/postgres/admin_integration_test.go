@@ -16,10 +16,10 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
-	"example.com/tbcg/server/internal/content/schema"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/taills/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 type adminAPIEnvelope struct {

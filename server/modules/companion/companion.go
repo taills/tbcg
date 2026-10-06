@@ -8,10 +8,10 @@ import (
 	"errors"
 	"unicode/utf8"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/character"
-	"example.com/tbcg/server/modules/quest"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/character"
+	"github.com/taills/tbcg/server/modules/quest"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 const maxFormation = 2

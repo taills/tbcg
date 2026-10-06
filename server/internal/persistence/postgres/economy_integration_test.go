@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 
-	"example.com/tbcg/server/internal/economy"
+	"github.com/taills/tbcg/server/internal/economy"
 )
 
 func TestEconomyClosedDatabaseReturnsExplicitErrors(t *testing.T) {

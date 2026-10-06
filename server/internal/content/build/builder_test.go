@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	"example.com/tbcg/server/internal/content/schema"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 func TestBuildProducesDeterministicSingleItemArtifacts(t *testing.T) {

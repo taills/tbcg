@@ -17,12 +17,12 @@ import (
 	"strings"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
-	"example.com/tbcg/server/internal/content/schema"
-	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/taills/tbcg/server/internal/admin"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 const (

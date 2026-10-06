@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"example.com/tbcg/server/internal/content/release"
+	"github.com/taills/tbcg/server/internal/content/release"
 )
 
 func newPrivateStoreDir(t *testing.T) string {

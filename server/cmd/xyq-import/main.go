@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"example.com/tbcg/server/internal/content/importer"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/importer"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 func main() {

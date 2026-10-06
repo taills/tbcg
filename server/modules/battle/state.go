@@ -5,7 +5,7 @@ package battle
 import (
 	"errors"
 
-	"example.com/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/catalog"
 )
 
 const (

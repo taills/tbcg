@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	leaftransport "example.com/tbcg/server/internal/transport/leaf"
+	leaftransport "github.com/taills/tbcg/server/internal/transport/leaf"
 )
 
 const minimumProbeTokenBytes = 32

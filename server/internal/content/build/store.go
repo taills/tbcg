@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"os"
 
-	"example.com/tbcg/server/internal/content/release"
+	"github.com/taills/tbcg/server/internal/content/release"
 )
 
 const (

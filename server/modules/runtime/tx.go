@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/persistence"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 var (

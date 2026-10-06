@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
-	rt "example.com/tbcg/server/modules/runtime"
 	"github.com/taills/leaf/v2/network"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 // TestGodotClientAgainstGameServer 以 headless Godot 运行真实客户端框架连接真实 game-server。

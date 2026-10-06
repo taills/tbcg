@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/release"
-	"example.com/tbcg/server/internal/content/schema"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/release"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 // SnapshotClaim 是 worker 视角的完整 Game 快照作业。

@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 func loadDemo(t *testing.T) *Catalog {

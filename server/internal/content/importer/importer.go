@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 // 字段映射状态。

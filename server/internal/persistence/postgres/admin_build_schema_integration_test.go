@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/taills/tbcg/server/internal/admin"
 )
 
 func TestBuildMigrationRejectsAndPreservesPreexistingOwnerACL(t *testing.T) {

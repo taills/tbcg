@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/character"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/character"
 )
 
 // CharacterState 是 characters.attributes 中的权威角色实例状态（网格坐标）。

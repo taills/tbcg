@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const (

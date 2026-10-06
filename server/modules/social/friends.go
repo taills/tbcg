@@ -5,7 +5,7 @@ package social
 import (
 	"context"
 
-	rt "example.com/tbcg/server/modules/runtime"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 func init() {

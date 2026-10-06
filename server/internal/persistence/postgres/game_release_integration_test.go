@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/admin"
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/buildworker"
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
-	rt "example.com/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/internal/admin"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
+	rt "github.com/taills/tbcg/server/modules/runtime"
 )
 
 // seedApprovedDemoContent 以受控测试数据写入全部示例内容的已批准 revision。

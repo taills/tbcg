@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"example.com/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/catalog"
 )
 
 // Combatant 描述一名参战角色及其随从的已提交属性快照。

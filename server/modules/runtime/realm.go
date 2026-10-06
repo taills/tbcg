@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/catalog"
 )
 
 // 运行面固定的规则/协议/实例版本；激活的 Release 必须声明相同版本。

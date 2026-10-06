@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 func demoCatalog(t *testing.T) *catalog.Catalog {

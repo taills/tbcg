@@ -14,8 +14,8 @@ import (
 	"regexp"
 	"strings"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	"example.com/tbcg/server/internal/content/schema"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const (

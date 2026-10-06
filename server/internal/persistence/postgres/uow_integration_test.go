@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"example.com/tbcg/server/internal/persistence"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/taills/tbcg/server/internal/persistence"
 )
 
 func TestUnitOfWorkCommitsGameCreation(t *testing.T) {

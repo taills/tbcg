@@ -21,8 +21,8 @@ import (
 	"time"
 	"unicode"
 
-	"example.com/tbcg/server/internal/content/mapdata"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	"github.com/taills/tbcg/server/internal/content/schema"
 	"golang.org/x/crypto/bcrypt"
 )
 

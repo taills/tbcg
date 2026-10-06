@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"example.com/tbcg/server/internal/admin"
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	"example.com/tbcg/server/internal/content/schema"
+	"github.com/taills/tbcg/server/internal/admin"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 type approvedBuildSeed struct {

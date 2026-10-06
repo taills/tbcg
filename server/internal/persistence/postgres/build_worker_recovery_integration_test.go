@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/buildworker"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/buildworker"
 )
 
 // lostFinishQueue simulates a process crash after artifacts were installed but before completion committed.

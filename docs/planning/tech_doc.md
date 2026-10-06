@@ -21,9 +21,9 @@
 | JSON Schema | `github.com/santhosh-tekuri/jsonschema/v6 v6.0.3` |
 | PostgreSQL 迁移 CLI | `github.com/jackc/tern/v2 v2.4.3`；独立安装，不作为游戏运行时依赖 |
 | Go 格式化工具 | `gofmt`（与 Go 工具链同版本）+ `golang.org/x/tools/cmd/goimports v0.51.0` |
-| 模块路径 | 暂用 `example.com/tbcg/server`；确认代码托管组织/远程仓库后、向外发布前需替换为正式模块路径。 |
+| 模块路径 | `github.com/taills/tbcg/server`（仓库 `git@github.com:taills/tbcg.git`，Go module 位于 `server/` 子目录）。 |
 
-`go.mod` 不设置指向 xyq、本机绝对目录或 Leaf 工作树的 `replace`。Leaf 使用 `/v2` 模块路径。Go 模块校验与依赖图在 Go 1.27.0 和 Go 1.26.4 下均成功；当前只实现 PostgreSQL persistence 基础切片，游戏网络/领域模块仍未实现。
+`go.mod` 不设置指向 xyq、本机绝对目录或 Leaf 工作树的 `replace`。Leaf 使用 `/v2` 模块路径。Go 模块校验与依赖图在 Go 1.27.0 和 Go 1.26.4 下均成功；游戏运行面位于 `server/modules/`，入口为 `server/cmd/game-server`。
 
 ## 3. Godot 客户端/创作工具
 

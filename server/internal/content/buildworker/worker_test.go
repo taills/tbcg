@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	contentassets "example.com/tbcg/server/internal/content/assets"
-	contentbuild "example.com/tbcg/server/internal/content/build"
-	"example.com/tbcg/server/internal/content/schema"
+	contentassets "github.com/taills/tbcg/server/internal/content/assets"
+	contentbuild "github.com/taills/tbcg/server/internal/content/build"
+	"github.com/taills/tbcg/server/internal/content/schema"
 )
 
 const testWorkerID = "00000000-0000-4000-8000-0000000000a1"

@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"time"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/internal/content/mapdata"
-	rt "example.com/tbcg/server/modules/runtime"
-	"example.com/tbcg/server/modules/world"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/internal/content/mapdata"
+	rt "github.com/taills/tbcg/server/modules/runtime"
+	"github.com/taills/tbcg/server/modules/world"
 )
 
 // State 是一个角色的任务实例。

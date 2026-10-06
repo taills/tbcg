@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 
-	"example.com/tbcg/server/internal/content/catalog"
-	"example.com/tbcg/server/modules/battle"
-	"example.com/tbcg/server/modules/character"
+	"github.com/taills/tbcg/server/internal/content/catalog"
+	"github.com/taills/tbcg/server/modules/battle"
+	"github.com/taills/tbcg/server/modules/character"
 )
 
 // RulesVersion 标识预览所用的规则实现，结果中回显以便追溯。
