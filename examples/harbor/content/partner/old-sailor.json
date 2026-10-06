@@ -1,0 +1,30 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:partner/old-sailor",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:partner/old-sailor",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "老水手",
+    "appearance_id": "harbor:appearance/old-sailor",
+    "skill_ids": [
+      "harbor:skill/harpoon-thrust",
+      "harbor:skill/tidal-surge"
+    ],
+    "min_level": 2,
+    "required_quest_id": "harbor:quest/new-in-port",
+    "recruit_cost": 60
+  },
+  "server": {
+    "stats": {
+      "max_hp": 120,
+      "max_mp": 30,
+      "attack": 16,
+      "defense": 7,
+      "speed": 8
+    }
+  }
+}

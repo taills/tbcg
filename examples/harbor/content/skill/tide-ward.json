@@ -1,0 +1,27 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/tide-ward",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/tide-ward",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "潮汐护佑",
+    "description": "三回合内提升全体友方防御。",
+    "kind": "buff",
+    "target": "ally_all",
+    "mp_cost": 10
+  },
+  "server": {
+    "power_percent": 0,
+    "hits": 1,
+    "crit_rate_bp": 0,
+    "buff": {
+      "stat": "defense",
+      "amount": 6,
+      "turns": 3
+    }
+  }
+}

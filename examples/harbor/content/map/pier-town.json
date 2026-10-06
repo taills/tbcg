@@ -1,0 +1,264 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:map/pier-town",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:map/pier-town",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "雾港码头",
+    "geometry": {
+      "schema_version": 1,
+      "map_id": "harbor:map/pier-town",
+      "geometry_revision": 1,
+      "width": 12,
+      "height": 8,
+      "tile_size": 32,
+      "origin": {
+        "x": 0,
+        "y": 0
+      },
+      "axis": "x_right_y_down",
+      "order": "row_major",
+      "diagonal_policy": "no_corner_cutting",
+      "grid": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      ],
+      "anchors": [
+        {
+          "placement_id": "arrival",
+          "kind": "spawn",
+          "cell": {
+            "x": 0,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "fishwife",
+          "kind": "npc",
+          "cell": {
+            "x": 7,
+            "y": 5
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "from-flats",
+          "kind": "spawn",
+          "cell": {
+            "x": 10,
+            "y": 6
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "from-lighthouse",
+          "kind": "spawn",
+          "cell": {
+            "x": 10,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "harbormaster",
+          "kind": "npc",
+          "cell": {
+            "x": 4,
+            "y": 2
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "lighthouse-steps",
+          "kind": "trigger",
+          "cell": {
+            "x": 9,
+            "y": 2
+          },
+          "extent": {
+            "x": 2,
+            "y": 2
+          }
+        },
+        {
+          "placement_id": "portal-flats",
+          "kind": "portal",
+          "cell": {
+            "x": 11,
+            "y": 7
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "portal-lighthouse",
+          "kind": "portal",
+          "cell": {
+            "x": 11,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      ]
+    },
+    "portals": [
+      {
+        "anchor_id": "portal-lighthouse",
+        "target_map_id": "harbor:map/lighthouse",
+        "target_anchor_id": "arrival"
+      },
+      {
+        "anchor_id": "portal-flats",
+        "target_map_id": "harbor:map/tide-flats",
+        "target_anchor_id": "arrival",
+        "required_quest_id": "harbor:quest/new-in-port"
+      }
+    ],
+    "zones": [
+      {
+        "anchor_id": "lighthouse-steps",
+        "display_name": "灯塔石阶"
+      }
+    ]
+  },
+  "server": {
+    "spawn_anchor_id": "arrival",
+    "max_path_cells": 24,
+    "min_step_interval_ms": 120
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:consumable/chart-fragment",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:consumable/chart-fragment",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/chart-fragment",
+    "description": "获得 60 点经验。",
+    "usable_in_battle": false
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "grant_exp",
+        "amount": 60
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/tentacle-sweep",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/tentacle-sweep",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "触手横扫",
+    "description": "巨大的触手横扫全场。",
+    "kind": "damage",
+    "target": "enemy_all",
+    "mp_cost": 10
+  },
+  "server": {
+    "power_percent": 70,
+    "hits": 1,
+    "crit_rate_bp": 0
+  }
+}

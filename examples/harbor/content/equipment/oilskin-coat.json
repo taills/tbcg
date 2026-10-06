@@ -1,0 +1,21 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:equipment/oilskin-coat",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:equipment/oilskin-coat",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/oilskin-coat",
+    "slot": "armor",
+    "min_level": 1,
+    "sect_ids": [],
+    "stats": {
+      "defense": 4,
+      "max_hp": 15
+    }
+  },
+  "server": {}
+}

@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_authoring_2d.gd" id="1_map"]
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_anchor_2d.gd" id="2_anchor"]
+
+[node name="PierTown" type="Node2D"]
+position = Vector2(0, 0)
+script = ExtResource("1_map")
+grid_rows = Array[String](["000000001000", "011000001000", "011000100000", "000000100000", "000100000110", "000100000110", "100000000000", "110000001100"])
+tile_size = 32
+map_id = "harbor:map/pier-town"
+geometry_revision = 1
+
+[node name="arrival" type="Marker2D" parent="."]
+position = Vector2(16, 16)
+script = ExtResource("2_anchor")
+placement_id = "arrival"
+kind = "spawn"
+extent = Vector2i(1, 1)
+
+[node name="fishwife" type="Marker2D" parent="."]
+position = Vector2(240, 176)
+script = ExtResource("2_anchor")
+placement_id = "fishwife"
+kind = "npc"
+extent = Vector2i(1, 1)
+
+[node name="from-flats" type="Marker2D" parent="."]
+position = Vector2(336, 208)
+script = ExtResource("2_anchor")
+placement_id = "from-flats"
+kind = "spawn"
+extent = Vector2i(1, 1)
+
+[node name="from-lighthouse" type="Marker2D" parent="."]
+position = Vector2(336, 16)
+script = ExtResource("2_anchor")
+placement_id = "from-lighthouse"
+kind = "spawn"
+extent = Vector2i(1, 1)
+
+[node name="harbormaster" type="Marker2D" parent="."]
+position = Vector2(144, 80)
+script = ExtResource("2_anchor")
+placement_id = "harbormaster"
+kind = "npc"
+extent = Vector2i(1, 1)
+
+[node name="lighthouse-steps" type="Marker2D" parent="."]
+position = Vector2(304, 80)
+script = ExtResource("2_anchor")
+placement_id = "lighthouse-steps"
+kind = "trigger"
+extent = Vector2i(2, 2)
+
+[node name="portal-flats" type="Marker2D" parent="."]
+position = Vector2(368, 240)
+script = ExtResource("2_anchor")
+placement_id = "portal-flats"
+kind = "portal"
+extent = Vector2i(1, 1)
+
+[node name="portal-lighthouse" type="Marker2D" parent="."]
+position = Vector2(368, 16)
+script = ExtResource("2_anchor")
+placement_id = "portal-lighthouse"
+kind = "portal"
+extent = Vector2i(1, 1)

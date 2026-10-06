@@ -1,0 +1,37 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:sect/tidewatch",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:sect/tidewatch",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "观潮阁",
+    "description": "世代守护雾港灯塔的门派，以浪为剑，以灯为盾。",
+    "min_level": 2,
+    "skills": [
+      {
+        "skill_id": "harbor:skill/tidal-surge",
+        "unlock_level": 2
+      },
+      {
+        "skill_id": "harbor:skill/tide-ward",
+        "unlock_level": 3
+      },
+      {
+        "skill_id": "harbor:skill/fog-veil",
+        "unlock_level": 4
+      }
+    ]
+  },
+  "server": {
+    "stat_bonus": {
+      "attack": 4,
+      "defense": 3,
+      "max_mp": 10
+    },
+    "join_npc_id": "harbor:npc/lightkeeper"
+  }
+}

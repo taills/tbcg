@@ -1,0 +1,16 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:social/rules",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:social/rules",
+    "revision": 1,
+    "schema_version": 1,
+    "max_friends": 50
+  },
+  "server": {
+    "max_pending_requests": 20
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:npc/fishwife",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:npc/fishwife",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "渔家阿婆",
+    "appearance_id": "harbor:appearance/fishwife",
+    "map_id": "harbor:map/pier-town",
+    "anchor_id": "fishwife"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "孩子，饿了吧？阿婆这儿有鱼汤和灯油，也能帮你熬汤、打鱼叉。",
+        "options": [
+          {
+            "option_id": "shop",
+            "text": "看看小摊",
+            "action": {
+              "kind": "open_shop",
+              "target_id": "harbor:shop/fishwife"
+            }
+          },
+          {
+            "option_id": "craft",
+            "text": "请阿婆帮忙熬汤、打造",
+            "action": {
+              "kind": "open_crafting"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

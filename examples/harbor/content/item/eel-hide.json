@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/eel-hide",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/eel-hide",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "material",
+    "display_name": "鳗鱼皮",
+    "description": "坚韧的鳗鱼皮，打造鱼叉的好材料。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 99,
+    "price_minor": "20"
+  },
+  "server": {
+    "reward_value_minor": "15",
+    "drop_weight_basis_points": 7000
+  }
+}

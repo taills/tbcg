@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/tidal-surge",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/tidal-surge",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "浪涌",
+    "description": "掀起浪头冲击全部敌人。",
+    "kind": "damage",
+    "target": "enemy_all",
+    "mp_cost": 8
+  },
+  "server": {
+    "power_percent": 75,
+    "hits": 1,
+    "crit_rate_bp": 500
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:npc/tidewright",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:npc/tidewright",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "老潮工",
+    "appearance_id": "harbor:appearance/tidewright",
+    "map_id": "harbor:map/tide-flats",
+    "anchor_id": "tidewright"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "潮窟里住着一只章鱼王，雾就是从那儿冒出来的。想进去，先在礁石边练练手。",
+        "options": [
+          {
+            "option_id": "patrol",
+            "text": "接取：礁石巡逻",
+            "condition": {
+              "quest_id": "harbor:quest/reef-patrol",
+              "quest_status": "available"
+            },
+            "action": {
+              "kind": "accept_quest",
+              "target_id": "harbor:quest/reef-patrol"
+            }
+          },
+          {
+            "option_id": "eels",
+            "text": "去礁石边驱赶鳗鱼（礁间鳗影）",
+            "action": {
+              "kind": "start_encounter",
+              "target_id": "harbor:encounter/eel-reef"
+            }
+          },
+          {
+            "option_id": "patrol-claim",
+            "text": "领取礁石巡逻的报酬",
+            "condition": {
+              "quest_id": "harbor:quest/reef-patrol",
+              "quest_status": "objectives_done"
+            },
+            "action": {
+              "kind": "claim_quest",
+              "target_id": "harbor:quest/reef-patrol"
+            }
+          },
+          {
+            "option_id": "grotto",
+            "text": "带队进入沉潮窟（副本，1–3 人）",
+            "action": {
+              "kind": "enter_dungeon",
+              "target_id": "harbor:dungeon/drowned-grotto"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

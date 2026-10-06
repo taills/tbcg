@@ -1,0 +1,79 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:quest/fog-lights",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:quest/fog-lights",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "雾中灯火",
+    "description": "守灯人想重新点亮雾灯，需要从退潮滩带回雾珠作灯芯。",
+    "min_level": 2,
+    "stage_descriptions": [
+      "前往退潮滩的沉船残骸",
+      "驱散残骸旁的雾水母（2 次）",
+      "向守灯人交付两颗雾珠",
+      "登上灯室，点亮雾灯"
+    ]
+  },
+  "server": {
+    "giver_npc_id": "harbor:npc/lightkeeper",
+    "turn_in_npc_id": "harbor:npc/lightkeeper",
+    "prerequisites": [
+      "harbor:quest/new-in-port"
+    ],
+    "repeat_policy": "once",
+    "stages": [
+      {
+        "objective": {
+          "kind": "enter_zone",
+          "map_id": "harbor:map/tide-flats",
+          "anchor_id": "wreck",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "defeat_encounter",
+          "encounter_id": "harbor:encounter/jelly-drift",
+          "count": 2,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "deliver_item",
+          "item_id": "harbor:item/mist-pearl",
+          "count": 2,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "enter_zone",
+          "map_id": "harbor:map/lighthouse",
+          "anchor_id": "lamp-room",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      }
+    ],
+    "rewards": {
+      "currency": 80,
+      "exp": 220,
+      "items": [
+        {
+          "item_id": "harbor:item/tide-charm",
+          "quantity": 1
+        },
+        {
+          "item_id": "harbor:item/lamp-oil",
+          "quantity": 2
+        }
+      ]
+    }
+  }
+}

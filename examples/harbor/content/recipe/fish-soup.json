@@ -1,0 +1,29 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:recipe/fish-soup",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:recipe/fish-soup",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "熬鱼汤",
+    "materials": [
+      {
+        "item_id": "harbor:item/crab-shell",
+        "quantity": 2
+      }
+    ],
+    "outputs": [
+      {
+        "item_id": "harbor:item/fish-soup",
+        "quantity": 2
+      }
+    ],
+    "min_level": 1
+  },
+  "server": {
+    "success_rate_bp": 10000
+  }
+}

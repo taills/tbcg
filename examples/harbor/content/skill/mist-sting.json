@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/mist-sting",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/mist-sting",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "雾刺",
+    "description": "放出带刺的雾气，伤害全部敌人。",
+    "kind": "damage",
+    "target": "enemy_all",
+    "mp_cost": 5
+  },
+  "server": {
+    "power_percent": 45,
+    "hits": 1,
+    "crit_rate_bp": 0
+  }
+}

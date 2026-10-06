@@ -1,0 +1,21 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:equipment/tide-charm",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:equipment/tide-charm",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/tide-charm",
+    "slot": "accessory",
+    "min_level": 2,
+    "sect_ids": [],
+    "stats": {
+      "max_mp": 15,
+      "defense": 2
+    }
+  },
+  "server": {}
+}

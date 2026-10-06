@@ -1,0 +1,59 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:archetype/lamp-speaker",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:archetype/lamp-speaker",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "灯语者",
+    "description": "能读懂雾中灯语的守灯学徒，擅长灯焰与海风疗愈。",
+    "appearance_id": "harbor:appearance/lamp-speaker"
+  },
+  "server": {
+    "base_stats": {
+      "max_hp": 105,
+      "max_mp": 60,
+      "attack": 15,
+      "defense": 6,
+      "speed": 11
+    },
+    "growth_per_level": {
+      "max_hp": 16,
+      "max_mp": 10,
+      "attack": 3,
+      "defense": 2,
+      "speed": 1
+    },
+    "level_exp": [
+      100,
+      260,
+      480,
+      760,
+      1100,
+      1500,
+      2000,
+      2600,
+      3300
+    ],
+    "start_map_id": "harbor:map/pier-town",
+    "start_anchor_id": "arrival",
+    "start_currency": 80,
+    "start_items": [
+      {
+        "item_id": "harbor:item/fish-soup",
+        "quantity": 3
+      },
+      {
+        "item_id": "harbor:item/lamp-oil",
+        "quantity": 2
+      }
+    ],
+    "default_skill_ids": [
+      "harbor:skill/lantern-flare",
+      "harbor:skill/sea-mend"
+    ]
+  }
+}

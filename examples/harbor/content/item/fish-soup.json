@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/fish-soup",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/fish-soup",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "鱼汤",
+    "description": "热腾腾的鱼汤，恢复 50 点气血，可在战斗中使用。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 20,
+    "price_minor": "10"
+  },
+  "server": {
+    "reward_value_minor": "10",
+    "drop_weight_basis_points": 2000
+  }
+}

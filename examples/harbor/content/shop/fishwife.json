@@ -1,0 +1,50 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:shop/fishwife",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:shop/fishwife",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "阿婆的小摊",
+    "npc_id": "harbor:npc/fishwife",
+    "currency_code": "coin",
+    "goods": [
+      {
+        "item_id": "harbor:item/fish-soup",
+        "price": 10,
+        "purchase_limit": 0
+      },
+      {
+        "item_id": "harbor:item/lamp-oil",
+        "price": 15,
+        "purchase_limit": 0
+      },
+      {
+        "item_id": "harbor:item/oilskin-coat",
+        "price": 60,
+        "purchase_limit": 1
+      },
+      {
+        "item_id": "harbor:item/chart-fragment",
+        "price": 40,
+        "purchase_limit": 3
+      },
+      {
+        "item_id": "harbor:item/turtle-reins",
+        "price": 260,
+        "purchase_limit": 1
+      }
+    ]
+  },
+  "server": {
+    "stock": [
+      {
+        "item_id": "harbor:item/turtle-reins",
+        "quantity": 100
+      }
+    ]
+  }
+}

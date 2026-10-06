@@ -1,0 +1,22 @@
+# 构建上下文是仓库根目录，只放行镜像需要的部分。
+*
+!server/go.mod
+!server/go.sum
+!server/cmd/
+!server/internal/
+!server/modules/
+!server/migrations/
+!contracts/
+!admin/
+admin/node_modules/
+admin/dist/
+admin/coverage/
+admin/test-results/
+!games/demo/assets/
+!examples/harbor/go.mod
+!examples/harbor/go.sum
+!examples/harbor/cmd/
+!examples/harbor/content/
+!examples/harbor/assets/
+!examples/harbor/docker/scripts/
+**/*_test.go

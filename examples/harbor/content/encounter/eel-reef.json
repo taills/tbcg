@@ -1,0 +1,29 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:encounter/eel-reef",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:encounter/eel-reef",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "礁间鳗影",
+    "description": "一条礁石鳗带着泡泡蟹守在礁石间。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "harbor:monster/reef-eel",
+        "count": 1
+      },
+      {
+        "monster_id": "harbor:monster/bubble-crab",
+        "count": 1
+      }
+    ],
+    "max_rounds": 20,
+    "round_timeout_ms": 30000,
+    "allow_flee": true
+  }
+}

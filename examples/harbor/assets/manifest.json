@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "asset_id": "harbor:icon/shell",
+      "path": "icons/shell.svg",
+      "sha256": "dbc2c7443ef1141a76bc527ddfcc8bf6cdffe3f22f60d6951c2b4d90dd54acd9",
+      "source": "Original TBCG example icon authored in-repository on 2026-10-07",
+      "license": "TBCG original asset; example use"
+    }
+  ]
+}

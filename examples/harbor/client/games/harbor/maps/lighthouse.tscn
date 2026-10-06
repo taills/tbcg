@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_authoring_2d.gd" id="1_map"]
+[ext_resource type="Script" path="res://addons/tbcg_authoring/map_anchor_2d.gd" id="2_anchor"]
+
+[node name="Lighthouse" type="Node2D"]
+position = Vector2(0, 0)
+script = ExtResource("1_map")
+grid_rows = Array[String](["11000011", "10000001", "00011000", "00011000", "10000001", "11000011"])
+tile_size = 32
+map_id = "harbor:map/lighthouse"
+geometry_revision = 1
+
+[node name="arrival" type="Marker2D" parent="."]
+position = Vector2(112, 144)
+script = ExtResource("2_anchor")
+placement_id = "arrival"
+kind = "spawn"
+extent = Vector2i(1, 1)
+
+[node name="lamp-room" type="Marker2D" parent="."]
+position = Vector2(80, 16)
+script = ExtResource("2_anchor")
+placement_id = "lamp-room"
+kind = "trigger"
+extent = Vector2i(4, 1)
+
+[node name="lightkeeper" type="Marker2D" parent="."]
+position = Vector2(208, 112)
+script = ExtResource("2_anchor")
+placement_id = "lightkeeper"
+kind = "npc"
+extent = Vector2i(1, 1)
+
+[node name="portal-down" type="Marker2D" parent="."]
+position = Vector2(80, 176)
+script = ExtResource("2_anchor")
+placement_id = "portal-down"
+kind = "portal"
+extent = Vector2i(1, 1)

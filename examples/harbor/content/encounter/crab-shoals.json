@@ -1,0 +1,25 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:encounter/crab-shoals",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:encounter/crab-shoals",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "码头蟹群",
+    "description": "两只吐着泡泡的泡泡蟹霸占了码头。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "harbor:monster/bubble-crab",
+        "count": 2
+      }
+    ],
+    "max_rounds": 20,
+    "round_timeout_ms": 30000,
+    "allow_flee": true
+  }
+}

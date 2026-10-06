@@ -1,0 +1,46 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:quest/reef-patrol",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:quest/reef-patrol",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "礁石巡逻",
+    "description": "老潮工请你和同伴清理礁石边的鳗鱼，可重复接取。",
+    "min_level": 2,
+    "stage_descriptions": [
+      "与队友一起击败礁间鳗影"
+    ]
+  },
+  "server": {
+    "giver_npc_id": "harbor:npc/tidewright",
+    "turn_in_npc_id": "harbor:npc/tidewright",
+    "prerequisites": [
+      "harbor:quest/new-in-port"
+    ],
+    "repeat_policy": "repeatable",
+    "stages": [
+      {
+        "objective": {
+          "kind": "defeat_encounter",
+          "encounter_id": "harbor:encounter/eel-reef",
+          "count": 1,
+          "progress_scope": "party"
+        }
+      }
+    ],
+    "rewards": {
+      "currency": 45,
+      "exp": 90,
+      "items": [
+        {
+          "item_id": "harbor:item/chart-fragment",
+          "quantity": 1
+        }
+      ]
+    }
+  }
+}

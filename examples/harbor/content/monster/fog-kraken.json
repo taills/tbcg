@@ -1,0 +1,43 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:monster/fog-kraken",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:monster/fog-kraken",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "雾海章鱼王",
+    "appearance_id": "harbor:appearance/fog-kraken",
+    "level": 5
+  },
+  "server": {
+    "stats": {
+      "max_hp": 440,
+      "max_mp": 80,
+      "attack": 27,
+      "defense": 11,
+      "speed": 7
+    },
+    "skill_ids": [
+      "harbor:skill/tentacle-sweep",
+      "harbor:skill/ink-blast"
+    ],
+    "skill_chance_bp": 4000,
+    "exp_reward": 260,
+    "currency_reward": 60,
+    "loot": [
+      {
+        "item_id": "harbor:item/mist-pearl",
+        "chance_bp": 10000,
+        "quantity": 2
+      },
+      {
+        "item_id": "harbor:item/eel-hide",
+        "chance_bp": 5000,
+        "quantity": 1
+      }
+    ]
+  }
+}

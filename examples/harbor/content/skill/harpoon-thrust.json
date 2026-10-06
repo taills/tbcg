@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/harpoon-thrust",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/harpoon-thrust",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "鱼叉突刺",
+    "description": "对单个敌人突刺。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 0
+  },
+  "server": {
+    "power_percent": 110,
+    "hits": 1,
+    "crit_rate_bp": 1000
+  }
+}

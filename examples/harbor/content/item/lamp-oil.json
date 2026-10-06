@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/lamp-oil",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/lamp-oil",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "灯油",
+    "description": "守灯人用的清油，恢复 30 点法力，可在战斗中使用。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 20,
+    "price_minor": "15"
+  },
+  "server": {
+    "reward_value_minor": "15",
+    "drop_weight_basis_points": 1500
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/tail-slap",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/tail-slap",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "拍尾",
+    "description": "小海豹用尾巴拍打敌人。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 3
+  },
+  "server": {
+    "power_percent": 120,
+    "hits": 1,
+    "crit_rate_bp": 0
+  }
+}

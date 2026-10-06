@@ -1,0 +1,25 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:encounter/jelly-drift",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:encounter/jelly-drift",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "残骸水母",
+    "description": "雾水母聚在沉船残骸旁，散发着微光。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "harbor:monster/mist-jelly",
+        "count": 2
+      }
+    ],
+    "max_rounds": 20,
+    "round_timeout_ms": 30000,
+    "allow_flee": true
+  }
+}

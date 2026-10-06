@@ -1,0 +1,29 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:encounter/grotto-guard",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:encounter/grotto-guard",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "潮窟前厅",
+    "description": "沉潮窟第一阶段：鳗鱼与水母守着通道。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "harbor:monster/reef-eel",
+        "count": 2
+      },
+      {
+        "monster_id": "harbor:monster/mist-jelly",
+        "count": 1
+      }
+    ],
+    "max_rounds": 25,
+    "round_timeout_ms": 30000,
+    "allow_flee": false
+  }
+}

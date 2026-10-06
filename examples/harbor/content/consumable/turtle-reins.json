@@ -1,0 +1,23 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:consumable/turtle-reins",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:consumable/turtle-reins",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/turtle-reins",
+    "description": "获得坐骑老海龟。",
+    "usable_in_battle": false
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "grant_mount",
+        "target_id": "harbor:mount/sea-turtle"
+      }
+    ]
+  }
+}

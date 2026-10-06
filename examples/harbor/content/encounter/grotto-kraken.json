@@ -1,0 +1,29 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:encounter/grotto-kraken",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:encounter/grotto-kraken",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "章鱼王巢",
+    "description": "沉潮窟第二阶段：雾海章鱼王现身。"
+  },
+  "server": {
+    "monsters": [
+      {
+        "monster_id": "harbor:monster/fog-kraken",
+        "count": 1
+      },
+      {
+        "monster_id": "harbor:monster/mist-jelly",
+        "count": 1
+      }
+    ],
+    "max_rounds": 30,
+    "round_timeout_ms": 30000,
+    "allow_flee": false
+  }
+}

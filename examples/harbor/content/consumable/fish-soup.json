@@ -1,0 +1,23 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:consumable/fish-soup",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:consumable/fish-soup",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/fish-soup",
+    "description": "恢复 50 点气血。",
+    "usable_in_battle": true
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "heal_hp",
+        "amount": 50
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:dungeon/drowned-grotto",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:dungeon/drowned-grotto",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "沉潮窟",
+    "description": "雾气的源头。先突破前厅，再与雾海章鱼王决战。",
+    "min_players": 1,
+    "max_players": 3,
+    "min_level": 3,
+    "daily_limit": 3,
+    "stage_names": [
+      "潮窟前厅",
+      "章鱼王巢"
+    ]
+  },
+  "server": {
+    "entry_npc_id": "harbor:npc/tidewright",
+    "stages": [
+      {
+        "encounter_id": "harbor:encounter/grotto-guard"
+      },
+      {
+        "encounter_id": "harbor:encounter/grotto-kraken"
+      }
+    ],
+    "rewards": {
+      "currency": 150,
+      "exp": 300,
+      "items": [
+        {
+          "item_id": "harbor:item/mist-pearl",
+          "quantity": 2
+        },
+        {
+          "item_id": "harbor:item/fish-soup",
+          "quantity": 3
+        }
+      ]
+    }
+  }
+}

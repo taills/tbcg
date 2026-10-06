@@ -1,0 +1,38 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:recipe/tide-harpoon",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:recipe/tide-harpoon",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "打造潮纹鱼叉",
+    "materials": [
+      {
+        "item_id": "harbor:item/eel-hide",
+        "quantity": 2
+      },
+      {
+        "item_id": "harbor:item/crab-shell",
+        "quantity": 3
+      },
+      {
+        "item_id": "harbor:item/mist-pearl",
+        "quantity": 1
+      }
+    ],
+    "outputs": [
+      {
+        "item_id": "harbor:item/tide-harpoon",
+        "quantity": 1
+      }
+    ],
+    "min_level": 3,
+    "sect_id": "harbor:sect/tidewatch"
+  },
+  "server": {
+    "success_rate_bp": 10000
+  }
+}

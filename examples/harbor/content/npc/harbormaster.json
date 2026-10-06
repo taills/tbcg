@@ -1,0 +1,113 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:npc/harbormaster",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:npc/harbormaster",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "港务长",
+    "appearance_id": "harbor:appearance/harbormaster",
+    "map_id": "harbor:map/pier-town",
+    "anchor_id": "harbormaster"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "雾又浓了……新来的？码头上正缺人手。",
+        "options": [
+          {
+            "option_id": "accept",
+            "text": "我来帮忙（接取：初到雾港）",
+            "condition": {
+              "quest_id": "harbor:quest/new-in-port",
+              "quest_status": "available"
+            },
+            "action": {
+              "kind": "accept_quest",
+              "target_id": "harbor:quest/new-in-port"
+            }
+          },
+          {
+            "option_id": "crabs",
+            "text": "清理码头上的泡泡蟹（码头蟹群）",
+            "action": {
+              "kind": "start_encounter",
+              "target_id": "harbor:encounter/crab-shoals"
+            }
+          },
+          {
+            "option_id": "deliver",
+            "text": "交付两枚蟹壳",
+            "condition": {
+              "quest_id": "harbor:quest/new-in-port",
+              "quest_status": "active"
+            },
+            "action": {
+              "kind": "deliver_item",
+              "target_id": "harbor:quest/new-in-port"
+            }
+          },
+          {
+            "option_id": "claim",
+            "text": "领取初到雾港的报酬",
+            "condition": {
+              "quest_id": "harbor:quest/new-in-port",
+              "quest_status": "objectives_done"
+            },
+            "action": {
+              "kind": "claim_quest",
+              "target_id": "harbor:quest/new-in-port"
+            }
+          },
+          {
+            "option_id": "sailor",
+            "text": "请老水手随我出海（招募伙伴）",
+            "condition": {
+              "quest_id": "harbor:quest/new-in-port",
+              "quest_status": "completed"
+            },
+            "action": {
+              "kind": "recruit_partner",
+              "target_id": "harbor:partner/old-sailor"
+            }
+          },
+          {
+            "option_id": "about",
+            "text": "雾港怎么了？",
+            "action": {
+              "kind": "goto",
+              "next_node": "about"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      },
+      {
+        "node_id": "about",
+        "text": "雾港靠打渔为生。这些年海雾越来越重，旧灯塔也很少亮了。去东边的灯塔石阶看看吧，守灯人就在塔里。",
+        "options": [
+          {
+            "option_id": "back",
+            "text": "明白了",
+            "action": {
+              "kind": "goto",
+              "next_node": "root"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

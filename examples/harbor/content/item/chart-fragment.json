@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/chart-fragment",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/chart-fragment",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "旧海图残页",
+    "description": "记着暗礁位置的旧海图，研读后获得 60 点经验。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 10,
+    "price_minor": "40"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:monster/mist-jelly",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:monster/mist-jelly",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "雾水母",
+    "appearance_id": "harbor:appearance/mist-jelly",
+    "level": 2
+  },
+  "server": {
+    "stats": {
+      "max_hp": 58,
+      "max_mp": 15,
+      "attack": 13,
+      "defense": 2,
+      "speed": 8
+    },
+    "skill_ids": [
+      "harbor:skill/mist-sting"
+    ],
+    "skill_chance_bp": 2500,
+    "exp_reward": 40,
+    "currency_reward": 7,
+    "loot": [
+      {
+        "item_id": "harbor:item/mist-pearl",
+        "chance_bp": 5500,
+        "quantity": 1
+      },
+      {
+        "item_id": "harbor:item/lamp-oil",
+        "chance_bp": 1500,
+        "quantity": 1
+      }
+    ]
+  }
+}

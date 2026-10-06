@@ -1,0 +1,27 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/fog-veil",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/fog-veil",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "迷雾灯语",
+    "description": "以雾中灯语迷惑一名敌人，三回合内降低其攻击。",
+    "kind": "buff",
+    "target": "enemy_single",
+    "mp_cost": 6
+  },
+  "server": {
+    "power_percent": 0,
+    "hits": 1,
+    "crit_rate_bp": 0,
+    "buff": {
+      "stat": "attack",
+      "amount": -6,
+      "turns": 3
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:quest/new-in-port",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:quest/new-in-port",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "初到雾港",
+    "description": "港务长托你熟悉雾港，顺便解决码头上的泡泡蟹。",
+    "min_level": 1,
+    "stage_descriptions": [
+      "登上码头东侧的灯塔石阶",
+      "去旧灯塔拜访守灯人苏娘",
+      "回码头找港务长，清理泡泡蟹",
+      "向港务长交付两枚蟹壳"
+    ]
+  },
+  "server": {
+    "giver_npc_id": "harbor:npc/harbormaster",
+    "turn_in_npc_id": "harbor:npc/harbormaster",
+    "prerequisites": [],
+    "repeat_policy": "once",
+    "stages": [
+      {
+        "objective": {
+          "kind": "enter_zone",
+          "map_id": "harbor:map/pier-town",
+          "anchor_id": "lighthouse-steps",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "talk_npc",
+          "npc_id": "harbor:npc/lightkeeper",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "defeat_encounter",
+          "encounter_id": "harbor:encounter/crab-shoals",
+          "count": 1,
+          "progress_scope": "personal"
+        }
+      },
+      {
+        "objective": {
+          "kind": "deliver_item",
+          "item_id": "harbor:item/crab-shell",
+          "count": 2,
+          "progress_scope": "personal"
+        }
+      }
+    ],
+    "rewards": {
+      "currency": 60,
+      "exp": 120,
+      "items": [
+        {
+          "item_id": "harbor:item/old-harpoon",
+          "quantity": 1
+        },
+        {
+          "item_id": "harbor:item/fish-soup",
+          "quantity": 2
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:npc/lightkeeper",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:npc/lightkeeper",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "守灯人",
+    "appearance_id": "harbor:appearance/lightkeeper",
+    "map_id": "harbor:map/lighthouse",
+    "anchor_id": "lightkeeper"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "灯塔已经三年没好好亮过了。你是港务长派来的？",
+        "options": [
+          {
+            "option_id": "visit",
+            "text": "港务长让我来拜访您",
+            "condition": {
+              "quest_id": "harbor:quest/new-in-port",
+              "quest_status": "active"
+            },
+            "action": {
+              "kind": "talk_objective",
+              "target_id": "harbor:quest/new-in-port"
+            }
+          },
+          {
+            "option_id": "accept",
+            "text": "我愿意帮忙重燃雾灯（接取：雾中灯火）",
+            "condition": {
+              "quest_id": "harbor:quest/fog-lights",
+              "quest_status": "available"
+            },
+            "action": {
+              "kind": "accept_quest",
+              "target_id": "harbor:quest/fog-lights"
+            }
+          },
+          {
+            "option_id": "deliver",
+            "text": "交付两颗雾珠",
+            "condition": {
+              "quest_id": "harbor:quest/fog-lights",
+              "quest_status": "active"
+            },
+            "action": {
+              "kind": "deliver_item",
+              "target_id": "harbor:quest/fog-lights"
+            }
+          },
+          {
+            "option_id": "claim",
+            "text": "领取雾中灯火的谢礼",
+            "condition": {
+              "quest_id": "harbor:quest/fog-lights",
+              "quest_status": "objectives_done"
+            },
+            "action": {
+              "kind": "claim_quest",
+              "target_id": "harbor:quest/fog-lights"
+            }
+          },
+          {
+            "option_id": "sect",
+            "text": "拜入观潮阁",
+            "condition": {
+              "min_level": 2,
+              "no_sect": true
+            },
+            "action": {
+              "kind": "join_sect",
+              "target_id": "harbor:sect/tidewatch"
+            }
+          },
+          {
+            "option_id": "lore",
+            "text": "观潮阁是什么？",
+            "action": {
+              "kind": "goto",
+              "next_node": "lore"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      },
+      {
+        "node_id": "lore",
+        "text": "观潮阁世代守着这座灯塔，以浪为剑、以灯为盾。等你到了二级，就可以来拜师。",
+        "options": [
+          {
+            "option_id": "back",
+            "text": "明白了",
+            "action": {
+              "kind": "goto",
+              "next_node": "root"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

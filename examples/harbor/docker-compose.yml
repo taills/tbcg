@@ -1,0 +1,173 @@
+# 「雾港奇谭」完整栈：数据库 + 游戏服务 + 管理后台 + 内容构建 worker，一条命令启动：
+#
+#   docker compose up --build
+#
+# 启动后 seed 会通过管理 API 走完整发布流程（导入 → 提交 → 审核 → 构建快照 → 激活），游戏服务随即加载该 Release。
+#   - 游戏：Godot 客户端默认地址 http://127.0.0.1:7080 与 ws://127.0.0.1:7443
+#   - 管理后台：https://127.0.0.1:8443（证书由本地 CA 签发，见 README）
+#
+# 框架约束与对应做法：
+#   - game-server 无 TLS 时只能绑定 loopback；管理服务与构建 worker 必须以 verify-full TLS 连接数据库。
+#     因此所有服务共享 postgres 的网络命名空间并全部走 127.0.0.1，数据库启用本地 CA 签发的证书。
+#   - 端口只发布到宿主机的 127.0.0.1。这是本地演示配置，不是生产部署；默认口令仅用于本机，可用环境变量覆盖。
+
+name: tbcg-harbor
+
+x-harbor: &harbor
+  image: tbcg-harbor/runtime
+  network_mode: "service:postgres"
+  volumes:
+    - certs:/certs:ro
+
+x-superuser-env: &superuser-env
+  PGHOST: 127.0.0.1
+  PGPORT: "5432"
+  PGUSER: harbor
+  PGDATABASE: harbor
+  PGPASSWORD: ${HARBOR_DB_PASSWORD:-harbor-local-only}
+  PGSSLMODE: verify-full
+  PGSSLROOTCERT: /certs/ca.crt
+
+services:
+  certs:
+    build:
+      context: ../..
+      dockerfile: examples/harbor/docker/Dockerfile
+    image: tbcg-harbor/runtime
+    user: root
+    entrypoint: ["/app/docker/certs.sh"]
+    volumes:
+      - certs:/certs
+
+  postgres:
+    image: postgres:18.3-bookworm
+    depends_on:
+      certs:
+        condition: service_completed_successfully
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/certs/postgres.crt
+      - -c
+      - ssl_key_file=/certs/postgres.key
+    environment:
+      POSTGRES_USER: harbor
+      POSTGRES_DB: harbor
+      POSTGRES_PASSWORD: ${HARBOR_DB_PASSWORD:-harbor-local-only}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - certs:/certs:ro
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      # 共享网络命名空间中的监听端口；数据库 5432 不对外发布。
+      - "127.0.0.1:${HARBOR_HTTP_PORT:-7080}:17080"
+      - "127.0.0.1:${HARBOR_WS_PORT:-7443}:17443"
+      - "127.0.0.1:8443:8443"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harbor -d harbor"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  setup:
+    <<: *harbor
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/app/docker/setup.sh"]
+    environment:
+      <<: *superuser-env
+      HARBOR_ADMIN_USERNAME: ${HARBOR_ADMIN_USERNAME:-admin}
+      HARBOR_ADMIN_PASSWORD: ${HARBOR_ADMIN_PASSWORD:-harbor-admin-local}
+      HARBOR_ADMIN_DB_PASSWORD: ${HARBOR_ADMIN_DB_PASSWORD:-harbor-admin-db-local}
+      HARBOR_WORKER_DB_PASSWORD: ${HARBOR_WORKER_DB_PASSWORD:-harbor-worker-db-local}
+
+  game-server:
+    <<: *harbor
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    entrypoint: ["game-server"]
+    volumes:
+      - certs:/certs:ro
+      - artifacts:/var/lib/tbcg/artifacts:ro
+    environment:
+      PGPASSWORD: ${HARBOR_DB_PASSWORD:-harbor-local-only}
+      TBCG_GAME_DATABASE_URL: postgresql://harbor@127.0.0.1:5432/harbor?sslmode=verify-full&sslrootcert=/certs/ca.crt
+      TBCG_PROJECT_ROOT: /app
+      TBCG_BUILD_ARTIFACT_DIR: /var/lib/tbcg/artifacts
+      TBCG_GAME_ID: harbor
+      TBCG_REALM_ID: main
+      TBCG_GAME_BOOTSTRAP_REALM: "1"
+      TBCG_GAME_HTTP_BIND: 127.0.0.1:7080
+      TBCG_GAME_WS_BIND: 127.0.0.1:7443
+    restart: on-failure
+
+  admin-server:
+    <<: *harbor
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    entrypoint: ["admin-server"]
+    environment:
+      PGPASSWORD: ${HARBOR_ADMIN_DB_PASSWORD:-harbor-admin-db-local}
+      TBCG_ADMIN_DATABASE_URL: postgresql://harbor_admin_app@127.0.0.1:5432/harbor?sslmode=verify-full&sslrootcert=/certs/ca.crt
+      TBCG_ADMIN_BIND: 0.0.0.0:8443
+      TBCG_ADMIN_ORIGIN: https://127.0.0.1:8443
+      TBCG_ADMIN_TLS_CERT: /certs/admin.crt
+      TBCG_ADMIN_TLS_KEY: /certs/admin.key
+      TBCG_PROJECT_ROOT: /app
+    restart: on-failure
+
+  build-worker:
+    <<: *harbor
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    entrypoint: ["content-build-worker"]
+    volumes:
+      - certs:/certs:ro
+      - artifacts:/var/lib/tbcg/artifacts
+    environment:
+      PGPASSWORD: ${HARBOR_WORKER_DB_PASSWORD:-harbor-worker-db-local}
+      TBCG_BUILD_WORKER_DATABASE_URL: postgresql://harbor_build_worker@127.0.0.1:5432/harbor?sslmode=verify-full&sslrootcert=/certs/ca.crt
+      TBCG_BUILD_WORKER_ID: 4f6d2c1e-8a3b-4c5d-9e7f-0a1b2c3d4e5f
+      TBCG_BUILD_ARTIFACT_DIR: /var/lib/tbcg/artifacts
+      TBCG_PROJECT_ROOT: /app
+    restart: on-failure
+
+  # 一次性：通过管理 API 发布示例内容并激活到 Realm main；已激活时直接退出。
+  seed:
+    <<: *harbor
+    depends_on:
+      admin-server:
+        condition: service_started
+      build-worker:
+        condition: service_started
+      game-server:
+        condition: service_started
+    entrypoint: ["harbor-seed"]
+    environment:
+      HARBOR_ADMIN_URL: https://127.0.0.1:8443
+      HARBOR_ADMIN_CA: /certs/ca.crt
+      HARBOR_ADMIN_USERNAME: ${HARBOR_ADMIN_USERNAME:-admin}
+      HARBOR_ADMIN_PASSWORD: ${HARBOR_ADMIN_PASSWORD:-harbor-admin-local}
+
+  gateway:
+    image: alpine/socat:1.8.0.3
+    network_mode: "service:postgres"
+    depends_on:
+      - game-server
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        socat TCP-LISTEN:17080,fork,reuseaddr TCP:127.0.0.1:7080 &
+        exec socat TCP-LISTEN:17443,fork,reuseaddr TCP:127.0.0.1:7443
+    restart: on-failure
+
+volumes:
+  pgdata:
+  certs:
+  artifacts:

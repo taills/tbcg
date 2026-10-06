@@ -1,0 +1,4 @@
+# Godot 编辑器缓存
+.godot/
+# make-public-bundle.sh 生成的公开包（地图创作 Dock 使用）
+harbor-public-bundle.json

@@ -1,0 +1,21 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:trade/rules",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:trade/rules",
+    "revision": 1,
+    "schema_version": 1,
+    "max_item_slots": 6,
+    "tax_bp": 300,
+    "timeout_seconds": 120
+  },
+  "server": {
+    "untradable_item_ids": [
+      "harbor:item/old-harpoon"
+    ],
+    "max_currency": 50000
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:map/tide-flats",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:map/tide-flats",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "退潮滩",
+    "geometry": {
+      "schema_version": 1,
+      "map_id": "harbor:map/tide-flats",
+      "geometry_revision": 1,
+      "width": 12,
+      "height": 8,
+      "tile_size": 32,
+      "origin": {
+        "x": 0,
+        "y": 0
+      },
+      "axis": "x_right_y_down",
+      "order": "row_major",
+      "diagonal_policy": "no_corner_cutting",
+      "grid": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      ],
+      "anchors": [
+        {
+          "placement_id": "arrival",
+          "kind": "spawn",
+          "cell": {
+            "x": 0,
+            "y": 0
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "beachcomber",
+          "kind": "npc",
+          "cell": {
+            "x": 3,
+            "y": 3
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "grotto-mouth",
+          "kind": "region",
+          "cell": {
+            "x": 10,
+            "y": 6
+          },
+          "extent": {
+            "x": 2,
+            "y": 2
+          }
+        },
+        {
+          "placement_id": "portal-back",
+          "kind": "portal",
+          "cell": {
+            "x": 0,
+            "y": 4
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "tidewright",
+          "kind": "npc",
+          "cell": {
+            "x": 10,
+            "y": 4
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "wreck",
+          "kind": "trigger",
+          "cell": {
+            "x": 6,
+            "y": 0
+          },
+          "extent": {
+            "x": 2,
+            "y": 2
+          }
+        }
+      ]
+    },
+    "portals": [
+      {
+        "anchor_id": "portal-back",
+        "target_map_id": "harbor:map/pier-town",
+        "target_anchor_id": "from-flats"
+      }
+    ],
+    "zones": [
+      {
+        "anchor_id": "wreck",
+        "display_name": "沉船残骸"
+      },
+      {
+        "anchor_id": "grotto-mouth",
+        "display_name": "潮窟入口"
+      }
+    ]
+  },
+  "server": {
+    "spawn_anchor_id": "arrival",
+    "max_path_cells": 24,
+    "min_step_interval_ms": 120
+  }
+}

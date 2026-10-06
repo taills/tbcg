@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/crab-shell",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/crab-shell",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "material",
+    "display_name": "蟹壳",
+    "description": "泡泡蟹的硬壳，可熬汤，也能打造器具。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 99,
+    "price_minor": "6"
+  },
+  "server": {
+    "reward_value_minor": "5",
+    "drop_weight_basis_points": 8000
+  }
+}

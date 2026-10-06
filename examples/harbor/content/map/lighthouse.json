@@ -1,0 +1,158 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:map/lighthouse",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:map/lighthouse",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "旧灯塔",
+    "geometry": {
+      "schema_version": 1,
+      "map_id": "harbor:map/lighthouse",
+      "geometry_revision": 1,
+      "width": 8,
+      "height": 6,
+      "tile_size": 32,
+      "origin": {
+        "x": 0,
+        "y": 0
+      },
+      "axis": "x_right_y_down",
+      "order": "row_major",
+      "diagonal_policy": "no_corner_cutting",
+      "grid": [
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1
+        ]
+      ],
+      "anchors": [
+        {
+          "placement_id": "arrival",
+          "kind": "spawn",
+          "cell": {
+            "x": 3,
+            "y": 4
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "lamp-room",
+          "kind": "trigger",
+          "cell": {
+            "x": 2,
+            "y": 0
+          },
+          "extent": {
+            "x": 4,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "lightkeeper",
+          "kind": "npc",
+          "cell": {
+            "x": 6,
+            "y": 3
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        },
+        {
+          "placement_id": "portal-down",
+          "kind": "portal",
+          "cell": {
+            "x": 2,
+            "y": 5
+          },
+          "extent": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      ]
+    },
+    "portals": [
+      {
+        "anchor_id": "portal-down",
+        "target_map_id": "harbor:map/pier-town",
+        "target_anchor_id": "from-lighthouse"
+      }
+    ],
+    "zones": [
+      {
+        "anchor_id": "lamp-room",
+        "display_name": "灯室"
+      }
+    ]
+  },
+  "server": {
+    "spawn_anchor_id": "arrival",
+    "max_path_cells": 16,
+    "min_step_interval_ms": 120
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:npc/beachcomber",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:npc/beachcomber",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "拾贝阿螺",
+    "appearance_id": "harbor:appearance/beachcomber",
+    "map_id": "harbor:map/tide-flats",
+    "anchor_id": "beachcomber"
+  },
+  "server": {
+    "interact_range_cells": 1,
+    "start_node": "root",
+    "nodes": [
+      {
+        "node_id": "root",
+        "text": "嘘——别惊动那些雾水母！它们最近老在沉船残骸边打转。",
+        "options": [
+          {
+            "option_id": "jellies",
+            "text": "去驱散雾水母（残骸水母）",
+            "action": {
+              "kind": "start_encounter",
+              "target_id": "harbor:encounter/jelly-drift"
+            }
+          },
+          {
+            "option_id": "seal",
+            "text": "收养搁浅的小海豹",
+            "condition": {
+              "quest_id": "harbor:quest/fog-lights",
+              "quest_status": "completed"
+            },
+            "action": {
+              "kind": "grant_pet",
+              "target_id": "harbor:pet/seal-pup"
+            }
+          },
+          {
+            "option_id": "bye",
+            "text": "告辞",
+            "action": {
+              "kind": "close"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

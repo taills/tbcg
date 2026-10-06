@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/tide-charm",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/tide-charm",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "equipment",
+    "display_name": "潮声护符",
+    "description": "贴近耳边能听见潮声的贝壳护符。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 1,
+    "price_minor": "90"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

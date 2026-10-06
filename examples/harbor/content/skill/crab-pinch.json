@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/crab-pinch",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/crab-pinch",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "双钳夹击",
+    "description": "连续夹击两次。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 0
+  },
+  "server": {
+    "power_percent": 60,
+    "hits": 2,
+    "crit_rate_bp": 0
+  }
+}

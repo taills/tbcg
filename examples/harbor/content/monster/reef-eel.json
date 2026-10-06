@@ -1,0 +1,42 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:monster/reef-eel",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:monster/reef-eel",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "礁石鳗",
+    "appearance_id": "harbor:appearance/reef-eel",
+    "level": 3
+  },
+  "server": {
+    "stats": {
+      "max_hp": 110,
+      "max_mp": 0,
+      "attack": 22,
+      "defense": 8,
+      "speed": 13
+    },
+    "skill_ids": [
+      "harbor:skill/eel-bite"
+    ],
+    "skill_chance_bp": 3000,
+    "exp_reward": 70,
+    "currency_reward": 12,
+    "loot": [
+      {
+        "item_id": "harbor:item/eel-hide",
+        "chance_bp": 7000,
+        "quantity": 1
+      },
+      {
+        "item_id": "harbor:item/crab-shell",
+        "chance_bp": 3000,
+        "quantity": 1
+      }
+    ]
+  }
+}

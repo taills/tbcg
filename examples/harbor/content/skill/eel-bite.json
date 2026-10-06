@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/eel-bite",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/eel-bite",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "缠咬",
+    "description": "缠住目标连咬两口。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 0
+  },
+  "server": {
+    "power_percent": 70,
+    "hits": 2,
+    "crit_rate_bp": 0
+  }
+}

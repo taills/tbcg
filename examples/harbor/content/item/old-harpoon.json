@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/old-harpoon",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/old-harpoon",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "equipment",
+    "display_name": "旧鱼叉",
+    "description": "港务长年轻时用过的鱼叉。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 1,
+    "price_minor": "40"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

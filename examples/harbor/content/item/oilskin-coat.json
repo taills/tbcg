@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/oilskin-coat",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/oilskin-coat",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "equipment",
+    "display_name": "油布雨衣",
+    "description": "渔民常穿的油布雨衣，挡风挡浪。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 1,
+    "price_minor": "60"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

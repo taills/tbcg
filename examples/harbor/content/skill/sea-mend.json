@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/sea-mend",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/sea-mend",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "海风疗愈",
+    "description": "恢复一名友方的气血。",
+    "kind": "heal",
+    "target": "ally_single",
+    "mp_cost": 6
+  },
+  "server": {
+    "power_percent": 160,
+    "hits": 1,
+    "crit_rate_bp": 0
+  }
+}

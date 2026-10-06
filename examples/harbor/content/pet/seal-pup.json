@@ -1,0 +1,40 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:pet/seal-pup",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:pet/seal-pup",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "小海豹",
+    "appearance_id": "harbor:appearance/seal-pup",
+    "skill_ids": [
+      "harbor:skill/tail-slap"
+    ]
+  },
+  "server": {
+    "base_stats": {
+      "max_hp": 70,
+      "max_mp": 20,
+      "attack": 11,
+      "defense": 4,
+      "speed": 9
+    },
+    "growth_per_level": {
+      "max_hp": 10,
+      "max_mp": 3,
+      "attack": 2,
+      "defense": 1,
+      "speed": 1
+    },
+    "level_exp": [
+      80,
+      200,
+      380,
+      620,
+      900
+    ]
+  }
+}

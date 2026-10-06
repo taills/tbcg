@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/ink-blast",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/ink-blast",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "墨潮",
+    "description": "喷出浓墨重击单个敌人。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 6
+  },
+  "server": {
+    "power_percent": 150,
+    "hits": 1,
+    "crit_rate_bp": 1500
+  }
+}

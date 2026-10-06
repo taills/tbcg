@@ -1,0 +1,2 @@
+# docker compose cp 导出的本地 CA（见 README）
+harbor-local-ca.crt

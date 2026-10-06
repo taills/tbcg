@@ -1,0 +1,23 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:consumable/lamp-oil",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:consumable/lamp-oil",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/lamp-oil",
+    "description": "恢复 30 点法力。",
+    "usable_in_battle": true
+  },
+  "server": {
+    "effects": [
+      {
+        "kind": "heal_mp",
+        "amount": 30
+      }
+    ]
+  }
+}

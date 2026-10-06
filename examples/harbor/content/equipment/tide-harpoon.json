@@ -1,0 +1,23 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:equipment/tide-harpoon",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:equipment/tide-harpoon",
+    "revision": 1,
+    "schema_version": 1,
+    "item_id": "harbor:item/tide-harpoon",
+    "slot": "weapon",
+    "min_level": 3,
+    "sect_ids": [
+      "harbor:sect/tidewatch"
+    ],
+    "stats": {
+      "attack": 14,
+      "speed": 2
+    }
+  },
+  "server": {}
+}

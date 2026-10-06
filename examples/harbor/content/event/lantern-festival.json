@@ -1,0 +1,39 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:event/lantern-festival",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:event/lantern-festival",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "渔灯节",
+    "description": "节庆期间驱散雾水母三次，即可领取渔灯节礼。",
+    "windows": [
+      {
+        "start": "2026-09-01T00:00:00Z",
+        "end": "2027-12-31T23:59:59Z"
+      }
+    ],
+    "objective": {
+      "kind": "defeat_encounter",
+      "target_id": "harbor:encounter/jelly-drift",
+      "count": 3
+    },
+    "max_claims_per_window": 1,
+    "leaderboard": true
+  },
+  "server": {
+    "rewards": {
+      "currency": 50,
+      "exp": 60,
+      "items": [
+        {
+          "item_id": "harbor:item/lamp-oil",
+          "quantity": 2
+        }
+      ]
+    }
+  }
+}

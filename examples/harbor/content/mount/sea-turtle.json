@@ -1,0 +1,20 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:mount/sea-turtle",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:mount/sea-turtle",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "老海龟",
+    "appearance_id": "harbor:appearance/sea-turtle",
+    "min_level": 2,
+    "stat_bonus": {
+      "defense": 4,
+      "max_hp": 20
+    }
+  },
+  "server": {}
+}

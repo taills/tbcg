@@ -1,0 +1,20 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:guild/rules",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:guild/rules",
+    "revision": 1,
+    "schema_version": 1,
+    "max_members": 20,
+    "create_cost": 150,
+    "create_min_level": 3,
+    "notice_max_length": 200
+  },
+  "server": {
+    "officer_can_invite": true,
+    "officer_can_kick": false
+  }
+}

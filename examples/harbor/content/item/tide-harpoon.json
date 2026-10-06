@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/tide-harpoon",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/tide-harpoon",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "equipment",
+    "display_name": "潮纹鱼叉",
+    "description": "镶嵌雾珠的鱼叉，观潮阁弟子专用。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 1,
+    "price_minor": "180"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

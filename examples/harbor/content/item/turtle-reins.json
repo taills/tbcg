@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/turtle-reins",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/turtle-reins",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "consumable",
+    "display_name": "海龟缰绳",
+    "description": "系在老海龟身上的缰绳，使用后获得坐骑老海龟。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 1,
+    "price_minor": "260"
+  },
+  "server": {
+    "reward_value_minor": "0",
+    "drop_weight_basis_points": 0
+  }
+}

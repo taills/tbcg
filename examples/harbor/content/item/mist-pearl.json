@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:item/mist-pearl",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:item/mist-pearl",
+    "revision": 1,
+    "schema_version": 1,
+    "item_type": "material",
+    "display_name": "雾珠",
+    "description": "雾水母体内凝结的珠子，在灯下会微微发亮。",
+    "icon_id": "harbor:icon/shell",
+    "stack_limit": 99,
+    "price_minor": "25"
+  },
+  "server": {
+    "reward_value_minor": "20",
+    "drop_weight_basis_points": 5500
+  }
+}

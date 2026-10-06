@@ -1,0 +1,22 @@
+{
+  "game_id": "harbor",
+  "content_id": "harbor:skill/lantern-flare",
+  "revision": 1,
+  "schema_version": 1,
+  "public": {
+    "game_id": "harbor",
+    "content_id": "harbor:skill/lantern-flare",
+    "revision": 1,
+    "schema_version": 1,
+    "display_name": "灯焰",
+    "description": "以灯焰灼烧单个敌人。",
+    "kind": "damage",
+    "target": "enemy_single",
+    "mp_cost": 4
+  },
+  "server": {
+    "power_percent": 140,
+    "hits": 1,
+    "crit_rate_bp": 500
+  }
+}
